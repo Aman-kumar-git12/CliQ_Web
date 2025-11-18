@@ -3,7 +3,7 @@ import axios from "axios";
 
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:2000 || process.env.BACKEND_URL",   // your backend URL
+  baseURL: "http://localhost:2000",   // your backend URL
   headers: {
     "Content-Type": "application/json",
   },

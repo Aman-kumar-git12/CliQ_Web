@@ -30,6 +30,7 @@ const Signup = () => {
     e.preventDefault();
     try {
       const response = await axiosClient.post("/signup", formData);
+      console.log(response)
       nevigate("/home");
       setShowErr(false);
       setError(null);
