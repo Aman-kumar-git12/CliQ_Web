@@ -10,15 +10,15 @@ export default function MobileNavbar({ dark, setDark }) {
             <Link to="/home" className={`p-2 rounded-xl transition-colors ${isActive('/home') ? "text-black dark:text-white" : "text-neutral-400"}`}>
                 <Home size={26} strokeWidth={isActive('/home') ? 2.5 : 2} />
             </Link>
-            <Link to="/search" className={`p-2 rounded-xl transition-colors ${isActive('/search') ? "text-black dark:text-white" : "text-neutral-400"}`}>
-                <Search size={26} strokeWidth={isActive('/search') ? 2.5 : 2} />
+            <Link to="/connections" className={`p-2 rounded-xl transition-colors ${isActive('/connections') ? "text-black dark:text-white" : "text-neutral-400"}`}>
+                <Search size={26} strokeWidth={isActive('/connections') ? 2.5 : 2} />
             </Link>
             <button className="p-2 rounded-xl text-neutral-400 hover:text-black dark:hover:text-white transition-colors">
                 <PlusSquare size={26} />
             </button>
-            <button className="p-2 rounded-xl text-neutral-400 hover:text-black dark:hover:text-white transition-colors">
+            <Link to="/connections/requests" className={`p-2 rounded-xl transition-colors ${isActive('/connections') ? "text-black dark:text-white" : "text-neutral-400"}`}>
                 <Heart size={26} />
-            </button>
+            </Link>
             <Link to="/profile" className={`p-2 rounded-xl transition-colors ${isActive('/profile') ? "text-black dark:text-white" : "text-neutral-400"}`}>
                 <User size={26} strokeWidth={isActive('/profile') ? 2.5 : 2} />
             </Link>

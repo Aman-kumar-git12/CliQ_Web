@@ -53,7 +53,7 @@ export default function Sidebar({ dark, setDark }) {
         >
             <Icon size={26} strokeWidth={isActive(to) ? 2.5 : 2} />
 
-            <span className="absolute left-14 bg-black dark:bg-white text-white dark:text-black text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
+            <span className="absolute left-20 bg-black dark:bg-white text-white dark:text-black text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
                 {label}
             </span>
         </Link>
@@ -78,17 +78,15 @@ export default function Sidebar({ dark, setDark }) {
                 confirmText="Yes, Logout"
             />
 
-            <div className="w-20 fixed left-0 top-0 h-screen border-r border-neutral-200 dark:border-neutral-800 hidden md:flex flex-col items-center py-8 justify-between bg-white/90 dark:bg-black/90 backdrop-blur-xl z-50 transition-colors duration-300">
+            <div className="w-28 fixed left-0 top-0 h-screen border-r border-neutral-200 dark:border-neutral-800 hidden md:flex flex-col items-center py-8 justify-between bg-white/90 dark:bg-black/90 backdrop-blur-xl z-50 transition-colors duration-300">
                 <div className="flex flex-col gap-8 items-center w-full">
                     <Link
                         to="/home"
                         className="mb-4 hover:scale-110 transition-transform duration-300"
                     >
-                        <img
-                            src="/threads-logo.svg"
-                            className="w-9 h-9 dark:invert"
-                            alt="Logo"
-                        />
+                        <h1 className="text-3xl font-extrabold tracking-tighter text-black dark:text-white">
+                            CliQ
+                        </h1>
                     </Link>
 
                     <div className="flex flex-col gap-4">
@@ -97,14 +95,14 @@ export default function Sidebar({ dark, setDark }) {
 
                         <button className="p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-900 transition text-neutral-500 hover:text-black dark:hover:text-white group relative">
                             <PlusSquare size={26} />
-                            <span className="absolute left-14 bg-black dark:bg-white text-white dark:text-black text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
+                            <span className="absolute left-20 bg-black dark:bg-white text-white dark:text-black text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
                                 Create
                             </span>
                         </button>
 
                         <Link to="/connections/requests" className="p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-900 transition text-neutral-500 hover:text-black dark:hover:text-white group relative">
                             <Heart size={26} />
-                            <span className="absolute left-14 bg-black dark:bg-white text-white dark:text-black text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
+                            <span className="absolute left-20 bg-black dark:bg-white text-white dark:text-black text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
                                 Activity
                             </span>
                         </Link>

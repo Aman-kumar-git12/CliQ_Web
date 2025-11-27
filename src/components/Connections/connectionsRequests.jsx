@@ -93,7 +93,7 @@ export default function ConnectionsRequest() {
     }
 
     return (
-        <div className="p-6 max-w-xl mx-auto">
+        <div className="p-6 w-full">
             <h1 className="text-2xl font-semibold text-black dark:text-white mb-4">
                 Connection Requests
             </h1>

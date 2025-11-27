@@ -6,7 +6,7 @@ export default function PeoplePage() {
     const [activeTab, setActiveTab] = useState("find");
 
     return (
-        <div className="w-full max-w-3xl mx-auto">
+        <div className="w-full">
             {/* ------------ Sticky Tabs ------------- */}
             <div className="sticky top-0 z-10 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 pt-4 px-4 mb-4">
                 <div className="flex w-full">
