@@ -13,9 +13,9 @@ export default function MobileNavbar({ dark, setDark }) {
             <Link to="/connections" className={`p-2 rounded-xl transition-colors ${isActive('/connections') ? "text-black dark:text-white" : "text-neutral-400"}`}>
                 <Search size={26} strokeWidth={isActive('/connections') ? 2.5 : 2} />
             </Link>
-            <button className="p-2 rounded-xl text-neutral-400 hover:text-black dark:hover:text-white transition-colors">
+            <Link to="/create/post" className="p-2 rounded-xl text-neutral-400 hover:text-black dark:hover:text-white transition-colors">
                 <PlusSquare size={26} />
-            </button>
+            </Link>
             <Link to="/connections/requests" className={`p-2 rounded-xl transition-colors ${isActive('/connections') ? "text-black dark:text-white" : "text-neutral-400"}`}>
                 <Heart size={26} />
             </Link>

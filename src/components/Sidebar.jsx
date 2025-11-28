@@ -91,22 +91,9 @@ export default function Sidebar({ dark, setDark }) {
 
                     <div className="flex flex-col gap-4">
                         <NavItem to="/home" icon={Home} label="Home" />
-                        <NavItem to="/connections" icon={Search} label="Search" />
-
-                        <button className="p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-900 transition text-neutral-500 hover:text-black dark:hover:text-white group relative">
-                            <PlusSquare size={26} />
-                            <span className="absolute left-20 bg-black dark:bg-white text-white dark:text-black text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
-                                Create
-                            </span>
-                        </button>
-
-                        <Link to="/connections/requests" className="p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-900 transition text-neutral-500 hover:text-black dark:hover:text-white group relative">
-                            <Heart size={26} />
-                            <span className="absolute left-20 bg-black dark:bg-white text-white dark:text-black text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
-                                Activity
-                            </span>
-                        </Link>
-
+                        <NavItem to="/connections" icon={Search} label="Find" />
+                        <NavItem to="/create/post" icon={PlusSquare} label="Create" />
+                        <NavItem to="/connections/requests" icon={Heart} label="Requests" />
                         <NavItem to="/profile" icon={User} label="Profile" />
                     </div>
                 </div>
@@ -146,12 +133,15 @@ export default function Sidebar({ dark, setDark }) {
 
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className={`p-3 rounded-xl transition-all duration-300 z-[70] ${isMenuOpen
+                        className={`p-3 rounded-xl transition-all duration-300 z-[70] group relative ${isMenuOpen
                             ? "bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white"
                             : "text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white"
                             }`}
                     >
                         <Menu size={26} />
+                        <span className="absolute left-20 bg-black dark:bg-white text-white dark:text-black text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">
+                            Menu
+                        </span>
                     </button>
                 </div>
             </div>

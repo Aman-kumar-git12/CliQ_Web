@@ -1,14 +1,19 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import axiosClient from "../api/axiosClient";
 import PostCard from "./Postcard";
+import { useFeedContext } from "../context/FeedContext";
 
 export default function Home() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    feedPosts, setFeedPosts,
+    feedPage, setFeedPage,
+    feedHasMore, setFeedHasMore,
+    feedScrollY, setFeedScrollY
+  } = useFeedContext();
+
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
 
   const observer = useRef();
   const lastPostElementRef = useCallback(
@@ -16,13 +21,13 @@ export default function Home() {
       if (loading || loadingMore) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage((prevPage) => prevPage + 1);
+        if (entries[0].isIntersecting && feedHasMore) {
+          setFeedPage((prevPage) => prevPage + 1);
         }
       });
       if (node) observer.current.observe(node);
     },
-    [loading, loadingMore, hasMore]
+    [loading, loadingMore, feedHasMore]
   );
 
   // Fetch posts feed
@@ -42,13 +47,13 @@ export default function Home() {
       }
 
       if (rawPosts.length === 0) {
-        setHasMore(false);
+        setFeedHasMore(false);
         setLoading(false);
         setLoadingMore(false);
         return;
       }
 
-      setHasMore(apiHasMore);
+      setFeedHasMore(apiHasMore);
 
       // Fetch usernames + avatar in parallel
       const postsWithUser = await Promise.all(
@@ -81,7 +86,7 @@ export default function Home() {
         })
       );
 
-      setPosts((prevPosts) => {
+      setFeedPosts((prevPosts) => {
         // Filter out duplicates based on ID
         const newPosts = postsWithUser.filter(
           (newPost) => !prevPosts.some((prevPost) => prevPost.id === newPost.id)
@@ -98,10 +103,60 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchFeed(page);
-  }, [page]);
+    // Only fetch if we have no posts (initial load) or if page changes
+    // But if we already have posts and page is 1, don't refetch on mount (navigation back)
+    if (feedPosts.length === 0 && feedPage === 1) {
+      fetchFeed(1);
+    } else if (feedPage > 1) {
+      // If page incremented, fetch that page
+      // We need to check if we already have data for this page to avoid double fetch?
+      // Actually, the page increments via scroll, so we should fetch.
+      // But we need to avoid re-fetching the SAME page if we navigated away and came back.
+      // Simple check: if feedPosts.length < feedPage * 5 (approx), fetch?
+      // Better: Just rely on the fact that setFeedPage is triggered by scroll.
+      // If we navigate back, feedPage is already X. We shouldn't fetch X again if we have data.
+      // So: Only fetch if we are "loading more" (triggered by scroll) or empty.
 
-  if (loading && page === 1) {
+      // Wait, if we navigate back, feedPage might be 5.
+      // We don't want to fetch page 5 again if we already have the posts.
+      // We only want to fetch if the user scrolls MORE.
+      // So, we should probably NOT fetch in useEffect[feedPage] if we are just mounting.
+
+      // Let's change logic:
+      // 1. On mount, if empty, fetch page 1.
+      // 2. If page changes (due to scroll), fetch new page.
+      // Problem: How to distinguish "mount with page=5" vs "scroll to page=5"?
+      // We can use a ref to track if it's the first render.
+    }
+  }, []);
+
+  // Separate effect for page changes triggered by scroll
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      // Restore scroll position immediately
+      if (feedScrollY > 0) {
+        window.scrollTo(0, feedScrollY);
+      } else {
+        window.scrollTo(0, 0);
+      }
+      return;
+    }
+    if (feedPage > 1) {
+      fetchFeed(feedPage);
+    }
+  }, [feedPage, feedScrollY]); // Added feedScrollY to dependencies
+
+  // Save scroll position on unmount
+  useEffect(() => {
+    return () => {
+      setFeedScrollY(window.scrollY);
+    };
+  }, [setFeedScrollY]);
+
+
+  if (loading && feedPage === 1 && feedPosts.length === 0) {
     return (
       <div className="flex justify-center py-10">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white"></div>
@@ -109,14 +164,14 @@ export default function Home() {
     );
   }
 
-  if (error && posts.length === 0) {
+  if (error && feedPosts.length === 0) {
     return <p className="text-center py-10 text-red-500">{error}</p>;
   }
 
   return (
     <div className="w-full pt-4">
       {/* Create Post Input */}
-      <div className="flex gap-4 p-4 border-b border-neutral-200 dark:border-neutral-800 mb-2">
+      {/* <div className="flex gap-4 p-4 border-b border-neutral-200 dark:border-neutral-800 mb-2">
         <div className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden shrink-0">
           <img
             src="https://github.com/shadcn.png"
@@ -144,11 +199,11 @@ export default function Home() {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* FEED POSTS */}
-      {posts.map((post, index) => {
-        if (posts.length === index + 1) {
+      {feedPosts.map((post, index) => {
+        if (feedPosts.length === index + 1) {
           return (
             <div ref={lastPostElementRef} key={post.id}>
               <PostCard post={post} />
@@ -165,7 +220,7 @@ export default function Home() {
         </div>
       )}
 
-      {!hasMore && posts.length > 0 && (
+      {!feedHasMore && feedPosts.length > 0 && (
         <p className="text-center text-neutral-500 py-4 text-sm">
           You've reached the end!
         </p>

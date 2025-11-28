@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import MobileNavbar from "./MobileviewFolder/MobileNavbar";
 import MobileTopBar from "./MobileviewFolder/MobileTopBar";
@@ -10,6 +10,8 @@ export default function Layout() {
         return savedTheme === "dark";
     });
 
+    const { pathname } = useLocation();
+
     useEffect(() => {
         if (dark) {
             document.documentElement.classList.add("dark");
@@ -19,6 +21,13 @@ export default function Layout() {
             localStorage.setItem("theme", "light");
         }
     }, [dark]);
+
+    // Scroll to top on route change, except for Home (which handles its own restoration)
+    useEffect(() => {
+        if (pathname !== "/home") {
+            window.scrollTo(0, 0);
+        }
+    }, [pathname]);
 
     return (
         <div className={`min-h-screen ${dark ? "dark bg-neutral-950 text-white" : "bg-white text-black"} transition-colors duration-300`}>

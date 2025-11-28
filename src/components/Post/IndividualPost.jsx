@@ -3,10 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Edit, Trash2, Calendar } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
 import DeletePost from "./DeletePost";
+import { useUserContext } from "../../context/userContext";
 
 export default function IndividualPost() {
     const { postId } = useParams();
     const navigate = useNavigate();
+    const { user } = useUserContext();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -29,18 +31,11 @@ export default function IndividualPost() {
     if (loading) return <div className="text-center text-white mt-10">Loading...</div>;
     if (!post) return <div className="text-center text-white mt-10">Post not found</div>;
 
+    const isOwner = user && post && (user.id === post.userId || user.id === post.user_id);
+
     return (
         <div className="w-full min-h-screen bg-black text-white pb-20">
-            {/* Header / Back Button */}
-            <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-gray-800 px-4 py-3 flex items-center gap-4">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="p-2 rounded-full hover:bg-gray-800 transition"
-                >
-                    <ArrowLeft size={24} />
-                </button>
-                <h1 className="text-xl font-bold">Post</h1>
-            </div>
+  
 
             <div className="max-w-2xl mx-auto mt-4 px-4">
                 {/* User Info */}
@@ -92,17 +87,19 @@ export default function IndividualPost() {
                         {/* Placeholder for social actions like Like/Comment if needed later */}
                     </div>
 
-                    <div className="flex gap-3">
-                        <button
-                            onClick={() => navigate(`/post/edit/${postId}`)}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-full transition font-medium"
-                        >
-                            <Edit size={18} />
-                            Edit
-                        </button>
+                    {isOwner && (
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => navigate(`/post/edit/${postId}`)}
+                                className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-full transition font-medium"
+                            >
+                                <Edit size={18} />
+                                Edit
+                            </button>
 
-                        <DeletePost postId={postId} />
-                    </div>
+                            <DeletePost postId={postId} />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
