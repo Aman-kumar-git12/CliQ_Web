@@ -21,7 +21,7 @@ export default function EditProfile() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await axiosClient.get("/profile", form , { withCredentials: true });
+                const res = await axiosClient.get("/profile", { withCredentials: true });
                 const user = res.data.user;
 
                 setForm({

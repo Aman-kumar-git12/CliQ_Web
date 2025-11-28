@@ -71,10 +71,14 @@ export default function MobileTopBar({ dark, setDark }) {
                     {/* Dropdown Menu */}
                     {isMenuOpen && (
                         <div className="absolute top-12 right-0 w-48 bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-2 flex flex-col gap-1 animate-in fade-in slide-in-from-top-4 duration-200 origin-top-right z-[60]">
-                            <button className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition text-sm font-medium text-black dark:text-white">
+                            <Link
+                                to="/settings"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition text-sm font-medium text-black dark:text-white"
+                            >
                                 <Settings size={18} />
                                 Settings
-                            </button>
+                            </Link>
 
                             <button
                                 onClick={() => setDark(!dark)}

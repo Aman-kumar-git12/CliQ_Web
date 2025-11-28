@@ -11,6 +11,7 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [loadingPosts, setLoadingPosts] = useState(true);
     const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+    const [showEditConfirm, setShowEditConfirm] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -58,6 +59,11 @@ export default function ProfilePage() {
         }
     };
 
+    const handleEditProfile = () => {
+        setShowEditConfirm(false);
+        navigate("/edit-profile");
+    };
+
     if (loading)
         return <div className="text-center text-white mt-10">Loading...</div>;
 
@@ -103,12 +109,12 @@ export default function ProfilePage() {
 
                     {/* BUTTONS */}
                     <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                        <Link
-                            to="/edit-profile"
+                        <button
+                            onClick={() => setShowEditConfirm(true)}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-center"
                         >
                             Edit Profile
-                        </Link>
+                        </button>
 
                         <button
                             onClick={() => setShowLogoutPopup(true)}
@@ -155,6 +161,15 @@ export default function ProfilePage() {
                 onConfirm={handleLogout}
                 title="Are you sure you want to logout?"
                 confirmText="Yes, Logout"
+            />
+
+            <LogoutConfirmation
+                isOpen={showEditConfirm}
+                onClose={() => setShowEditConfirm(false)}
+                onConfirm={handleEditProfile}
+                title="Edit Profile?"
+                confirmText="Yes, Edit"
+                confirmColor="bg-blue-600 hover:bg-blue-700"
             />
         </div>
 

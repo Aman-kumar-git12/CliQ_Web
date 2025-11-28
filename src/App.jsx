@@ -9,6 +9,8 @@ import EditProfile from "./components/EditProfile";
 import Connections from "./components/Connections/connections";
 import ConnectionsRequest from "./components/Connections/connectionsRequests";
 
+import Settings from "./components/Settings";
+
 function App() {
   return (
     <BrowserRouter basename="/">
@@ -22,6 +24,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/connections" element={<Connections />} />
             <Route path="/connections/requests" element={<ConnectionsRequest />} />
           </Route>
