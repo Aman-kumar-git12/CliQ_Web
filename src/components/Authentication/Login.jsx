@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
-import axiosClient from "../api/axiosClient";
+import axiosClient from "../../api/axiosClient";
 
 export default function Login() {
     const [formData, setFormData] = useState({

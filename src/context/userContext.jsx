@@ -19,10 +19,6 @@ export const UserContextProvider = ({ children }) => {
                 // If token is valid → user returned
                 if (res.data.user) {
                     setUser(res.data.user);
-                    // If on public routes (login/signup), redirect to home
-                    if (location.pathname === "/" || location.pathname === "/login") {
-                        navigate("/home");
-                    }
                 } else {
                     setUser(null);
                 }

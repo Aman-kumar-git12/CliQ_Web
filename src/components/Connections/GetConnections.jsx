@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import axiosClient from "../../api/axiosClient";
 import { X, Check } from "lucide-react";
+import { Link } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, useAnimation, animate } from "framer-motion";
+import MyExperties from "../MyExperties/MyExperties";
 
 export default function GetConnections() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
+    const [showExpertise, setShowExpertise] = useState(false);
 
     const x = useMotionValue(0);
     const dragX = useMotionValue(0);
@@ -32,6 +35,7 @@ export default function GetConnections() {
 
     const fetchRandomUser = async () => {
         setLoading(true);
+        setShowExpertise(false);
         controls.set({ x: 0, opacity: 1 });
         dragX.set(0);
 
@@ -181,8 +185,11 @@ export default function GetConnections() {
                     {user.age ? `${user.age} years old` : "New User"}
                 </p>
 
-                <button className="px-6 py-2 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-medium text-sm mb-8 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors pointer-events-auto">
-                    My Expertise
+                <button
+                    onClick={() => setShowExpertise(true)}
+                    className="px-6 py-2 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-medium text-sm mb-8 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors pointer-events-auto"
+                >
+                    View Expertise
                 </button>
 
                 <div
@@ -206,6 +213,26 @@ export default function GetConnections() {
                     </button>
                 </div>
             </motion.div>
+
+            {/* EXPERTISE MODAL */}
+            {showExpertise && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-neutral-900 w-full max-w-4xl max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl relative flex flex-col">
+                        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center bg-white dark:bg-neutral-900 z-10">
+                            <h3 className="text-lg font-bold text-black dark:text-white">User Expertise</h3>
+                            <button
+                                onClick={() => setShowExpertise(false)}
+                                className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                            >
+                                <X size={20} className="text-black dark:text-white" />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-0">
+                            <MyExperties expertise={user.expertise} />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* SNACKBAR */}
             {snack && (

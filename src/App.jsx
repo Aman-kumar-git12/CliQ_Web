@@ -1,8 +1,8 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import Layout from "./Layout";
-import Signup from "./components/Signup";
-import Login from "./components/Login";
+import Signup from "./components/Authentication/Signup";
+import Login from "./components/Authentication/Login";
 import { UserContextProvider } from "./context/userContext";
 import Profile from "./components/profile";
 import EditProfile from "./components/EditProfile";
@@ -16,6 +16,9 @@ import EditPost from "./components/Post/EditPost";
 
 import { FeedProvider } from "./context/FeedContext";
 import CreatePost from "./components/Post/CreatePost";
+import MyExperties from "./components/MyExperties/EditExperties";
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
 
 function App() {
   return (
@@ -23,22 +26,28 @@ function App() {
       <UserContextProvider>
         <FeedProvider>
           <Routes>
-            <Route path="/" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
+            {/* Public Routes (Redirect to Home if logged in) */}
+            <Route element={<PublicRoute />}>
+              <Route path="/" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+            </Route>
 
-            {/* Protected/App Routes */}
-            <Route element={<Layout />}>
-              <Route path="/home" element={<Home />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/edit-profile" element={<EditProfile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/connections" element={<Connections />} />
-              <Route path="/connections/requests" element={<ConnectionsRequest />} />
+            {/* Protected Routes (Redirect to Login if not logged in) */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route path="/home" element={<Home />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/edit-profile" element={<EditProfile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/connections" element={<Connections />} />
+                <Route path="/connections/requests" element={<ConnectionsRequest />} />
 
-              {/* Post Routes */}
-              <Route path="/post/:postId" element={<IndividualPost />} />
-              <Route path="/post/edit/:postId" element={<EditPost />} />
-              <Route path="/create/post" element={<CreatePost />} />
+                {/* Post Routes */}
+                <Route path="/post/:postId" element={<IndividualPost />} />
+                <Route path="/post/edit/:postId" element={<EditPost />} />
+                <Route path="/create/post" element={<CreatePost />} />
+                <Route path="/my-experties" element={<MyExperties />} />
+              </Route>
             </Route>
           </Routes>
         </FeedProvider>

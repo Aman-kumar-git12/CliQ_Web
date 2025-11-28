@@ -189,7 +189,7 @@ const CreatePost = () => {
                         >
                             {loading ? (
                                 <>
-                                    <Loader2 size={20} className="animate-spin" />
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white dark:border-black"></div>
                                     Posting...
                                 </>
                             ) : (

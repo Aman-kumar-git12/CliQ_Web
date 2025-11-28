@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import axiosClient from "../api/axiosClient";
 import { Link, useNavigate } from "react-router-dom";
 import LogoutConfirmation from "./Confirmation";
+import MyExperties from "./MyExperties/MyExperties";
 import { Plus, Camera, Eye, Upload, X } from "lucide-react";
 
 export default function ProfilePage() {
@@ -21,6 +22,10 @@ export default function ProfilePage() {
     const [uploading, setUploading] = useState(false);
     const [showImageMenu, setShowImageMenu] = useState(false);
     const [showImageViewer, setShowImageViewer] = useState(false);
+
+    // Expertise States
+    const [showExpertiseMenu, setShowExpertiseMenu] = useState(false);
+    const [showExpertiseModal, setShowExpertiseModal] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -212,13 +217,46 @@ export default function ProfilePage() {
                     </div>
 
                     {/* BUTTONS */}
-                    <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                    <div className="flex flex-col sm:flex-row gap-4 mt-8 relative">
                         <button
                             onClick={() => setShowEditConfirm(true)}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-center shadow-md dark:shadow-none"
                         >
                             Edit Profile
                         </button>
+
+                        {/* My Expertise Button & Menu */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowExpertiseMenu(!showExpertiseMenu)}
+                                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-xl text-center shadow-md dark:shadow-none w-full sm:w-auto"
+                            >
+                                My Expertise
+                            </button>
+
+                            {showExpertiseMenu && (
+                                <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-[#222] border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden flex flex-col animate-fadeIn">
+                                    <button
+                                        onClick={() => {
+                                            setShowExpertiseMenu(false);
+                                            navigate("/my-experties");
+                                        }}
+                                        className="px-4 py-3 text-left text-black dark:text-white hover:bg-gray-100 dark:hover:bg-[#333] transition-colors border-b border-gray-200 dark:border-gray-800"
+                                    >
+                                        Add Expertise
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowExpertiseMenu(false);
+                                            setShowExpertiseModal(true);
+                                        }}
+                                        className="px-4 py-3 text-left text-black dark:text-white hover:bg-gray-100 dark:hover:bg-[#333] transition-colors"
+                                    >
+                                        View Expertise
+                                    </button>
+                                </div>
+                            )}
+                        </div>
 
                         <button
                             onClick={() => setShowLogoutPopup(true)}
@@ -308,7 +346,47 @@ export default function ProfilePage() {
                     />
                 </div>
             )}
-        </div>
 
+            {/* View Expertise Modal */}
+            {showExpertiseModal && (
+                <div
+                    className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+                    onClick={() => setShowExpertiseModal(false)}
+                >
+                    <div
+                        className="bg-white dark:bg-[#111] w-full max-w-2xl rounded-2xl p-6 shadow-2xl border border-gray-200 dark:border-gray-800 relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setShowExpertiseModal(false)}
+                            className="absolute top-4 right-4 text-gray-500 hover:text-black dark:hover:text-white transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <h2 className="text-2xl font-bold mb-6 text-black dark:text-white">My Expertise</h2>
+
+                        {user.expertise ? (
+                            <div className="mt-4 max-h-[80vh] overflow-y-auto">
+                                <MyExperties expertise={user.expertise} />
+                            </div>
+                        ) : (
+                            <div className="text-center py-10">
+                                <p className="text-gray-500 dark:text-gray-400 mb-4">You haven't added any expertise yet.</p>
+                                <button
+                                    onClick={() => {
+                                        setShowExpertiseModal(false);
+                                        navigate("/my-experties");
+                                    }}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl"
+                                >
+                                    Add Expertise
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

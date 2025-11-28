@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-import MobileNavbar from "./MobileviewFolder/MobileNavbar";
-import MobileTopBar from "./MobileviewFolder/MobileTopBar";
+import MobileNavbar from "./components/MobileviewFolder/MobileNavbar";
+import MobileTopBar from "./components/MobileviewFolder/MobileTopBar";
 
 export default function Layout() {
     const [dark, setDark] = useState(() => {
