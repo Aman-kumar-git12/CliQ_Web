@@ -49,6 +49,13 @@ export default function GetConnections() {
         fetchRandomUser();
     }, []);
 
+    const [snack, setSnack] = useState("");
+
+    const showSnack = (msg) => {
+        setSnack(msg);
+        setTimeout(() => setSnack(""), 2000);
+    };
+
     const handleIgnore = async () => {
         if (!user || sending) return;
         setSending(true);
@@ -57,6 +64,7 @@ export default function GetConnections() {
 
         try {
             await axiosClient.post(`/request/send/ignored/${user.id}`);
+            showSnack("Ignored user");
         } catch (err) {
             console.error("Failed to ignore:", err);
         }
@@ -73,6 +81,7 @@ export default function GetConnections() {
 
         try {
             await axiosClient.post(`/request/send/interested/${user.id}`);
+            showSnack("Request sent successfully");
         } catch (err) {
             console.error("Failed to send interest:", err);
         }
@@ -134,6 +143,7 @@ export default function GetConnections() {
                 min-h-[500px]
                 rounded-3xl
                 transition-colors duration-200
+                relative
             "
         >
 
@@ -196,6 +206,15 @@ export default function GetConnections() {
                     </button>
                 </div>
             </motion.div>
+
+            {/* SNACKBAR */}
+            {snack && (
+                <div className="fixed bottom-20  translate-x-1 z-[100]
+                                px-6 py-3 bg-black/90 text-white text-sm font-medium
+                                rounded-full shadow-2xl animate-fadeIn pointer-events-none whitespace-nowrap">
+                    {snack}
+                </div>
+            )}
         </motion.div>
     );
 }

@@ -11,6 +11,9 @@ import ConnectionsRequest from "./components/Connections/connectionsRequests";
 
 import Settings from "./components/Settings";
 
+import IndividualPost from "./components/Post/IndividualPost";
+import EditPost from "./components/Post/EditPost";
+
 function App() {
   return (
     <BrowserRouter basename="/">
@@ -27,6 +30,10 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/connections" element={<Connections />} />
             <Route path="/connections/requests" element={<ConnectionsRequest />} />
+
+            {/* Post Routes */}
+            <Route path="/post/:postId" element={<IndividualPost />} />
+            <Route path="/post/edit/:postId" element={<EditPost />} />
           </Route>
         </Routes>
       </UserContextProvider>

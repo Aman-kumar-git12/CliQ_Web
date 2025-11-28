@@ -1,4 +1,5 @@
 import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const PostCard = ({ post }) => {
     if (!post) return null;
@@ -14,7 +15,7 @@ const PostCard = ({ post }) => {
                 <div className="flex flex-col items-center">
                     <div className="relative w-11 h-11">
                         <img
-                            src={post.avatar}
+                            src={post.avatar || "https://github.com/shadcn.png"}
                             className="w-11 h-11 rounded-full object-cover border border-neutral-300 dark:border-neutral-700"
                         />
 
@@ -31,16 +32,16 @@ const PostCard = ({ post }) => {
                 </div>
 
                 {/* RIGHT: Content */}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
 
                     {/* Header */}
                     <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-black dark:text-white">
-                                {post.username}
+                            <span className="font-semibold text-black dark:text-white hover:underline">
+                                {post.username || "Anonymous"}
                             </span>
                             <span className="text-neutral-400 text-xs">
-                                {post.time}
+                                {post.time || "Just now"}
                             </span>
                         </div>
                         <button className="text-neutral-500 hover:text-black dark:hover:text-white">
@@ -48,38 +49,40 @@ const PostCard = ({ post }) => {
                         </button>
                     </div>
 
-                    {/* Text */}
-                    <p className="text-[15px] text-black dark:text-white leading-snug mb-3 whitespace-pre-wrap">
-                        {text}
-                    </p>
+                    {/* Post Text & Image - Clickable */}
+                    <Link to={`/post/${post.id}`} className="block group">
+                        <p className="text-[15px] text-black dark:text-white leading-snug mb-3 whitespace-pre-wrap">
+                            {text}
+                        </p>
 
-                    {/* IMAGES */}
-                    {(() => {
-                        const imgSrc = post.image || post.images;
-                        const images = Array.isArray(imgSrc) ? imgSrc : imgSrc ? [imgSrc] : [];
+                        {/* IMAGES */}
+                        {(() => {
+                            const imgSrc = post.image || post.images;
+                            const images = Array.isArray(imgSrc) ? imgSrc : imgSrc ? [imgSrc] : [];
 
-                        if (images.length === 0) return null;
+                            if (images.length === 0) return null;
 
-                        return (
-                            <div
-                                className={`
-                                    flex gap-2 mb-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800 
-                                    ${images.length > 1 ? "h-60 sm:h-72" : "h-auto"}
-                                `}
-                            >
-                                {images.map((img, i) => (
-                                    <img
-                                        key={i}
-                                        src={img}
-                                        className={`
-                                            object-cover 
-                                            ${images.length === 1 ? "w-full rounded-xl max-h-[450px]" : "w-full h-full"}
-                                        `}
-                                    />
-                                ))}
-                            </div>
-                        );
-                    })()}
+                            return (
+                                <div
+                                    className={`
+                                        flex gap-2 mb-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800 
+                                        ${images.length > 1 ? "h-60 sm:h-72" : "h-auto"}
+                                    `}
+                                >
+                                    {images.map((img, i) => (
+                                        <img
+                                            key={i}
+                                            src={img}
+                                            className={`
+                                                object-cover 
+                                                ${images.length === 1 ? "w-full rounded-xl max-h-[450px]" : "w-full h-full"}
+                                            `}
+                                        />
+                                    ))}
+                                </div>
+                            );
+                        })()}
+                    </Link>
 
                     {/* ACTIONS */}
                     <div className="flex items-center gap-6 mt-3 text-neutral-600 dark:text-neutral-400">

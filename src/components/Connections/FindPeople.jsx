@@ -66,7 +66,7 @@ export default function FindPeople() {
 
         try {
             await axiosClient.post(`/request/send/interested/${userId}`);
-            showSnack("Connection request sent");
+            showSnack("Follow request sent");
             // Trigger refresh in background to ensure sync, but UI is already updated
             setRefreshTrigger(!refreshTrigger);
         } catch (error) {
@@ -156,9 +156,9 @@ export default function FindPeople() {
 
             {/* SNACKBAR */}
             {snack && (
-                <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50
-                                px-6 py-3 bg-black/80 text-white text-sm 
-                                rounded-xl shadow-lg animate-slideUp">
+                <div className="fixed bottom-20 left-1/2 -translate-x-1 z-[100]
+                                px-6 py-3 bg-black/90 text-white text-sm font-medium
+                                rounded-full shadow-2xl animate-fadeIn pointer-events-none whitespace-nowrap">
                     {snack}
                 </div>
             )}

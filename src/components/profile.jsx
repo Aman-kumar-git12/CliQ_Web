@@ -31,21 +31,21 @@ export default function ProfilePage() {
     }, []);
 
     useEffect(() => {
+
         if (!user) return;
 
         const fetchPosts = async () => {
             try {
-                const res = await axiosClient.get(`/user/post/${user.id}`, {
+                const res = await axiosClient.get(`/user/posts/${user.id}`, {
                     withCredentials: true,
                 });
-                setPosts(res.data);
+                setPosts(Array.isArray(res.data) ? res.data : []);
             } catch (error) {
                 console.error("Error fetching posts:", error);
             } finally {
                 setLoadingPosts(false);
             }
         };
-
         fetchPosts();
     }, [user]);
 
@@ -137,9 +137,10 @@ export default function ProfilePage() {
 
                     <div className="grid grid-cols-3 gap-1 sm:gap-2">
                         {posts.map((post) => (
-                            <div
+                            <Link
+                                to={`/post/${post.id}`}
                                 key={post.id}
-                                className="bg-[#111] border border-gray-800 rounded-xl overflow-hidden flex items-center justify-center h-40 sm:h-48"
+                                className="bg-[#111] border border-gray-800 rounded-xl overflow-hidden flex items-center justify-center h-40 sm:h-48 hover:opacity-90 transition"
                             >
                                 {post.image && (
                                     <img
@@ -148,7 +149,7 @@ export default function ProfilePage() {
                                         className="object-cover w-full h-full"
                                     />
                                 )}
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
