@@ -4,10 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import LogoutConfirmation from "./Confirmation";
 import MyExperties from "./MyExperties/MyExperties";
 import { Plus, Camera, Eye, Upload, X } from "lucide-react";
+import { useUserContext } from "../context/userContext";
 
 export default function ProfilePage() {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
+    const { setUser: setGlobalUser } = useUserContext();
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
@@ -67,6 +69,7 @@ export default function ProfilePage() {
         try {
             await axiosClient.post("/logout", {}, { withCredentials: true });
             setUser(null);
+            setGlobalUser(null); // Clear global user state
             navigate("/login");
         } catch (error) {
             console.error("Logout failed:", error);

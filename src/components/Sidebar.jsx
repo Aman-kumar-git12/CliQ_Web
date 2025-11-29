@@ -13,7 +13,7 @@ import {
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import axios from "../api/axiosClient";
+import axiosClient from "../api/axiosClient";
 
 import LogoutConfirmation from "./Confirmation";
 
@@ -28,7 +28,7 @@ export default function Sidebar({ dark, setDark }) {
 
     const HandleLogout = async () => {
         try {
-            const res = await axios.post(
+            const res = await axiosClient.post(
                 "/logout",
                 {},
                 { withCredentials: true }

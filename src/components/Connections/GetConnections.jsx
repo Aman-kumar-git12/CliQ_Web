@@ -81,17 +81,50 @@ export default function GetConnections() {
         if (!user || sending) return;
         setSending(true);
 
-        await controls.start({ x: 500, opacity: 0, transition: { duration: 0.3 } });
-
         try {
+            // Check if connection already exists
+            let shouldDeleteIgnored = false;
+            try {
+                const res = await axiosClient.get(`/user/connections/${user.id}`);
+                const status = res.data.status || (res.data.connection && res.data.connection.status);
+
+                if (status === "ignored") {
+                    shouldDeleteIgnored = true;
+                } else if (status && status !== "none") {
+                    showSnack("Connection already exists");
+                    setSending(false);
+                    return;
+                }
+            } catch (error) {
+                // If 404 or error, connection likely doesn't exist, proceed
+                if (error.response && error.response.status !== 404) {
+                    console.error("Error checking connection:", error);
+                }
+            }
+
+            if (shouldDeleteIgnored) {
+                try {
+                    await axiosClient.delete(`/user/connections/cancel/${user.id}`);
+                } catch (delErr) {
+                    console.error("Failed to delete ignored connection:", delErr);
+                }
+            }
+
+            await controls.start({ x: 500, opacity: 0, transition: { duration: 0.3 } });
+
             await axiosClient.post(`/request/send/interested/${user.id}`);
+            localStorage.setItem(`connection_status_${user.id}`, "interested");
             showSnack("Request sent successfully");
+
+            fetchRandomUser();
         } catch (err) {
             console.error("Failed to send interest:", err);
+            showSnack("Failed to send request");
+            // Reset animation if failed
+            controls.set({ x: 0, opacity: 1 });
+        } finally {
+            setSending(false);
         }
-
-        setSending(false);
-        fetchRandomUser();
     };
 
     const handlePan = (_, info) => {

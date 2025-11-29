@@ -30,20 +30,51 @@ export default function Home() {
     [loading, loadingMore, feedHasMore]
   );
 
+  const timeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return interval + "y ago";
+
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return interval + "mo ago";
+
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return interval + "d ago";
+
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return interval + "h ago";
+
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return interval + "m ago";
+
+    return Math.floor(seconds) + "s ago";
+  };
+
   // Fetch posts feed
   const fetchFeed = async (pageNum) => {
     try {
       if (pageNum === 1) setLoading(true);
       else setLoadingMore(true);
 
-      const res = await axiosClient.get(`/post/feed?page=${pageNum}&limit=5`, {
+      const limit = 5;
+      const res = await axiosClient.get(`/post/feed?page=${pageNum}&limit=${limit}`, {
         withCredentials: true,
       });
 
-      const { posts: rawPosts = [], hasMore: apiHasMore } = res.data;
+      let rawPosts = [];
+      let apiHasMore = false;
 
-      if (!Array.isArray(rawPosts)) {
-        console.warn("API posts is not an array:", rawPosts);
+      if (Array.isArray(res.data)) {
+        rawPosts = res.data;
+        apiHasMore = rawPosts.length === limit;
+      } else if (res.data && Array.isArray(res.data.posts)) {
+        rawPosts = res.data.posts;
+        apiHasMore = res.data.hasMore !== undefined ? res.data.hasMore : rawPosts.length === limit;
+      } else {
+        console.warn("Unexpected API response format:", res.data);
       }
 
       if (rawPosts.length === 0) {
@@ -69,7 +100,7 @@ export default function Home() {
               ...post,
               username: `${user.firstname || "Unknown"} ${user.lastname || ""}`,
               avatar: user.imageUrl || "/default-avatar.png",
-              time: new Date(post.createdAt).toLocaleDateString(),
+              time: timeAgo(post.createdAt),
               likes: post.likes || 0,
               comments: post.comments || 0,
               reposts: post.reposts || 0,

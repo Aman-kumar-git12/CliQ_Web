@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "../../api/axiosClient";
+import axiosClient from "../../api/axiosClient";
 import Confirmation from "../Confirmation";
 
 export default function ConnectionsRequest() {
@@ -18,7 +18,7 @@ export default function ConnectionsRequest() {
         const fetchAllRequests = async () => {
             try {
                 // 1️⃣ Fetch all connection requests
-                const res = await axios.get("/user/requests", {
+                const res = await axiosClient.get("/user/requests", {
                     withCredentials: true,
                 });
 
@@ -29,8 +29,8 @@ export default function ConnectionsRequest() {
                 const requestsWithUserData = await Promise.all(
                     rawRequests.map(async (req) => {
                         try {
-                            const userRes = await axios.get(
-                                `/user/${req.fromUserId}`,
+                            const userRes = await axiosClient.get(
+                            `/user/${req.fromUserId}`,
                                 { withCredentials: true }
                             );
                             console.log(userRes.data);
@@ -57,26 +57,28 @@ export default function ConnectionsRequest() {
         fetchAllRequests();
     }, [loadingReview]);
 
-    const openConfirmation = (userId, status) => {
+    const openConfirmation = (userId, status, requestId) => {
         setConfirmation({
             isOpen: true,
             type: status,
-            userId: userId
+            userId: userId,
+            requestId: requestId
         });
     };
 
     const confirmReview = async () => {
-        if (!confirmation.userId || !confirmation.type) return;
+        if (!confirmation.userId || !confirmation.type || !confirmation.requestId) return;
 
-        const { userId, type } = confirmation;
+        const { userId, type, requestId } = confirmation;
 
         try {
-            console.log(userId, type)
-            await axios.post(
-                `/request/review/${type}/${userId}`,
+            console.log("Reviewing request:", requestId, type, "for user:", userId);
+            await axiosClient.post(
+                `/request/review/${type}/${requestId}`,
                 {},
                 { withCredentials: true }
             );
+            console.log("done")
             setLoadingReview(!loadingReview);
 
             setRequests((prev) => prev.filter((req) => req.fromUserId !== userId));
@@ -136,14 +138,14 @@ export default function ConnectionsRequest() {
                         {/* RIGHT: Accept / Reject */}
                         <div className="flex gap-2">
                             <button
-                                onClick={() => openConfirmation(req.fromUserId, "accepted")}
+                                onClick={() => openConfirmation(req.fromUserId, "accepted", req.id)}
                                 className="px-3 py-1 rounded-lg bg-green-500 text-white hover:bg-green-600 transition"
                             >
                                 Accept
                             </button>
 
                             <button
-                                onClick={() => openConfirmation(req.fromUserId, "rejected")}
+                                onClick={() => openConfirmation(req.fromUserId, "rejected", req.id)}
                                 className="px-3 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
                             >
                                 Reject

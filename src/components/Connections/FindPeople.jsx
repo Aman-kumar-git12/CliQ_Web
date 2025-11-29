@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import axiosClient from "../../api/axiosClient";
 import { Search } from "lucide-react";
+import { Link } from "react-router-dom";
+import axiosClient from "../../api/axiosClient";
 
 export default function FindPeople() {
     const [search, setSearch] = useState("");
     const [suggestions, setSuggestions] = useState([]);
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
-
     const [snack, setSnack] = useState(""); // SNACK MESSAGE STATE
     const [refreshTrigger, setRefreshTrigger] = useState(false);
 
@@ -20,11 +20,14 @@ export default function FindPeople() {
     // Fetch suggested users
     useEffect(() => {
         const fetchSuggestions = async () => {
+            if (!search) setLoading(true); // Only show loader if not searching
             try {
                 const res = await axiosClient.get("/user/search/suggested");
                 setSuggestions(res.data);
             } catch (err) {
                 console.error("Suggestion error:", err);
+            } finally {
+                if (!search) setLoading(false);
             }
         };
         fetchSuggestions();
@@ -52,29 +55,130 @@ export default function FindPeople() {
         return () => clearTimeout(timer);
     }, [search]);
 
+
+
     const avatar = (img) =>
         img || "https://cdn-icons-png.flaticon.com/512/219/219969.png";
 
+    const [connectionStatuses, setConnectionStatuses] = useState({});
+
+    // Fetch connection statuses for users in the list
+    useEffect(() => {
+        const usersToFetch = search ? results : suggestions;
+        if (usersToFetch.length === 0) return;
+
+        const fetchStatuses = async () => {
+            const statuses = {};
+            await Promise.all(usersToFetch.map(async (user) => {
+                try {
+                    const res = await axiosClient.get(`/user/connections/${user.id}`);
+                    // Assuming API returns { status: "..." } or similar
+                    const status = res.data.status || (res.data.connection && res.data.connection.status);
+                    const senderId = res.data.sender || (res.data.connection && res.data.connection.sender);
+
+                    if (status) {
+                        statuses[user.id] = {
+                            status: status === "accepted" ? "connected" : status,
+                            sender: senderId
+                        };
+                    } else {
+                        statuses[user.id] = { status: "none" };
+                    }
+                } catch (err) {
+                    if (err.response && err.response.status === 404) {
+                        statuses[user.id] = { status: "none" };
+                    }
+                }
+            }));
+            setConnectionStatuses(prev => ({ ...prev, ...statuses }));
+        };
+
+        fetchStatuses();
+    }, [results, suggestions]);
+
     // 🔵 FOLLOW BUTTON HANDLER
     const handleFollow = async (userId) => {
-        // Optimistic Update: Remove user immediately
-        if (search) {
-            setResults((prev) => prev.filter((u) => u.id !== userId));
-        } else {
-            setSuggestions((prev) => prev.filter((u) => u.id !== userId));
+        const currentData = connectionStatuses[userId] || { status: "none" };
+        const currentStatus = currentData.status;
+
+        if (currentStatus === "connected" || currentStatus === "interested") {
+            return;
         }
 
         try {
             await axiosClient.post(`/request/send/interested/${userId}`);
-            showSnack("Follow request sent");
-            // Trigger refresh in background to ensure sync, but UI is already updated
+
+            // Update local state
+            setConnectionStatuses(prev => ({
+                ...prev,
+                [userId]: { status: "interested" }
+            }));
+            localStorage.setItem(`connection_status_${userId}`, "interested");
+
+            showSnack("Request sent");
+
+            // Trigger refresh in background
             setRefreshTrigger(!refreshTrigger);
         } catch (error) {
             console.error("Follow failed:", error);
-            showSnack("Failed to send request");
-            // Revert optimistic update if needed (optional, but keeping simple for now)
-            setRefreshTrigger(!refreshTrigger); // Refresh to get correct state back
+
+            if (error.response && error.response.status === 409) {
+                const existing = error.response.data.existing;
+                if (existing) {
+                    if (existing.status === "ignored") {
+                        // If ignored, delete the connection and retry
+                        try {
+                            await axiosClient.delete(`/user/connections/cancel/${userId}`);
+                            // Retry follow
+                            await axiosClient.post(`/request/send/interested/${userId}`);
+
+                            setConnectionStatuses(prev => ({
+                                ...prev,
+                                [userId]: { status: "interested" }
+                            }));
+                            localStorage.setItem(`connection_status_${userId}`, "interested");
+                            showSnack("Request sent successfully");
+                            setRefreshTrigger(!refreshTrigger);
+                        } catch (retryError) {
+                            console.error("Retry follow failed:", retryError);
+                            showSnack("Failed to send request");
+                        }
+                    } else if (existing.status === "interested") {
+                        setConnectionStatuses(prev => ({
+                            ...prev,
+                            [userId]: { status: "interested" }
+                        }));
+                        showSnack("Request already sent");
+                    } else if (existing.status === "accepted") {
+                        setConnectionStatuses(prev => ({
+                            ...prev,
+                            [userId]: { status: "connected" }
+                        }));
+                        showSnack("You are already following this user");
+                    }
+                } else {
+                    showSnack("Failed to send request");
+                }
+            } else {
+                showSnack("Failed to send request");
+            }
         }
+    };
+
+    const getButtonText = (userId) => {
+        const status = connectionStatuses[userId]?.status;
+        switch (status) {
+            case "connected": return "Connected";
+            case "interested": return "Requested";
+            default: return "Follow";
+        }
+    };
+
+    const getButtonStyle = (userId) => {
+        const status = connectionStatuses[userId]?.status;
+        if (status === "connected") return "bg-green-100 text-green-700 border-green-200 cursor-default";
+        if (status === "interested") return "bg-neutral-100 text-neutral-500 border-neutral-200 cursor-default";
+        return "bg-black dark:bg-white text-white dark:text-black hover:opacity-80";
     };
 
     return (
@@ -115,7 +219,7 @@ export default function FindPeople() {
                         className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-900/50 transition-colors"
                     >
                         {/* Left Section */}
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <Link to={`/user/${user.id}`} className="flex items-center gap-3 min-w-0 flex-1">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-neutral-200 dark:bg-neutral-800">
                                 <img
                                     src={avatar(user.imageUrl)}
@@ -132,36 +236,48 @@ export default function FindPeople() {
                                     {user.username || user.email.split("@")[0]}
                                 </span>
                             </div>
-                        </div>
+                        </Link>
 
                         {/* FOLLOW BUTTON */}
                         <button
                             onClick={() => handleFollow(user.id)}
-                            className="px-4 sm:px-6 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 
-                                       text-sm font-semibold bg-white dark:bg-neutral-900 
-                                       hover:bg-neutral-100 dark:hover:bg-neutral-800 transition text-black dark:text-white"
+                            disabled={connectionStatuses[user.id]?.status === "connected" || connectionStatuses[user.id]?.status === "interested"}
+                            className={`px-4 sm:px-6 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 
+                                       text-sm font-semibold transition-all duration-200
+                                       ${getButtonStyle(user.id)}`}
                         >
-                            Follow
+                            {getButtonText(user.id)}
                         </button>
                     </div>
-                ))}
+                ))
+                }
 
                 {/* No results */}
-                {search && results.length === 0 && !loading && (
-                    <p className="text-neutral-500 text-center py-8 text-sm">
-                        No users found.
-                    </p>
-                )}
-            </div>
+                {
+                    !loading && (
+                        (search && results.length === 0) ? (
+                            <p className="text-neutral-500 text-center py-8 text-sm">
+                                No users found.
+                            </p>
+                        ) : (!search && suggestions.length === 0) ? (
+                            <p className="text-neutral-500 text-center py-8 text-sm">
+                                No suggestions available.
+                            </p>
+                        ) : null
+                    )
+                }
+            </div >
 
             {/* SNACKBAR */}
-            {snack && (
-                <div className="fixed bottom-20 left-1/2 -translate-x-1 z-[100]
+            {
+                snack && (
+                    <div className="fixed bottom-20 left-1/2 -translate-x-1 z-[100]
                                 px-6 py-3 bg-black/90 text-white text-sm font-medium
                                 rounded-full shadow-2xl animate-fadeIn pointer-events-none whitespace-nowrap">
-                    {snack}
-                </div>
-            )}
-        </div>
+                        {snack}
+                    </div>
+                )
+            }
+        </div >
     );
 }

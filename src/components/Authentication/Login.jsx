@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
+import { useUserContext } from "../../context/userContext";
 
 export default function Login() {
     const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ export default function Login() {
         password: "",
     });
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     const [error, setError] = useState(null);
     const [showErr, setShowErr] = useState(false);
@@ -29,6 +31,7 @@ export default function Login() {
         try {
             const response = await axiosClient.post("/login", formData);
             // console.log("Login response:", response.data);
+            setUser(response.data.user);
             navigate("/home");
             setShowErr(false);
             setError(null);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, Settings, Sun, Moon, LogOut, ArrowLeft } from "lucide-react";
-import axios from "../../api/axiosClient";
+import axiosClient from "../../api/axiosClient";
 import LogoutConfirmation from "../Confirmation";
 
 export default function MobileTopBar({ dark, setDark }) {
@@ -12,7 +12,7 @@ export default function MobileTopBar({ dark, setDark }) {
 
     const HandleLogout = async () => {
         try {
-            const res = await axios.post(
+            const res = await axiosClient.post(
                 "/logout",
                 {},
                 { withCredentials: true }

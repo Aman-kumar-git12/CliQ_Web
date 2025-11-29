@@ -13,19 +13,13 @@ const PostCard = ({ post }) => {
 
                 {/* LEFT: Avatar + Line */}
                 <div className="flex flex-col items-center">
-                    <div className="relative w-11 h-11">
+                    <Link to={`/user/${post.userId}`} className="relative w-11 h-11">
                         <img
                             src={post.avatar || "https://github.com/shadcn.png"}
                             className="w-11 h-11 rounded-full object-cover border border-neutral-300 dark:border-neutral-700"
                         />
 
-                        {/* Plus Icon */}
-                        <div className="absolute -bottom-1 -right-1 bg-white dark:bg-black rounded-full p-[2px] shadow-sm">
-                            <div className="bg-black dark:bg-white rounded-full w-4 h-4 flex items-center justify-center">
-                                <Plus size={10} className="text-white dark:text-black" />
-                            </div>
-                        </div>
-                    </div>
+                    </Link>
 
                     {/* Line */}
                     <div className="w-[2px] flex-1 bg-neutral-200 dark:bg-neutral-800 my-2 rounded-full" />
@@ -37,16 +31,13 @@ const PostCard = ({ post }) => {
                     {/* Header */}
                     <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-black dark:text-white hover:underline">
+                            <Link to={`/user/${post.userId}`} className="font-semibold text-black dark:text-white hover:underline">
                                 {post.username || "Anonymous"}
-                            </span>
+                            </Link>
                             <span className="text-neutral-400 text-xs">
                                 {post.time || "Just now"}
                             </span>
                         </div>
-                        <button className="text-neutral-500 hover:text-black dark:hover:text-white">
-                            <MoreHorizontal size={20} />
-                        </button>
                     </div>
 
                     {/* Post Text & Image - Clickable */}
@@ -117,7 +108,7 @@ const PostCard = ({ post }) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
