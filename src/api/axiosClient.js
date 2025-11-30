@@ -1,10 +1,10 @@
 
 import axios from "axios";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const pro = import.meta.env.VITE_BACKEND_URL;
 
 const axiosClient = axios.create({
-  baseURL: backendUrl,   // your backend  URL
+  baseURL: pro,   // your backend  URL
   headers: {
     "Content-Type": "application/json",
   },

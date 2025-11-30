@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 
+
 const UserContext = createContext();
 
 export const UserContextProvider = ({ children }) => {
