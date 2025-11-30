@@ -37,8 +37,13 @@ export default function Signup() {
             setShowErr(false);
             setError(null);
         } catch (error) {
-            setShowErr(error.response?.data.error);
-            setError(error.response?.data.error || "Signup failed");
+            const apiError = error.response?.data?.error;
+            const errorMessage = typeof apiError === 'string'
+                ? apiError
+                : apiError?.message || "Signup failed";
+
+            setShowErr(true);
+            setError(errorMessage);
         }
     };
 

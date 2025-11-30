@@ -62,7 +62,11 @@ export default function EditProfile() {
             navigate("/profile");
         } catch (error) {
             console.error("Update failed:", error);
-            setErrorMsg(error.response?.data?.error || "Something went wrong. Try again.");
+            const apiError = error.response?.data?.error;
+            const errorMessage = typeof apiError === 'string'
+                ? apiError
+                : apiError?.message || "Something went wrong. Try again.";
+            setErrorMsg(errorMessage);
         }
     };
 

@@ -37,7 +37,11 @@ export default function Login() {
             setError(null);
         } catch (err) {
             // show backend error message
-            setError(err.response?.data?.error || "Something went wrong");
+            const apiError = err.response?.data?.error;
+            const errorMessage = typeof apiError === 'string'
+                ? apiError
+                : apiError?.message || "Something went wrong";
+            setError(errorMessage);
             setShowErr(true);
             // console.log("Login error:", err.response?.data);
         }
