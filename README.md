@@ -90,4 +90,5 @@ src/
 └── main.jsx        # Application entry point
 
 
-
+frontend url - https://cliq-web-rho.vercel.app
+backend url - https://cliq-backend-1.onrender.com
