@@ -28,17 +28,15 @@ export default function Sidebar({ dark, setDark }) {
 
     const HandleLogout = async () => {
         try {
-            const res = await axiosClient.post(
+            await axiosClient.post(
                 "/logout",
                 {},
                 { withCredentials: true }
             );
-
-            if (res.status === 200) {
-                navigate("/login");
-            }
         } catch (err) {
             console.log(err);
+        } finally {
+            navigate("/login");
         }
     };
 

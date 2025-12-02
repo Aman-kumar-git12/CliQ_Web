@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
 import Confirmation from "../Confirmation";
+import CreatePostShimmering from "../shimmering/CreatePostShimmering";
 
 export default function EditPost() {
     const { postId } = useParams();
@@ -47,7 +48,7 @@ export default function EditPost() {
         }
     };
 
-    if (loading) return <div className="text-center text-white mt-10">Loading...</div>;
+    if (loading) return <CreatePostShimmering />;
 
     return (
         <div className="w-full pt-4 px-4 pb-20 flex justify-center">

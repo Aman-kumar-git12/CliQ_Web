@@ -5,6 +5,7 @@ import LogoutConfirmation from "./Confirmation";
 import MyExperties from "./MyExperties/MyExperties";
 import { Plus, Camera, Eye, Upload, X } from "lucide-react";
 import { useUserContext } from "../context/userContext";
+import ProfileShimmering from "./shimmering/ProfileShimmering";
 
 export default function ProfilePage() {
     const navigate = useNavigate();
@@ -68,11 +69,12 @@ export default function ProfilePage() {
     const handleLogout = async () => {
         try {
             await axiosClient.post("/logout", {}, { withCredentials: true });
+        } catch (error) {
+            console.error("Logout failed:", error);
+        } finally {
             setUser(null);
             setGlobalUser(null); // Clear global user state
             navigate("/login");
-        } catch (error) {
-            console.error("Logout failed:", error);
         }
     };
 
@@ -137,7 +139,7 @@ export default function ProfilePage() {
     };
 
     if (loading)
-        return <div className="text-center text-white mt-10">Loading...</div>;
+        return <ProfileShimmering />;
 
     if (!user)
         return <div className="text-center text-white mt-10">No user found</div>;

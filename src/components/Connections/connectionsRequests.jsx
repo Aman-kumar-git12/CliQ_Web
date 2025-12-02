@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axiosClient from "../../api/axiosClient";
 import Confirmation from "../Confirmation";
+import RequestsShimmering from "../shimmering/RequestsShimmering";
 
 export default function ConnectionsRequest() {
     const [requests, setRequests] = useState([]);
@@ -30,7 +31,7 @@ export default function ConnectionsRequest() {
                     rawRequests.map(async (req) => {
                         try {
                             const userRes = await axiosClient.get(
-                            `/user/${req.fromUserId}`,
+                                `/user/${req.fromUserId}`,
                                 { withCredentials: true }
                             );
                             console.log(userRes.data);
@@ -91,7 +92,7 @@ export default function ConnectionsRequest() {
     };
 
     if (loading) {
-        return <p className="p-6">Loading requests...</p>;
+        return <RequestsShimmering />;
     }
 
     return (

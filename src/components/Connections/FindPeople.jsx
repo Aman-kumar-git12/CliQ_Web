@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
+import FindPeopleShimmering from "../shimmering/FindPeopleShimmering";
 
 export default function FindPeople() {
     const [search, setSearch] = useState("");
@@ -205,11 +206,7 @@ export default function FindPeople() {
             </h2>
 
             {/* Loader */}
-            {loading && (
-                <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black dark:border-white"></div>
-                </div>
-            )}
+            {loading && <FindPeopleShimmering />}
 
             {/* User List */}
             <div className="flex flex-col gap-1">

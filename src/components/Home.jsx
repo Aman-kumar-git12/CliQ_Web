@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import axiosClient from "../api/axiosClient";
 import PostCard from "./Postcard";
 import { useFeedContext } from "../context/FeedContext";
+import HomeShimmering from "./shimmering/HomeShimmering";
 
 export default function Home() {
   const {
@@ -188,11 +189,7 @@ export default function Home() {
 
 
   if (loading && feedPage === 1 && feedPosts.length === 0) {
-    return (
-      <div className="flex justify-center py-10">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white"></div>
-      </div>
-    );
+    return <HomeShimmering />;
   }
 
   if (error && feedPosts.length === 0) {
