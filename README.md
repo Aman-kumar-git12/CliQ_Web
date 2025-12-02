@@ -1,4 +1,4 @@
-🚀 What This App Offers
+🚀 What CliQ Offers
 🔐 Secure Authentication
 Easy and safe Login/Signup flow to get started quickly.
 
