@@ -31,16 +31,16 @@ export default function Layout() {
 
     return (
         <div className={`min-h-screen ${dark ? "dark bg-neutral-950 text-white" : "bg-white text-black"} transition-colors duration-300`}>
-            <MobileTopBar dark={dark} setDark={setDark} />
+            {!pathname.startsWith("/chat") && <MobileTopBar dark={dark} setDark={setDark} />}
             <Sidebar dark={dark} setDark={setDark} />
 
-            <main className="w-full md:pl-28 pt-16 md:pt-0 min-h-screen">
+            <main className={`w-full md:pl-28 md:pt-0 min-h-screen ${pathname.startsWith("/chat") ? "" : "pt-16"}`}>
                 <div className="max-w-2xl mx-auto border-x border-neutral-200 dark:border-neutral-800 min-h-screen">
                     <Outlet />
                 </div>
             </main>
 
-            <MobileNavbar dark={dark} setDark={setDark} />
+            {!pathname.startsWith("/chat") && <MobileNavbar dark={dark} setDark={setDark} />}
         </div>
     );
 }

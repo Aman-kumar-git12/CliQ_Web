@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import MyExperties from "./MyExperties/MyExperties";
 
-import { X, ArrowLeft } from "lucide-react";
+import { X, ArrowLeft, MessageSquare } from "lucide-react";
 
 export default function PublicProfile() {
     const { userId } = useParams();
@@ -227,6 +227,14 @@ export default function PublicProfile() {
                                     ? "Connected"
                                     : "Follow"
                             }
+                        </button>
+
+                        <button
+                            onClick={() => navigate(`/chat/${user.id}`)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-center shadow-md dark:shadow-none w-full sm:w-auto flex items-center justify-center gap-2"
+                        >
+                            <MessageSquare size={18} />
+                            <span>Chat</span>
                         </button>
 
                         <button

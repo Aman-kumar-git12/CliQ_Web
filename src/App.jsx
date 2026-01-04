@@ -21,6 +21,8 @@ import MyExperties from "./components/MyExperties/EditExperties";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import PublicProfile from "./components/PublicProfile";
+import MyConnection from "./components/MyConnection";
+import ChatUI from "./components/Chat/chat";
 
 function App() {
   return (
@@ -49,6 +51,8 @@ function App() {
                 <Route path="/post/edit/:postId" element={<EditPost />} />
                 <Route path="/create/post" element={<CreatePost />} />
                 <Route path="/my-experties" element={<MyExperties />} />
+                <Route path="/my-connections" element={<MyConnection />} />
+                <Route path="/chat/:targetuserId" element={<ChatUI />} />
                 <Route path="/user/:userId" element={<PublicProfile />} />
               </Route>
             </Route>

@@ -222,19 +222,14 @@ export default function ProfilePage() {
                     </div>
 
                     {/* BUTTONS */}
-                    <div className="flex flex-col sm:flex-row gap-4 mt-8 relative">
-                        <button
-                            onClick={() => setShowEditConfirm(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-center shadow-md dark:shadow-none"
-                        >
-                            Edit Profile
-                        </button>
+                    <div className="flex flex-row overflow-x-auto pb-2 sm:overflow-visible gap-4 mt-8 relative w-full sm:w-auto items-center no-scrollbar">
+
 
                         {/* My Expertise Button & Menu */}
                         <div className="relative">
                             <button
                                 onClick={() => setShowExpertiseMenu(!showExpertiseMenu)}
-                                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-xl text-center shadow-md dark:shadow-none w-full sm:w-auto"
+                                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-xl text-center shadow-md dark:shadow-none whitespace-nowrap"
                             >
                                 My Expertise
                             </button>
@@ -264,11 +259,13 @@ export default function ProfilePage() {
                         </div>
 
                         <button
-                            onClick={() => setShowLogoutPopup(true)}
-                            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-xl shadow-md dark:shadow-none"
+                            onClick={() => navigate("/my-connections")}
+                            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-xl shadow-md dark:shadow-none whitespace-nowrap"
                         >
-                            Logout
+                            My Connections
                         </button>
+
+
                     </div>
                 </div>
 
