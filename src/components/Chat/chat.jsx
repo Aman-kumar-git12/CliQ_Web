@@ -96,16 +96,26 @@ const ChatUI = () => {
             }]);
         };
 
+        newSocket.on("connect", () => {
+            console.log("Socket connected:", newSocket.id);
+        });
+
+        newSocket.on("connect_error", (err) => {
+            console.error("Socket connection error:", err);
+        });
+
         newSocket.on("message", handleIncomingMessage);
         newSocket.on('receiveMessage', handleIncomingMessage);
 
         newSocket.on("messageDeleted", ({ messageId }) => {
+            console.log("Socket: messageDeleted event received", messageId);
             setMessages((prev) => prev.map(msg =>
                 msg.id === messageId ? { ...msg, isDelete: true, text: "This message is deleted" } : msg
             ));
         });
 
         newSocket.on("messageUpdated", ({ messageId, text }) => {
+            console.log("Socket: messageUpdated event received", messageId, text);
             setMessages((prev) => prev.map(msg =>
                 msg.id === messageId ? { ...msg, text: text } : msg
             ));
