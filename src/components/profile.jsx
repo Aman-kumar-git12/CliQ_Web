@@ -74,7 +74,6 @@ export default function ProfilePage() {
         } finally {
             setUser(null);
             setGlobalUser(null); // Clear global user state
-            navigate("/login");
         }
     };
 

@@ -8,18 +8,21 @@ import {
     Sun,
     Moon,
     LogOut,
-    Settings
+    Settings,
+    MessageSquare
 } from "lucide-react";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axiosClient from "../api/axiosClient";
+import { useUserContext } from "../context/userContext";
 
 import LogoutConfirmation from "./Confirmation";
 
 export default function Sidebar({ dark, setDark }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+    const { setUser } = useUserContext();
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -36,6 +39,7 @@ export default function Sidebar({ dark, setDark }) {
         } catch (err) {
             console.log(err);
         } finally {
+            setUser(null);
             navigate("/login");
         }
     };
@@ -92,6 +96,7 @@ export default function Sidebar({ dark, setDark }) {
                         <NavItem to="/connections" icon={Search} label="Find" />
                         <NavItem to="/create/post" icon={PlusSquare} label="Create" />
                         <NavItem to="/connections/requests" icon={Heart} label="Requests" />
+                        <NavItem to="/my-connections" icon={MessageSquare} label="Messages" />
                         <NavItem to="/profile" icon={User} label="Profile" />
                     </div>
                 </div>

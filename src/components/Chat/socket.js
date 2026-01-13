@@ -1,9 +1,10 @@
 import io from "socket.io-client";
 
 const createSocketConnection = () => {
-    const socket = io("http://localhost:2001", {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const socket = io(backendUrl, {
         withCredentials: true,
-        transports: ['websocket']
+        transports: ['websocket', 'polling']
     });
     return socket;
 }

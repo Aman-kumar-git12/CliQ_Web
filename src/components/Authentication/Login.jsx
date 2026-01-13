@@ -14,6 +14,7 @@ export default function Login() {
 
     const [error, setError] = useState(null);
     const [showErr, setShowErr] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setShowErr(false); // hide error while typing
@@ -27,6 +28,7 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         try {
             const response = await axiosClient.post("/login", formData);
@@ -44,6 +46,8 @@ export default function Login() {
             setError(errorMessage);
             setShowErr(true);
             // console.log("Login error:", err.response?.data);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -102,10 +106,11 @@ export default function Login() {
 
                 {/* Submit Button */}
                 <button
+                    disabled={loading}
                     type="submit"
-                    className="w-full bg-white text-black font-semibold py-3 rounded-full hover:opacity-90"
+                    className={`w-full bg-white text-black font-semibold py-3 rounded-full hover:opacity-90 transition-all ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
                 >
-                    Login
+                    {loading ? "Logging in..." : "Login"}
                 </button>
             </form>
         </div>

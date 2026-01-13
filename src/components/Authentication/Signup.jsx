@@ -17,6 +17,7 @@ export default function Signup() {
     const { setUser } = useUserContext();
     const [error, setError] = useState(null);
     const [showErr, setShowErr] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setShowErr(false);
@@ -29,6 +30,7 @@ export default function Signup() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const response = await axiosClient.post("/signup", formData);
             console.log(response)
@@ -44,6 +46,8 @@ export default function Signup() {
 
             setShowErr(true);
             setError(errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -166,10 +170,11 @@ export default function Signup() {
 
                 {/* SUBMIT */}
                 <button
+                    disabled={loading}
                     type="submit"
-                    className="w-full bg-white text-black font-semibold py-3 rounded-full hover:opacity-90"
+                    className={`w-full bg-white text-black font-semibold py-3 rounded-full hover:opacity-90 transition-all ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
                 >
-                    Create an account
+                    {loading ? "Signing up..." : "Create an account"}
                 </button>
             </form>
         </div>

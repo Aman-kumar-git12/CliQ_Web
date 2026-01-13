@@ -23,6 +23,7 @@ import PublicRoute from "./components/PublicRoute";
 import PublicProfile from "./components/PublicProfile";
 import MyConnection from "./components/MyConnection";
 import ChatUI from "./components/Chat/chat";
+import ChatList from "./components/Chat/ChatList";
 
 function App() {
   return (
