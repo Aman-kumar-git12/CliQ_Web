@@ -5,8 +5,6 @@ import {
     Heart,
     User,
     Menu,
-    Sun,
-    Moon,
     LogOut,
     Settings,
     MessageSquare
@@ -19,7 +17,7 @@ import { useUserContext } from "../context/userContext";
 
 import LogoutConfirmation from "./Confirmation";
 
-export default function Sidebar({ dark, setDark }) {
+export default function Sidebar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showLogoutPopup, setShowLogoutPopup] = useState(false);
     const { setUser } = useUserContext();
@@ -113,14 +111,6 @@ export default function Sidebar({ dark, setDark }) {
                                 <Settings size={18} />
                                 Settings
                             </Link>
-
-                            <button
-                                onClick={() => setDark(!dark)}
-                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition text-sm font-medium text-black dark:text-white w-full text-left"
-                            >
-                                {dark ? <Sun size={18} /> : <Moon size={18} />}
-                                Switch Appearance
-                            </button>
 
                             <div className="h-px bg-neutral-200 dark:bg-neutral-800 my-1"></div>
 

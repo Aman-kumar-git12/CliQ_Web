@@ -229,8 +229,8 @@ export default function PublicProfile() {
                             {/* Follow Button */}
                             <div className="relative flex-1 group">
                                 <div className={`absolute -inset-0.5 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200 ${connectionStatus === "following" ? "bg-green-500" :
-                                        connectionStatus === "interested" ? "bg-gray-500" :
-                                            "bg-gradient-to-r from-blue-600 to-indigo-600"
+                                    connectionStatus === "interested" ? "bg-gray-500" :
+                                        "bg-gradient-to-r from-blue-600 to-indigo-600"
                                     }`}></div>
                                 <button
                                     onClick={handleButtonClick}

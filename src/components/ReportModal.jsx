@@ -57,8 +57,8 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
                             <label
                                 key={reason}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-200 ${selectedReason === reason
-                                        ? 'bg-red-500/10 border-red-500/50 text-white'
-                                        : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10'
+                                    ? 'bg-red-500/10 border-red-500/50 text-white'
+                                    : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10'
                                     }`}
                             >
                                 <input

@@ -126,7 +126,7 @@ const PostCard = ({ post }) => {
     const text = post.text || post.content || "";
 
     return (
-        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-900/40 transition cursor-pointer">
+        <div className="p-4 bg-neutral-100 dark:bg-transparent border border-neutral-200 dark:border-neutral-800 shadow-none hover:shadow-sm transition-shadow duration-200 rounded-xl mb-4">
             <div className="flex gap-3">
 
                 {/* LEFT: Avatar + Line */}
@@ -152,10 +152,10 @@ const PostCard = ({ post }) => {
                             <Link to={`/public-profile/${post.userId}`} className="font-semibold text-black dark:text-white hover:underline">
                                 {post.username || "Anonymous"}
                             </Link>
-                            <span className="text-neutral-400 text-xs text-center flex items-center">
+                            <span className="text-black dark:text-white text-xs text-center flex items-center opacity-60">
                                 •
                             </span>
-                            <span className="text-neutral-400 text-xs">
+                            <span className="text-black dark:text-white text-xs opacity-60">
                                 {post.time || "Just now"}
                             </span>
                         </div>
@@ -232,7 +232,7 @@ const PostCard = ({ post }) => {
                             onClick={toggleLike}
                             onMouseEnter={() => handleMouseEnter('like')}
                             onMouseLeave={handleMouseLeave}
-                            className={`group relative flex items-center transition-colors ${liked ? 'text-rose-500' : 'hover:text-rose-500 text-neutral-600 dark:text-neutral-400'}`}
+                            className={`group relative flex items-center transition-colors ${liked ? 'text-rose-500' : 'hover:text-rose-500 text-black dark:text-white'}`}
                         >
                             {likesCount > 0 && (
                                 <span className="text-sm font-semibold mr-1.5">{likesCount}</span>

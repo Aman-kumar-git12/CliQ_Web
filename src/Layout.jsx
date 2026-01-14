@@ -5,22 +5,7 @@ import MobileNavbar from "./components/MobileviewFolder/MobileNavbar";
 import MobileTopBar from "./components/MobileviewFolder/MobileTopBar";
 
 export default function Layout() {
-    const [dark, setDark] = useState(() => {
-        const savedTheme = localStorage.getItem("theme");
-        return savedTheme === "dark";
-    });
-
     const { pathname } = useLocation();
-
-    useEffect(() => {
-        if (dark) {
-            document.documentElement.classList.add("dark");
-            localStorage.setItem("theme", "dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-            localStorage.setItem("theme", "light");
-        }
-    }, [dark]);
 
     // Scroll to top on route change, except for Home (which handles its own restoration)
     useEffect(() => {
@@ -30,17 +15,17 @@ export default function Layout() {
     }, [pathname]);
 
     return (
-        <div className={`min-h-screen ${dark ? "dark bg-neutral-950 text-white" : "bg-white text-black"} transition-colors duration-300`}>
-            {!pathname.startsWith("/chat") && <MobileTopBar dark={dark} setDark={setDark} />}
-            <Sidebar dark={dark} setDark={setDark} />
+        <div className="min-h-screen bg-neutral-950 text-white transition-colors duration-300">
+            {!pathname.startsWith("/chat") && <MobileTopBar />}
+            <Sidebar />
 
             <main className={`w-full md:pl-28 md:pt-0 min-h-screen ${pathname.startsWith("/chat") ? "" : "pt-16"}`}>
-                <div className="max-w-2xl mx-auto border-x border-neutral-200 dark:border-neutral-800 min-h-screen">
+                <div className="max-w-2xl mx-auto border-x border-neutral-800 min-h-screen">
                     <Outlet />
                 </div>
             </main>
 
-            {!pathname.startsWith("/chat") && <MobileNavbar dark={dark} setDark={setDark} />}
+            {!pathname.startsWith("/chat") && <MobileNavbar />}
         </div>
     );
 }

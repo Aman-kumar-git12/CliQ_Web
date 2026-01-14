@@ -370,51 +370,53 @@ export default function ProfilePage() {
             )}
 
             {/* My Expertise Modal */}
-            {showExpertiseModal && (
-                <div
-                    className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
-                    onClick={() => setShowExpertiseModal(false)}
-                >
+            {
+                showExpertiseModal && (
                     <div
-                        className="bg-white dark:bg-[#0f0f0f] w-full max-w-2xl rounded-3xl p-8 shadow-2xl border border-white/10 relative overflow-hidden"
-                        onClick={(e) => e.stopPropagation()}
+                        className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
+                        onClick={() => setShowExpertiseModal(false)}
                     >
-                        {/* Modal Gradient Blob */}
-                        <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-purple-500/10 rounded-full blur-[60px] pointer-events-none" />
+                        <div
+                            className="bg-white dark:bg-[#0f0f0f] w-full max-w-2xl rounded-3xl p-8 shadow-2xl border border-white/10 relative overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Modal Gradient Blob */}
+                            <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-purple-500/10 rounded-full blur-[60px] pointer-events-none" />
 
-                        <div className="flex justify-between items-center mb-8 relative z-10">
-                            <h2 className="text-3xl font-bold text-black dark:text-white">My Expertise</h2>
-                            <button
-                                onClick={() => setShowExpertiseModal(false)}
-                                className="bg-gray-100 dark:bg-white/5 p-2 rounded-full text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
+                            <div className="flex justify-between items-center mb-8 relative z-10">
+                                <h2 className="text-3xl font-bold text-black dark:text-white">My Expertise</h2>
+                                <button
+                                    onClick={() => setShowExpertiseModal(false)}
+                                    className="bg-gray-100 dark:bg-white/5 p-2 rounded-full text-gray-500 hover:text-black dark:hover:text-white transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
 
-                        <div className="relative z-10">
-                            {user.expertise ? (
-                                <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                                    <MyExperties expertise={user.expertise} />
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
-                                    <p className="text-gray-500 dark:text-gray-400 mb-6">Showcase your skills to the community.</p>
-                                    <button
-                                        onClick={() => {
-                                            setShowExpertiseModal(false);
-                                            navigate("/my-experties");
-                                        }}
-                                        className="bg-black dark:bg-white text-white dark:text-black px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
-                                    >
-                                        Add Skills
-                                    </button>
-                                </div>
-                            )}
+                            <div className="relative z-10">
+                                {user.expertise ? (
+                                    <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                                        <MyExperties expertise={user.expertise} />
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
+                                        <p className="text-gray-500 dark:text-gray-400 mb-6">Showcase your skills to the community.</p>
+                                        <button
+                                            onClick={() => {
+                                                setShowExpertiseModal(false);
+                                                navigate("/my-experties");
+                                            }}
+                                            className="bg-black dark:bg-white text-white dark:text-black px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
+                                        >
+                                            Add Skills
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

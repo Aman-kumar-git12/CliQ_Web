@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply antialiased text-neutral-900 dark:text-neutral-50 bg-white dark:bg-neutral-950;
+    @apply antialiased text-white bg-neutral-950;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
