@@ -158,117 +158,157 @@ export default function PublicProfile() {
         return <div className="text-center text-white mt-10">User not found</div>;
 
     return (
-        <div className="w-full mt-0 pt-3 md:pt-4 px-3 pb-10">
-            <div className="w-full">
+        <div className="min-h-screen bg-gray-50 dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
+            {/* Background Gradients (Subtle Dark Glow) */}
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-800/20 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
+
+            <div className="w-full max-w-4xl mx-auto pt-4 px-4 pb-20 relative z-10">
 
                 {/* BACK BUTTON - Hidden on Desktop */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex md:hidden items-center gap-2 text-gray-500 hover:text-black dark:hover:text-white mb-4 transition-colors"
+                    className="flex md:hidden items-center gap-2 text-gray-500 hover:text-black dark:hover:text-white mb-4 transition-colors p-2 bg-white/50 dark:bg-black/50 backdrop-blur-md rounded-full w-fit"
                 >
                     <ArrowLeft size={20} />
                     <span>Back</span>
                 </button>
 
-                {/* PROFILE CARD */}
-                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-800 text-black dark:text-white shadow-xl dark:shadow-2xl rounded-2xl p-6 sm:p-8 transition-colors duration-300">
+                {/* GLASSMORPHIC PROFILE CARD */}
+                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl rounded-3xl overflow-hidden">
 
-                    {/* HEADER */}
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="relative">
-                            <img
-                                src={user.imageUrl || "https://github.com/shadcn.png"}
-                                alt="User"
-                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border border-gray-200 dark:border-gray-700"
-                            />
-                        </div>
-
-                        <div>
-                            <h2 className="text-2xl sm:text-3xl font-semibold text-black dark:text-white">
-                                {user.firstname} {user.lastname}
-                            </h2>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base">{user.email}</p>
-                        </div>
+                    {/* Header Banner / Gradient Top */}
+                    <div className="h-32 bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 p-6 flex justify-end relative overflow-hidden">
+                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100"></div>
                     </div>
 
-                    {/* USER DETAILS */}
-                    <div className="space-y-3 text-gray-600 dark:text-gray-300 text-sm sm:text-base">
-                        <p>
-                            <span className="font-medium text-black dark:text-white">User ID:</span>{" "}
-                            {user.username || `${user.firstname.toLowerCase()}_${user.lastname.toLowerCase()}`}
-                        </p>
-                        {user.age && (
-                            <p>
-                                <span className="font-medium text-black dark:text-white">Age:</span> {user.age}
-                            </p>
-                        )}
-                        <p>
-                            <span className="font-medium text-black dark:text-white">Joined:</span>{" "}
-                            {new Date(user.createdAt).toLocaleDateString()}
-                        </p>
-                    </div>
+                    <div className="px-6 sm:px-10 pb-10">
+                        {/* AVATAR & INFO HEADER */}
+                        <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-12 mb-8 gap-6">
 
-                    {/* BUTTONS */}
-                    <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                        <button
-                            onClick={handleButtonClick}
-                            disabled={connectionStatus === "following" || connectionStatus === "interested"}
-                            className={`px-6 py-2 rounded-xl text-center shadow-md dark:shadow-none w-full sm:w-auto font-medium transition-colors
-                                ${connectionStatus === "interested"
-                                    ? "bg-gray-200 dark:bg-neutral-800 text-gray-500 cursor-default"
-                                    : connectionStatus === "following"
-                                        ? "bg-green-600 text-white cursor-default"
-                                        : "bg-black dark:bg-white text-white dark:text-black hover:opacity-90"
-                                }`}
-                        >
-                            {connectionStatus === "interested"
-                                ? "Requested"
-                                : connectionStatus === "following"
-                                    ? "Connected"
-                                    : "Follow"
-                            }
-                        </button>
+                            {/* Avatar Wrapper */}
+                            <div className="relative group">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-white/20 to-white/40 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-200"></div>
+                                <img
+                                    src={user.imageUrl || "https://github.com/shadcn.png"}
+                                    alt="User"
+                                    className="relative w-32 h-32 rounded-full object-cover border-4 border-white dark:border-[#111] shadow-2xl"
+                                />
+                            </div>
 
-                        <button
-                            onClick={() => navigate(`/chat/${user.id}`)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-center shadow-md dark:shadow-none w-full sm:w-auto flex items-center justify-center gap-2"
-                        >
-                            <MessageSquare size={18} />
-                            <span>Chat</span>
-                        </button>
+                            {/* User Name & Handle */}
+                            <div className="text-center sm:text-left flex-1">
+                                <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">
+                                    {user.firstname} {user.lastname}
+                                </h1>
+                                <p className="text-gray-500 dark:text-gray-400 font-medium">@{user.username || `${user.firstname.toLowerCase()}_${user.lastname.toLowerCase()}`}</p>
+                            </div>
+                        </div>
 
-                        <button
-                            onClick={() => setShowExpertiseModal(true)}
-                            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-xl text-center shadow-md dark:shadow-none w-full sm:w-auto"
-                        >
-                            View Expertise
-                        </button>
+                        {/* STATS ROW (Grid Layout) */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+                            {user.age && (
+                                <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
+                                    <span className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Age</span>
+                                    <span className="text-xl font-bold dark:text-gray-200">{user.age}</span>
+                                </div>
+                            )}
+                            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
+                                <span className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Posts</span>
+                                <span className="text-xl font-bold dark:text-gray-200">{posts.length}</span>
+                            </div>
+                            <div className={`bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center ${user.age ? 'sm:col-span-2' : 'col-span-2 sm:col-span-3'}`}>
+                                <span className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Joined</span>
+                                <span className="text-lg font-bold dark:text-gray-200">{new Date(user.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>
+                            </div>
+                        </div>
+
+                        {/* ACTION BUTTONS */}
+                        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+
+                            {/* Follow Button */}
+                            <div className="relative flex-1 group">
+                                <div className={`absolute -inset-0.5 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200 ${connectionStatus === "following" ? "bg-green-500" :
+                                        connectionStatus === "interested" ? "bg-gray-500" :
+                                            "bg-gradient-to-r from-blue-600 to-indigo-600"
+                                    }`}></div>
+                                <button
+                                    onClick={handleButtonClick}
+                                    disabled={connectionStatus === "following" || connectionStatus === "interested"}
+                                    className={`relative w-full py-3.5 rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2
+                                        ${connectionStatus === "interested"
+                                            ? "bg-neutral-800 text-gray-400 cursor-default"
+                                            : connectionStatus === "following"
+                                                ? "bg-green-600 text-white cursor-default"
+                                                : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-blue-500/25"
+                                        }`}
+                                >
+                                    {connectionStatus === "interested" ? "Request Sent" :
+                                        connectionStatus === "following" ? "Connected" : "Connect"}
+                                </button>
+                            </div>
+
+                            {/* Chat Button */}
+                            <div className="relative flex-1 group">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
+                                <button
+                                    onClick={() => navigate(`/chat/${user.id}`)}
+                                    className="relative w-full bg-black dark:bg-[#0a0a0a] text-white border border-gray-800 rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 hover:bg-gray-900 transition-all"
+                                >
+                                    <MessageSquare size={18} /> Chat
+                                </button>
+                            </div>
+
+                            {/* Expertise Button */}
+                            <div className="relative flex-1 group">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
+                                <button
+                                    onClick={() => setShowExpertiseModal(true)}
+                                    className="relative w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl py-3.5 font-semibold shadow-lg hover:shadow-orange-500/25 transition-all"
+                                >
+                                    Expertise
+                                </button>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
 
-                {/* POSTS GRID */}
-                <div className="mt-10">
-                    <h2 className="text-xl font-semibold text-black dark:text-white mb-4">
-                        Posts
-                    </h2>
+                {/* POSTS SECTION */}
+                <div className="mt-12">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold text-black dark:text-white flex items-center gap-2">
+                            Posts
+                            <span className="text-sm font-normal text-gray-500 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-full">{posts.length}</span>
+                        </h2>
+                    </div>
 
                     {!loadingPosts && posts.length === 0 && (
-                        <p className="text-gray-500 dark:text-gray-400">No posts found.</p>
+                        <div className="text-center py-20 bg-white/50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700">
+                            <p className="text-gray-500 dark:text-gray-400">This user hasn't posted anything yet.</p>
+                        </div>
                     )}
 
-                    <div className="grid grid-cols-3 gap-1 sm:gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                         {posts.map((post) => (
                             <Link
                                 to={`/post/${post.id}`}
                                 key={post.id}
-                                className="bg-gray-100 dark:bg-[#111] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden flex items-center justify-center h-40 sm:h-48 hover:opacity-90 transition"
+                                className="group relative aspect-square bg-gray-100 dark:bg-[#111] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
                             >
-                                {post.image && (
-                                    <img
-                                        src={post.image}
-                                        alt="User Post"
-                                        className="object-cover w-full h-full"
-                                    />
+                                {post.image ? (
+                                    <>
+                                        <img
+                                            src={post.image}
+                                            alt="Post"
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                                    </>
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400 p-4 text-center text-sm">
+                                        <p className="line-clamp-3">{post.content}</p>
+                                    </div>
                                 )}
                             </Link>
                         ))}
@@ -277,45 +317,49 @@ export default function PublicProfile() {
 
             </div>
 
-
-
             {/* View Expertise Modal */}
             {showExpertiseModal && (
                 <div
-                    className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
+                    className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
                     onClick={() => setShowExpertiseModal(false)}
                 >
                     <div
-                        className="bg-white dark:bg-[#111] w-full max-w-2xl rounded-2xl p-6 shadow-2xl border border-gray-200 dark:border-gray-800 relative"
+                        className="bg-white dark:bg-[#0f0f0f] w-full max-w-2xl rounded-3xl p-8 shadow-2xl border border-white/10 relative overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <button
-                            onClick={() => setShowExpertiseModal(false)}
-                            className="absolute top-4 right-4 text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                        >
-                            <X size={24} />
-                        </button>
+                        {/* Modal Gradient Blob */}
+                        <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-amber-500/10 rounded-full blur-[60px] pointer-events-none" />
 
-                        <h2 className="text-2xl font-bold mb-6 text-black dark:text-white">User Expertise</h2>
+                        <div className="flex justify-between items-center mb-8 relative z-10">
+                            <h2 className="text-3xl font-bold text-black dark:text-white">User Expertise</h2>
+                            <button
+                                onClick={() => setShowExpertiseModal(false)}
+                                className="bg-gray-100 dark:bg-white/5 p-2 rounded-full text-gray-500 hover:text-black dark:hover:text-white transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
 
-                        {user.expertise ? (
-                            <div className="mt-4 max-h-[80vh] overflow-y-auto">
-                                <MyExperties expertise={user.expertise} />
-                            </div>
-                        ) : (
-                            <div className="text-center py-10">
-                                <p className="text-gray-500 dark:text-gray-400">This user hasn't added any expertise yet.</p>
-                            </div>
-                        )}
+                        <div className="relative z-10">
+                            {user.expertise ? (
+                                <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                                    <MyExperties expertise={user.expertise} />
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
+                                    <p className="text-gray-500 dark:text-gray-400">This user hasn't added any expertise yet.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
 
             {/* SNACKBAR */}
             {snack && (
-                <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[100]
-                                px-6 py-3 bg-black/90 text-white text-sm font-medium
-                                rounded-full shadow-2xl animate-fadeIn pointer-events-none whitespace-nowrap">
+                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]
+                                px-6 py-3 bg-white dark:bg-[#222] text-black dark:text-white text-sm font-medium
+                                rounded-full shadow-2xl border border-gray-200 dark:border-gray-800 animate-fadeIn pointer-events-none whitespace-nowrap">
                     {snack}
                 </div>
             )}

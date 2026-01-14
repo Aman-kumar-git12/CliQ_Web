@@ -4,6 +4,8 @@ import axiosClient from "../api/axiosClient";
 import { Link, useNavigate } from "react-router-dom";
 import { User, MessageSquare } from "lucide-react";
 
+import MyConnectionShimmering from "./shimmering/MyConnectionShimmering";
+
 export default function MyConnection() {
     const navigate = useNavigate();
     const [connections, setConnections] = useState([]);
@@ -36,11 +38,7 @@ export default function MyConnection() {
         img || "https://cdn-icons-png.flaticon.com/512/219/219969.png";
 
     if (loading) {
-        return (
-            <div className="flex justify-center items-center py-20">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white"></div>
-            </div>
-        );
+        return <MyConnectionShimmering />;
     }
 
     if (error) {
@@ -54,7 +52,7 @@ export default function MyConnection() {
     return (
         <div className="w-full relative px-2">
 
-            <h2 className="text-xl font-bold text-black dark:text-white mb-6 px-1">
+            <h2 className="text-3xl font-bold text-black dark:text-white mb-6 mt-4 px-1">
                 My Connections
             </h2>
 

@@ -10,11 +10,11 @@ const HomeShimmering = () => {
                     className="bg-white dark:bg-[#111] border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 mb-4"
                 >
                     {/* Header: Avatar + Name */}
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800"></div>
-                        <div className="flex flex-col gap-2">
-                            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-800 rounded"></div>
-                            <div className="h-3 w-20 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                    <div className="h-24 bg-gray-200 dark:bg-neutral-900 rounded-2xl border border-gray-300 dark:border-neutral-800 mb-6 p-4 flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-full bg-gray-300 dark:bg-neutral-800"></div>
+                        <div className="flex-1 space-y-2">
+                            <div className="h-4 w-1/3 bg-gray-300 dark:bg-neutral-800 rounded"></div>
+                            <div className="h-10 w-full bg-gray-300 dark:bg-neutral-800 rounded-xl"></div>
                         </div>
                     </div>
 

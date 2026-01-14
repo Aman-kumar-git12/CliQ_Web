@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axiosClient from "../../api/axiosClient";
 import { ImagePlus, X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Confirmation from "../Confirmation";
+import CreatePostShimmering from "../shimmering/CreatePostShimmering";
 
 const CreatePost = () => {
     const navigate = useNavigate();
@@ -11,8 +12,17 @@ const CreatePost = () => {
     const [selectedFile, setSelectedFile] = useState(null); // Store raw file
     const [preview, setPreview] = useState("");
     const [loading, setLoading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
     const [showConfirm, setShowConfirm] = useState(false);
     const [snack, setSnack] = useState(""); // SNACK MESSAGE STATE
+
+    // Simulate loading on mount (for smoother transition/shimmer effect)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setInitialLoading(false);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, []);
 
     // Show snackbar for 3 seconds
     const showSnack = (msg) => {
@@ -82,6 +92,8 @@ const CreatePost = () => {
             setLoading(false);
         }
     };
+
+    if (initialLoading) return <CreatePostShimmering />;
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black text-black dark:text-white p-4 flex flex-col items-center pt-10 relative transition-colors duration-300">
