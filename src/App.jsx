@@ -9,6 +9,8 @@ import Profile from "./components/profile";
 import EditProfile from "./components/EditProfile";
 import Connections from "./components/Connections/connections";
 import ConnectionsRequest from "./components/Connections/connectionsRequests";
+import FindPeople from "./components/Connections/FindPeople";
+import GetConnections from "./components/Connections/GetConnections";
 
 import Settings from "./components/Settings";
 
@@ -43,8 +45,12 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/edit-profile" element={<EditProfile />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/connections" element={<Connections />} />
-                <Route path="/connections/requests" element={<ConnectionsRequest />} />
+                <Route path="/find" element={<Connections />}>
+                  <Route index element={<Navigate to="findpeople" replace />} />
+                  <Route path="findpeople" element={<FindPeople />} />
+                  <Route path="getconnection" element={<GetConnections />} />
+                </Route>
+                <Route path="/requests" element={<ConnectionsRequest />} />
 
                 {/* Post Routes */}
                 <Route path="/post/:postId" element={<IndividualPost />} />

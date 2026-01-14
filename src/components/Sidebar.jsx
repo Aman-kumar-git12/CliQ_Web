@@ -93,9 +93,9 @@ export default function Sidebar({ dark, setDark }) {
 
                     <div className="flex flex-col gap-4">
                         <NavItem to="/home" icon={Home} label="Home" />
-                        <NavItem to="/connections" icon={Search} label="Find" />
+                        <NavItem to="/find/findpeople" icon={Search} label="Find" />
+                        <NavItem to="/requests" icon={Heart} label="Requests" />
                         <NavItem to="/create/post" icon={PlusSquare} label="Create" />
-                        <NavItem to="/connections/requests" icon={Heart} label="Requests" />
                         <NavItem to="/my-connections" icon={MessageSquare} label="Messages" />
                         <NavItem to="/profile" icon={User} label="Profile" />
                     </div>

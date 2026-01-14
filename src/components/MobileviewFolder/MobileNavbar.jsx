@@ -10,8 +10,8 @@ export default function MobileNavbar({ dark, setDark }) {
             <Link to="/home" className={`p-2 rounded-xl transition-colors ${isActive('/home') ? "text-black dark:text-white" : "text-neutral-400"}`}>
                 <Home size={24} strokeWidth={isActive('/home') ? 2.5 : 2} />
             </Link>
-            <Link to="/connections" className={`p-2 rounded-xl transition-colors ${isActive('/connections') ? "text-black dark:text-white" : "text-neutral-400"}`}>
-                <Search size={24} strokeWidth={isActive('/connections') ? 2.5 : 2} />
+            <Link to="/find/findpeople" className={`p-2 rounded-xl transition-colors ${isActive('/find') ? "text-black dark:text-white" : "text-neutral-400"}`}>
+                <Search size={24} strokeWidth={isActive('/find') ? 2.5 : 2} />
             </Link>
             <Link to="/create/post" className="p-2 rounded-xl text-neutral-400 hover:text-black dark:hover:text-white transition-colors">
                 <PlusSquare size={24} />
@@ -19,7 +19,8 @@ export default function MobileNavbar({ dark, setDark }) {
             <Link to="/my-connections" className={`p-2 rounded-xl transition-colors ${isActive('/my-connections') ? "text-black dark:text-white" : "text-neutral-400"}`}>
                 <MessageSquare size={24} strokeWidth={isActive('/my-connections') ? 2.5 : 2} />
             </Link>
-            <Link to="/connections/requests" className={`p-2 rounded-xl transition-colors ${isActive('/connections/requests') ? "text-black dark:text-white" : "text-neutral-400"}`}>
+
+            <Link to="/requests" className={`p-2 rounded-xl transition-colors ${isActive('/requests') ? "text-black dark:text-white" : "text-neutral-400"}`}>
                 <Heart size={24} />
             </Link>
             <Link to="/profile" className={`p-2 rounded-xl transition-colors ${isActive('/profile') ? "text-black dark:text-white" : "text-neutral-400"}`}>

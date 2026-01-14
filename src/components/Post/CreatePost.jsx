@@ -72,7 +72,7 @@ const CreatePost = () => {
                 setContent("");
                 setSelectedFile(null);
                 setPreview("");
-                navigate("/home");
+                navigate("/profile");
             }, 1500);
 
         } catch (err) {
