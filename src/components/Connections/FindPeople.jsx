@@ -216,7 +216,7 @@ export default function FindPeople() {
                         className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-900/50 transition-colors"
                     >
                         {/* Left Section */}
-                        <Link to={`/user/${user.id}`} className="flex items-center gap-3 min-w-0 flex-1">
+                        <Link to={`/public-profile/${user.id}`} className="flex items-center gap-3 min-w-0 flex-1">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-neutral-200 dark:bg-neutral-800">
                                 <img
                                     src={avatar(user.imageUrl)}

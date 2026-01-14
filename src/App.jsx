@@ -54,6 +54,7 @@ function App() {
                 <Route path="/my-connections" element={<MyConnection />} />
                 <Route path="/chat" element={<Navigate to="/my-connections" replace />} />
                 <Route path="/chat/:targetuserId" element={<ChatUI />} />
+                <Route path="/public-profile/:userId" element={<PublicProfile />} />
                 <Route path="/user/:userId" element={<PublicProfile />} />
               </Route>
             </Route>

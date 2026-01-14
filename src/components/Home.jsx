@@ -106,6 +106,7 @@ export default function Home() {
               comments: post.comments || 0,
               reposts: post.reposts || 0,
               shares: post.shares || 0,
+              isLiked: post.isLiked || false,
             };
           } catch (err) {
             console.error("User fetch failed for post:", post.id, err);

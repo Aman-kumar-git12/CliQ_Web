@@ -7,13 +7,14 @@ export default function Confirmation({
     title = "Are you sure?",
     confirmText = "Yes",
     cancelText = "Cancel",
-    confirmColor = "bg-red-500 hover:bg-red-600"
+    confirmColor = "bg-red-500 hover:bg-red-600",
+    isLoading = false
 }) {
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80] flex items-center justify-center">
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl p-6 w-80 text-center border border-neutral-200 dark:border-neutral-800">
+            <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl p-6 w-80 text-center border border-neutral-200 dark:border-neutral-800 animate-fadeIn">
                 <h2 className="text-lg font-semibold text-black dark:text-white">
                     {title}
                 </h2>
@@ -21,16 +22,21 @@ export default function Confirmation({
                 <div className="flex justify-center gap-4 mt-6">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-700 text-black dark:text-white hover:bg-neutral-300 dark:hover:bg-neutral-600 transition"
+                        disabled={isLoading}
+                        className="px-4 py-2 rounded-xl bg-neutral-200 dark:bg-neutral-700 text-black dark:text-white hover:bg-neutral-300 dark:hover:bg-neutral-600 transition disabled:opacity-50"
                     >
                         {cancelText}
                     </button>
 
                     <button
                         onClick={onConfirm}
-                        className={`px-4 py-2 rounded-xl text-white transition ${confirmColor}`}
+                        disabled={isLoading}
+                        className={`px-4 py-2 rounded-xl text-white transition ${confirmColor} disabled:opacity-50 flex items-center justify-center`}
                     >
-                        {confirmText}
+                        {isLoading ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                        ) : null}
+                        {isLoading ? "Deleting..." : confirmText}
                     </button>
                 </div>
             </div>
