@@ -2,14 +2,22 @@ import { useState, useEffect, useRef } from "react";
 import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, Plus, Flag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
+import { useFeedContext } from "../context/FeedContext";
 import Toastbar from "./Chat/Toastbar";
 import ReportModal from "./ReportModal";
 
 const PostCard = ({ post }) => {
     const navigate = useNavigate();
+    const { updateFeedPost } = useFeedContext();
     const [liked, setLiked] = useState(post?.isLiked || false);
     const [likesCount, setLikesCount] = useState(post?.likes || 0);
     const [isLiking, setIsLiking] = useState(false);
+
+    // Sync local state with props (Important for navigation back/forth)
+    useEffect(() => {
+        setLiked(post?.isLiked || false);
+        setLikesCount(post?.likes || 0);
+    }, [post]);
 
     // Toast states
     const [showToast, setShowToast] = useState(false);
@@ -67,6 +75,12 @@ const PostCard = ({ post }) => {
             // Re-fetch accurate count
             const countRes = await axiosClient.get(`/user/post/likes/count/${post.id}`, { withCredentials: true });
             setLikesCount(countRes.data.likesCount);
+
+            // Sync with global feed
+            updateFeedPost(post.id, (p) => ({
+                isLiked: res.data.isLiked,
+                likes: countRes.data.likesCount
+            }));
         } catch (error) {
             console.error("Error toggling like:", error);
             // Rollback on error

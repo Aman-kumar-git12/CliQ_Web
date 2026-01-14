@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
 import { useUserContext } from "../../context/userContext";
+import { useFeedContext } from "../../context/FeedContext";
 import Confirmation from "../Confirmation";
 import Toastbar from "../Chat/Toastbar";
 import ReportModal from "../ReportModal";
@@ -26,6 +27,7 @@ export default function IndividualPost() {
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
     const { user } = useUserContext();
+    const { updateFeedPost } = useFeedContext();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [liked, setLiked] = useState(false);
@@ -177,6 +179,12 @@ export default function IndividualPost() {
             };
             setComments([commentToAdd, ...comments]);
             setNewComment("");
+
+            // Update local post state
+            setPost(prev => ({ ...prev, comments: (prev.comments || 0) + 1 }));
+
+            // Sync with global feed (Incremental)
+            updateFeedPost(postId, (p) => ({ comments: (p.comments || 0) + 1 }));
         } catch (error) {
             console.error("Error adding comment:", error);
         } finally {
@@ -193,6 +201,12 @@ export default function IndividualPost() {
             setComments(prev => prev.filter(c => c.id !== deletingCommentId));
             setShowDeleteConfirm(false);
             setDeletingCommentId(null);
+
+            // Update local post state
+            setPost(prev => ({ ...prev, comments: Math.max(0, (prev.comments || 0) - 1) }));
+
+            // Sync with global feed (Decremental)
+            updateFeedPost(postId, (p) => ({ comments: Math.max(0, (p.comments || 0) - 1) }));
         } catch (error) {
             console.error("Error deleting comment:", error);
         } finally {
@@ -215,6 +229,15 @@ export default function IndividualPost() {
             // Re-fetch count to be accurate
             const countRes = await axiosClient.get(`/user/post/likes/count/${postId}`, { withCredentials: true });
             setLikesCount(countRes.data.likesCount);
+
+            // Sync with global feed (Toggle)
+            updateFeedPost(postId, (p) => ({
+                isLiked: res.data.isLiked,
+                likes: countRes.data.likesCount,
+                // Optional: if backend doesn't return count, we could toggle manually:
+                // isLiked: !p.isLiked,
+                // likes: !p.isLiked ? p.likes + 1 : p.likes - 1
+            }));
         } catch (error) {
             console.error("Error toggling like:", error);
             // Rollback on error

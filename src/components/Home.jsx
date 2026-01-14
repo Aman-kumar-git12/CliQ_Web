@@ -54,29 +54,23 @@ export default function Home() {
     return Math.floor(seconds) + "s ago";
   };
 
-  // Fetch posts feed
+  // Fetch posts feed (Randomized)
   const fetchFeed = async (pageNum) => {
     try {
       if (pageNum === 1) setLoading(true);
       else setLoadingMore(true);
 
-      const limit = 5;
-      const res = await axiosClient.get(`/post/feed?page=${pageNum}&limit=${limit}`, {
+      // Collect IDs to exclude (only if loading more)
+      const excludeIds = pageNum === 1 ? [] : feedPosts.map(p => p.id);
+
+      const res = await axiosClient.post("/post/feed/random", {
+        excludeIds
+      }, {
         withCredentials: true,
       });
 
-      let rawPosts = [];
-      let apiHasMore = false;
-
-      if (Array.isArray(res.data)) {
-        rawPosts = res.data;
-        apiHasMore = rawPosts.length === limit;
-      } else if (res.data && Array.isArray(res.data.posts)) {
-        rawPosts = res.data.posts;
-        apiHasMore = res.data.hasMore !== undefined ? res.data.hasMore : rawPosts.length === limit;
-      } else {
-        console.warn("Unexpected API response format:", res.data);
-      }
+      let rawPosts = res.data.posts || [];
+      const apiHasMore = res.data.hasMore;
 
       if (rawPosts.length === 0) {
         setFeedHasMore(false);
@@ -87,45 +81,27 @@ export default function Home() {
 
       setFeedHasMore(apiHasMore);
 
-      // Fetch usernames + avatar in parallel
-      const postsWithUser = await Promise.all(
-        rawPosts.map(async (post) => {
-          try {
-            const userRes = await axiosClient.get(`/user/${post.userId}`, {
-              withCredentials: true,
-            });
-
-            const user = userRes.data?.user || {};
-
-            return {
-              ...post,
-              username: `${user.firstname || "Unknown"} ${user.lastname || ""}`,
-              avatar: user.imageUrl || "/default-avatar.png",
-              time: timeAgo(post.createdAt),
-              likes: post.likes || 0,
-              comments: post.comments || 0,
-              reposts: post.reposts || 0,
-              shares: post.shares || 0,
-              isLiked: post.isLiked || false,
-            };
-          } catch (err) {
-            console.error("User fetch failed for post:", post.id, err);
-            return {
-              ...post,
-              username: "Unknown",
-              avatar: "/default-avatar.png",
-            };
-          }
-        })
-      );
+      // Pre-process posts (backend already provides format, but ensuring consistency)
+      const processedPosts = rawPosts.map(post => ({
+        ...post,
+        time: timeAgo(post.createdAt),
+        // Backend now returns standardized fields, but keeping fallbacks just in case
+        username: post.username || "Unknown",
+        avatar: post.avatar || "/default-avatar.png",
+        likes: post.likes || 0,
+        comments: post.comments || 0,
+        isLiked: post.isLiked || false,
+      }));
 
       setFeedPosts((prevPosts) => {
-        // Filter out duplicates based on ID
-        const newPosts = postsWithUser.filter(
+        if (pageNum === 1) return processedPosts;
+        // Filter duplicates strictly (though backend random logic handles most)
+        const newPosts = processedPosts.filter(
           (newPost) => !prevPosts.some((prevPost) => prevPost.id === newPost.id)
         );
         return [...prevPosts, ...newPosts];
       });
+
     } catch (err) {
       setError("Failed to load feed");
       console.error("Feed fetch failed:", err);
