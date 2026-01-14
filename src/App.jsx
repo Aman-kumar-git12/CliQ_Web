@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import Home from "./components/Home";
 import Layout from "./Layout";
 import Signup from "./components/Authentication/Signup";
@@ -23,7 +23,6 @@ import PublicRoute from "./components/PublicRoute";
 import PublicProfile from "./components/PublicProfile";
 import MyConnection from "./components/MyConnection";
 import ChatUI from "./components/Chat/chat";
-import ChatList from "./components/Chat/ChatList";
 
 function App() {
   return (
@@ -53,6 +52,7 @@ function App() {
                 <Route path="/create/post" element={<CreatePost />} />
                 <Route path="/my-experties" element={<MyExperties />} />
                 <Route path="/my-connections" element={<MyConnection />} />
+                <Route path="/chat" element={<Navigate to="/my-connections" replace />} />
                 <Route path="/chat/:targetuserId" element={<ChatUI />} />
                 <Route path="/user/:userId" element={<PublicProfile />} />
               </Route>
