@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
 import Confirmation from "../Confirmation";
 import RequestsShimmering from "../shimmering/RequestsShimmering";
@@ -114,7 +115,10 @@ export default function ConnectionsRequest() {
                         className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow flex justify-between items-center"
                     >
                         {/* LEFT: Profile Pic + Name */}
-                        <div className="flex items-center gap-3">
+                        <Link
+                            to={`/public-profile/${req.fromUserId}`}
+                            className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer text-inherit no-underline"
+                        >
                             <img
                                 src={
                                     req.user?.imageUrl ||
@@ -134,7 +138,7 @@ export default function ConnectionsRequest() {
                                     sent you a connection request
                                 </p>
                             </div>
-                        </div>
+                        </Link>
 
                         {/* RIGHT: Accept / Reject */}
                         <div className="flex gap-2">
