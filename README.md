@@ -8,11 +8,11 @@ It blends social media engagement with professional networking, making it easy t
 
 
 # Follow this steps to run smoothly on the hosted link..
-1. When you open the website for the first time then it might possible it will not load the page for the first time then you can refresh the page it will load the page 
-2. if first point is not working then close the tab and then reopen then link , 2 to 3 times make the website run smoothly 
-3. You should have a stable internet connection.
-4. Website can take some time to load the page due to the slowness of render server , so plss wait for some time to load the page .
-
+1. When you open the website for the first time and it doesn’t load, refresh the page once.
+2. If it still doesn’t load, close the tab and reopen the link. Repeat this 2–3 times if needed.
+3. Make sure you have a stable and active internet connection.
+4. The first request may take some time because the server is waking up — please be patient while the page loads.
+5. Since images are loaded from the server, they may take a short time to appear, especially on slower connections.
 
 
 # 🧩 The Problem
@@ -95,11 +95,24 @@ Install dependencies -> npm install
 🔑 Environment Variables
 
 Create a .env file in the project root:
-VITE_BACKEND_URL="http://localhost:2001"
 
+# Frontend
+
+- VITE_BACKEND_URL="http://localhost:2001"
 ▶ Run Development Server -> npm run dev
-
 🏗 Create Production Build -> npm run build
+
+# Backend
+
+- PORT = 2001
+- MONGODB_URI
+- JWT_SECRET
+- NODE_ENV
+- CLOUDINARY_API_KEY
+- CLOUDINARY_API_SECRET
+- CLOUDINARY_CLOUD_NAME
+- FRONTEND_URL
+
 
 # 📁 Project Structure
 
