@@ -38,7 +38,7 @@ export default function EditPost() {
             console.log(postId);
             console.log("Saving post...");
             await axiosClient.put(`/update/post/${postId}`, { content }, { withCredentials: true });
-            navigate("/profile");
+            navigate(`/post/${postId}`);
         } catch (error) {
             console.error("Update failed:", error);
             alert("Failed to update post.");

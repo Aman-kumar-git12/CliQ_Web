@@ -40,10 +40,15 @@ export default function IndividualPost() {
     const [deletingCommentId, setDeletingCommentId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeletePostConfirm, setShowDeletePostConfirm] = useState(false);
+    const [isDeletingPost, setIsDeletingPost] = useState(false);
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [showPostMenu, setShowPostMenu] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportTarget, setReportTarget] = useState({ type: 'post', id: null });
+    const isEditing = location.pathname.endsWith("/edit");
+    const [editContent, setEditContent] = useState("");
+    const [isSavingEdit, setIsSavingEdit] = useState(false);
     const [isReporting, setIsReporting] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
@@ -135,6 +140,17 @@ export default function IndividualPost() {
             return;
         }
 
+        if (isEditing && post) {
+            setEditContent(post.content || "");
+        }
+    }, [isEditing, post]);
+
+    useEffect(() => {
+        if (!postId || postId === "undefined") {
+            setLoading(false);
+            return;
+        }
+
         const fetchPostAndComments = async () => {
             try {
                 // Fetch Post
@@ -144,6 +160,10 @@ export default function IndividualPost() {
                 setLikesCount(postData.likes || 0);
                 setLiked(postData.isLiked || false);
                 setReportedPost(postData.isReported || false);
+
+                if (isEditing) {
+                    setEditContent(postData.content || "");
+                }
 
                 // Fetch Comments
                 const commentsRes = await axiosClient.get(`/user/post/comments/${postId}`, { withCredentials: true });
@@ -212,6 +232,39 @@ export default function IndividualPost() {
         } finally {
             setIsDeleting(false);
         }
+    };
+
+    const handleDeletePost = async () => {
+        setIsDeletingPost(true);
+        try {
+            await axiosClient.delete(`/delete/post/${postId}`, { withCredentials: true });
+            navigate("/profile");
+        } catch (error) {
+            console.error("Delete failed:", error);
+            alert("Failed to delete post.");
+        } finally {
+            setIsDeletingPost(false);
+            setShowDeletePostConfirm(false);
+        }
+    };
+
+    const handleSaveEdit = async () => {
+        setIsSavingEdit(true);
+        try {
+            await axiosClient.put(`/update/post/${postId}`, { content: editContent }, { withCredentials: true });
+            setPost(prev => ({ ...prev, content: editContent }));
+            navigate(`/post/${postId}`, { replace: true });
+        } catch (error) {
+            console.error("Update failed:", error);
+            alert("Failed to update post.");
+        } finally {
+            setIsSavingEdit(false);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditContent(post.content);
+        navigate(`/post/${postId}`, { replace: true });
     };
 
     const toggleLike = async () => {
@@ -335,12 +388,22 @@ export default function IndividualPost() {
                     </div>
                     {isOwner ? (
                         <div className="flex space-x-2">
-                            <button className="p-2 hover:bg-white/10 rounded-full text-blue-400">
-                                <Edit2 size={18} />
-                            </button>
-                            <button className="p-2 hover:bg-white/10 rounded-full text-red-500">
-                                <Trash2 size={18} />
-                            </button>
+                            {!isEditing && (
+                                <>
+                                    <button
+                                        onClick={() => navigate(`/post/${postId}/edit`)}
+                                        className="p-2 hover:bg-white/10 rounded-full text-blue-400"
+                                    >
+                                        <Edit2 size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDeletePostConfirm(true)}
+                                        className="p-2 hover:bg-white/10 rounded-full text-red-500"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </>
+                            )}
                         </div>
                     ) : (
                         <div className="relative post-menu-container">
@@ -404,9 +467,32 @@ export default function IndividualPost() {
 
                     {/* Content */}
                     <div className="space-y-3">
-                        <p className="text-xl leading-relaxed text-gray-100 whitespace-pre-wrap">
-                            {post.content}
-                        </p>
+                        {isEditing ? (
+                            <>
+                                <style>
+                                    {`
+                                        .custom-resize-handle::-webkit-resizer {
+                                            border-style: solid;
+                                            border-width: 0 0 12px 12px;
+                                            border-color: transparent transparent #555 transparent;
+                                        }
+                                        .custom-resize-handle:hover::-webkit-resizer {
+                                             border-color: transparent transparent #3b82f6 transparent;
+                                        }
+                                    `}
+                                </style>
+                                <textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    className="custom-resize-handle w-full h-24 bg-[#111] border border-gray-700 rounded-xl p-4 text-white focus:outline-none focus:border-blue-500 resize-y text-xl leading-relaxed"
+                                    placeholder="Edit your post content..."
+                                />
+                            </>
+                        ) : (
+                            <p className="text-xl leading-relaxed text-gray-100 whitespace-pre-wrap">
+                                {post.content}
+                            </p>
+                        )}
 
                         {post.image && (
                             <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-2xl">
@@ -421,67 +507,88 @@ export default function IndividualPost() {
 
                     {/* Interaction Buttons - Re-styled with counts, border-b, and tooltips */}
                     <div className="flex items-center justify-between px-2 py-4 border-y border-white/10">
-                        <button
-                            onClick={toggleLike}
-                            onMouseEnter={() => handleMouseEnter('like')}
-                            onMouseLeave={handleMouseLeave}
-                            className={`flex items-center group relative transition-colors ${liked ? 'text-rose-500' : 'text-gray-500 md:hover:text-rose-500'}`}
-                        >
-                            {likesCount > 0 && <span className="text-sm font-bold mr-1">{likesCount}</span>}
-                            <div className={`p-2 rounded-full transition-colors ${liked ? 'bg-rose-500/10' : 'group-hover:bg-rose-500/10'}`}>
-                                <Heart size={20} fill={liked ? "currentColor" : "none"} strokeWidth={liked ? 0 : 2} />
+                        {isEditing ? (
+                            <div className="flex justify-end gap-3 w-full">
+                                <button
+                                    onClick={handleCancelEdit}
+                                    disabled={isSavingEdit}
+                                    className="px-4 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition font-medium"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveEdit}
+                                    disabled={isSavingEdit}
+                                    className="px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition font-bold shadow-lg shadow-blue-900/20 disabled:opacity-50"
+                                >
+                                    {isSavingEdit ? "Saving..." : "Save Changes"}
+                                </button>
                             </div>
-                            {/* Tooltip */}
-                            <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'like' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
-                                Like
-                            </span>
-                        </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={toggleLike}
+                                    onMouseEnter={() => handleMouseEnter('like')}
+                                    onMouseLeave={handleMouseLeave}
+                                    className={`flex items-center group relative transition-colors ${liked ? 'text-rose-500' : 'text-gray-500 md:hover:text-rose-500'}`}
+                                >
+                                    {likesCount > 0 && <span className="text-sm font-bold mr-1">{likesCount}</span>}
+                                    <div className={`p-2 rounded-full transition-colors ${liked ? 'bg-rose-500/10' : 'group-hover:bg-rose-500/10'}`}>
+                                        <Heart size={20} fill={liked ? "currentColor" : "none"} strokeWidth={liked ? 0 : 2} />
+                                    </div>
+                                    {/* Tooltip */}
+                                    <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'like' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
+                                        Like
+                                    </span>
+                                </button>
 
-                        <button
-                            onClick={toggleComments}
-                            onMouseEnter={() => handleMouseEnter('comments')}
-                            onMouseLeave={handleMouseLeave}
-                            className={`flex items-center group relative transition-colors ${showComments ? 'text-blue-500' : 'text-gray-500 md:hover:text-blue-500'}`}
-                        >
-                            {comments.length > 0 && <span className="text-sm font-bold mr-1">{comments.length}</span>}
-                            <div className={`p-2 rounded-full transition-colors ${showComments ? 'bg-blue-500/10' : 'group-hover:bg-blue-500/10'}`}>
-                                <MessageCircle size={20} fill={showComments ? "currentColor" : "none"} strokeWidth={showComments ? 0 : 2} />
-                            </div>
-                            {/* Tooltip */}
-                            <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'comments' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
-                                Comments
-                            </span>
-                        </button>
+                                <button
+                                    onClick={toggleComments}
+                                    onMouseEnter={() => handleMouseEnter('comments')}
+                                    onMouseLeave={handleMouseLeave}
+                                    className={`flex items-center group relative transition-colors ${showComments ? 'text-blue-500' : 'text-gray-500 md:hover:text-blue-500'}`}
+                                >
+                                    {comments.length > 0 && <span className="text-sm font-bold mr-1">{comments.length}</span>}
+                                    <div className={`p-2 rounded-full transition-colors ${showComments ? 'bg-blue-500/10' : 'group-hover:bg-blue-500/10'}`}>
+                                        <MessageCircle size={20} fill={showComments ? "currentColor" : "none"} strokeWidth={showComments ? 0 : 2} />
+                                    </div>
+                                    {/* Tooltip */}
+                                    <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'comments' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
+                                        Comments
+                                    </span>
+                                </button>
 
-                        <button
-                            onClick={() => handleActionClick("Remix is on a coffee break ☕")}
-                            onMouseEnter={() => handleMouseEnter('remix')}
-                            onMouseLeave={handleMouseLeave}
-                            className="flex items-center group relative text-gray-500 md:hover:text-emerald-500 transition-colors"
-                        >
-                            <div className="p-2 rounded-full group-hover:bg-emerald-500/10">
-                                <Repeat size={20} />
-                            </div>
-                            {/* Tooltip */}
-                            <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'remix' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
-                                Remix
-                            </span>
-                        </button>
+                                <button
+                                    onClick={() => handleActionClick("Remix is on a coffee break ☕")}
+                                    onMouseEnter={() => handleMouseEnter('remix')}
+                                    onMouseLeave={handleMouseLeave}
+                                    className="flex items-center group relative text-gray-500 md:hover:text-emerald-500 transition-colors"
+                                >
+                                    <div className="p-2 rounded-full group-hover:bg-emerald-500/10">
+                                        <Repeat size={20} />
+                                    </div>
+                                    {/* Tooltip */}
+                                    <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'remix' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
+                                        Remix
+                                    </span>
+                                </button>
 
-                        <button
-                            onClick={() => handleActionClick("This post is feeling a little too private 🤫")}
-                            onMouseEnter={() => handleMouseEnter('share')}
-                            onMouseLeave={handleMouseLeave}
-                            className="flex items-center group relative text-gray-500 md:hover:text-amber-500 transition-colors"
-                        >
-                            <div className="p-2 rounded-full group-hover:bg-amber-500/10">
-                                <Share2 size={20} />
-                            </div>
-                            {/* Tooltip */}
-                            <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'share' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
-                                Share
-                            </span>
-                        </button>
+                                <button
+                                    onClick={() => handleActionClick("This post is feeling a little too private 🤫")}
+                                    onMouseEnter={() => handleMouseEnter('share')}
+                                    onMouseLeave={handleMouseLeave}
+                                    className="flex items-center group relative text-gray-500 md:hover:text-amber-500 transition-colors"
+                                >
+                                    <div className="p-2 rounded-full group-hover:bg-amber-500/10">
+                                        <Share2 size={20} />
+                                    </div>
+                                    {/* Tooltip */}
+                                    <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'share' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
+                                        Share
+                                    </span>
+                                </button>
+                            </>
+                        )}
                     </div>
 
                     {showToast && (
@@ -605,6 +712,17 @@ export default function IndividualPost() {
                 onClose={closeReportModal}
                 onReport={handleReportPost}
                 isReporting={isReporting}
+            />
+
+            <Confirmation
+                isOpen={showDeletePostConfirm}
+                onClose={() => setShowDeletePostConfirm(false)}
+                onConfirm={handleDeletePost}
+                title="Delete Post?"
+                message="Are you sure you want to delete this post? This action cannot be undone."
+                confirmText="Delete Post"
+                confirmColor="bg-red-600 hover:bg-red-700"
+                isLoading={isDeletingPost}
             />
         </div>
     );

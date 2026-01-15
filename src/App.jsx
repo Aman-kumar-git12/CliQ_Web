@@ -4,7 +4,7 @@ import Home from "./components/Home";
 import Layout from "./Layout";
 import Signup from "./components/Authentication/Signup";
 import Login from "./components/Authentication/Login";
-import { UserContextProvider } from "./context/userContext";
+import { useUserContext } from "./context/userContext";
 import Profile from "./components/profile";
 import EditProfile from "./components/EditProfile";
 import Connections from "./components/Connections/connections";
@@ -25,49 +25,69 @@ import PublicRoute from "./components/PublicRoute";
 import PublicProfile from "./components/PublicProfile";
 import MyConnection from "./components/MyConnection";
 import ChatUI from "./components/Chat/chat";
+import SplashScreen from "./components/SplashScreen";
+import { useState, useEffect } from "react";
 
 function App() {
+  const { loading } = useUserContext();
+  const [showSplash, setShowSplash] = useState(() => {
+    // Check synchronously on mount if splash has been seen
+    return !sessionStorage.getItem("splashSeen");
+  });
+
+  // No useEffect needed for checking, as we do it in initial state
+
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+    sessionStorage.setItem("splashSeen", "true");
+  };
+
   return (
-    <BrowserRouter basename="/">
-      <UserContextProvider>
-        <FeedProvider>
-          <Routes>
-            {/* Public Routes (Redirect to Home if logged in) */}
-            <Route element={<PublicRoute />}>
-              <Route path="/" element={<Signup />} />
-              <Route path="/login" element={<Login />} />
-            </Route>
+    <>
+      {showSplash && (
+        <SplashScreen
+          onFinish={handleSplashFinish}
+          isAppReady={!loading}
+        />
+      )}
+      <FeedProvider>
+        <Routes>
+          {/* Public Routes (Redirect to Home if logged in) */}
+          <Route element={<PublicRoute />}>
+            <Route path="/" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+          </Route>
 
-            {/* Protected Routes (Redirect to Login if not logged in) */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<Layout />}>
-                <Route path="/home" element={<Home />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/edit-profile" element={<EditProfile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/find" element={<Connections />}>
-                  <Route index element={<Navigate to="findpeople" replace />} />
-                  <Route path="findpeople" element={<FindPeople />} />
-                  <Route path="getconnection" element={<GetConnections />} />
-                </Route>
-                <Route path="/requests" element={<ConnectionsRequest />} />
-
-                {/* Post Routes */}
-                <Route path="/post/:postId" element={<IndividualPost />} />
-                <Route path="/post/edit/:postId" element={<EditPost />} />
-                <Route path="/create/post" element={<CreatePost />} />
-                <Route path="/my-experties" element={<MyExperties />} />
-                <Route path="/my-connections" element={<MyConnection />} />
-                <Route path="/chat" element={<Navigate to="/my-connections" replace />} />
-                <Route path="/chat/:targetuserId" element={<ChatUI />} />
-                <Route path="/public-profile/:userId" element={<PublicProfile />} />
-                <Route path="/user/:userId" element={<PublicProfile />} />
+          {/* Protected Routes (Redirect to Login if not logged in) */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/home" element={<Home />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/edit-profile" element={<EditProfile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/find" element={<Connections />}>
+                <Route index element={<Navigate to="findpeople" replace />} />
+                <Route path="findpeople" element={<FindPeople />} />
+                <Route path="getconnection" element={<GetConnections />} />
               </Route>
+              <Route path="/requests" element={<ConnectionsRequest />} />
+
+              {/* Post Routes */}
+              <Route path="/post/:postId" element={<IndividualPost />} />
+              <Route path="/post/:postId/edit" element={<IndividualPost />} />
+              <Route path="/create/post" element={<CreatePost />} />
+              <Route path="/my-experties" element={<MyExperties />} />
+              <Route path="/my-connections" element={<MyConnection />} />
+              <Route path="/chat" element={<Navigate to="/my-connections" replace />} />
+              <Route path="/chat/:targetuserId" element={<ChatUI />} />
+              <Route path="/public-profile/:userId" element={<PublicProfile />} />
+              <Route path="/user/:userId" element={<PublicProfile />} />
             </Route>
-          </Routes>
-        </FeedProvider>
-      </UserContextProvider>
-    </BrowserRouter>
+          </Route>
+        </Routes>
+      </FeedProvider>
+
+    </>
   );
 }
 

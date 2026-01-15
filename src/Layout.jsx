@@ -16,10 +16,10 @@ export default function Layout() {
 
     return (
         <div className="min-h-screen bg-neutral-950 text-white transition-colors duration-300">
-            {!pathname.startsWith("/chat") && <MobileTopBar />}
+            {!pathname.startsWith("/chat") && !pathname.startsWith("/post/") && <MobileTopBar />}
             <Sidebar />
 
-            <main className={`w-full md:pl-28 md:pt-0 min-h-screen ${pathname.startsWith("/chat") ? "" : "pt-16"}`}>
+            <main className={`w-full md:pl-28 md:pt-0 min-h-screen ${pathname.startsWith("/chat") || pathname.startsWith("/post/") ? "" : "pt-16"}`}>
                 <div className="max-w-2xl mx-auto border-x border-neutral-800 min-h-screen">
                     <Outlet />
                 </div>
