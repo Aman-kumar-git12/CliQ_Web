@@ -425,7 +425,7 @@ export default function IndividualPost() {
                             onClick={toggleLike}
                             onMouseEnter={() => handleMouseEnter('like')}
                             onMouseLeave={handleMouseLeave}
-                            className={`flex items-center group relative transition-colors ${liked ? 'text-rose-500' : 'text-gray-500 hover:text-rose-500'}`}
+                            className={`flex items-center group relative transition-colors ${liked ? 'text-rose-500' : 'text-gray-500 md:hover:text-rose-500'}`}
                         >
                             {likesCount > 0 && <span className="text-sm font-bold mr-1">{likesCount}</span>}
                             <div className={`p-2 rounded-full transition-colors ${liked ? 'bg-rose-500/10' : 'group-hover:bg-rose-500/10'}`}>
@@ -441,7 +441,7 @@ export default function IndividualPost() {
                             onClick={toggleComments}
                             onMouseEnter={() => handleMouseEnter('comments')}
                             onMouseLeave={handleMouseLeave}
-                            className={`flex items-center group relative transition-colors ${showComments ? 'text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}
+                            className={`flex items-center group relative transition-colors ${showComments ? 'text-blue-500' : 'text-gray-500 md:hover:text-blue-500'}`}
                         >
                             {comments.length > 0 && <span className="text-sm font-bold mr-1">{comments.length}</span>}
                             <div className={`p-2 rounded-full transition-colors ${showComments ? 'bg-blue-500/10' : 'group-hover:bg-blue-500/10'}`}>
@@ -457,7 +457,7 @@ export default function IndividualPost() {
                             onClick={() => handleActionClick("Remix is on a coffee break ☕")}
                             onMouseEnter={() => handleMouseEnter('remix')}
                             onMouseLeave={handleMouseLeave}
-                            className="flex items-center group relative text-gray-500 hover:text-emerald-500 transition-colors"
+                            className="flex items-center group relative text-gray-500 md:hover:text-emerald-500 transition-colors"
                         >
                             <div className="p-2 rounded-full group-hover:bg-emerald-500/10">
                                 <Repeat size={20} />
@@ -472,7 +472,7 @@ export default function IndividualPost() {
                             onClick={() => handleActionClick("This post is feeling a little too private 🤫")}
                             onMouseEnter={() => handleMouseEnter('share')}
                             onMouseLeave={handleMouseLeave}
-                            className="flex items-center group relative text-gray-500 hover:text-amber-500 transition-colors"
+                            className="flex items-center group relative text-gray-500 md:hover:text-amber-500 transition-colors"
                         >
                             <div className="p-2 rounded-full group-hover:bg-amber-500/10">
                                 <Share2 size={20} />

@@ -140,29 +140,50 @@ export default function Home() {
   }, []);
 
   // Separate effect for page changes triggered by scroll
-  const isFirstRender = useRef(true);
+  // Save scroll position in real-time (throttled)
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      // Restore scroll position immediately
-      if (feedScrollY > 0) {
-        window.scrollTo(0, feedScrollY);
-      } else {
-        window.scrollTo(0, 0);
+    const handleScroll = () => {
+      if (window.scrollY > 0) {
+        setFeedScrollY(window.scrollY);
       }
-      return;
+    };
+
+    // Using a simple throttle to avoid excessive state updates
+    let timeoutId = null;
+    const throttledScroll = () => {
+      if (!timeoutId) {
+        timeoutId = setTimeout(() => {
+          handleScroll();
+          timeoutId = null;
+        }, 150);
+      }
+    };
+
+    window.addEventListener("scroll", throttledScroll);
+    return () => {
+      window.removeEventListener("scroll", throttledScroll);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [setFeedScrollY]);
+
+  // Restore scroll position on mount
+  useEffect(() => {
+    if (feedPosts.length > 0 && feedScrollY > 0) {
+      // Use requestAnimationFrame to ensure the DOM has rendered the posts
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.scrollTo(0, feedScrollY);
+        });
+      });
     }
+  }, []); // Only once on mount
+
+  // Separate effect for page changes triggered by scroll (pagination)
+  useEffect(() => {
     if (feedPage > 1) {
       fetchFeed(feedPage);
     }
-  }, [feedPage, feedScrollY]); // Added feedScrollY to dependencies
-
-  // Save scroll position on unmount
-  useEffect(() => {
-    return () => {
-      setFeedScrollY(window.scrollY);
-    };
-  }, [setFeedScrollY]);
+  }, [feedPage]);
 
 
   if (loading && feedPage === 1 && feedPosts.length === 0) {

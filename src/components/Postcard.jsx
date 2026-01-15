@@ -232,7 +232,7 @@ const PostCard = ({ post }) => {
                             onClick={toggleLike}
                             onMouseEnter={() => handleMouseEnter('like')}
                             onMouseLeave={handleMouseLeave}
-                            className={`group relative flex items-center transition-colors ${liked ? 'text-rose-500' : 'hover:text-rose-500 text-black dark:text-white'}`}
+                            className={`group relative flex items-center transition-colors ${liked ? 'text-rose-500' : 'text-black dark:text-white md:hover:text-rose-500'}`}
                         >
                             {likesCount > 0 && (
                                 <span className="text-sm font-semibold mr-1.5">{likesCount}</span>
@@ -254,7 +254,7 @@ const PostCard = ({ post }) => {
                             }}
                             onMouseEnter={() => handleMouseEnter('comments')}
                             onMouseLeave={handleMouseLeave}
-                            className="group relative flex items-center hover:text-blue-500 transition"
+                            className="group relative flex items-center md:hover:text-blue-500 transition"
                         >
                             {post.comments > 0 && (
                                 <span className="text-sm font-semibold mr-1.5">{post.comments}</span>
@@ -272,7 +272,7 @@ const PostCard = ({ post }) => {
                             onClick={(e) => handleActionClick(e, "Remix is on a coffee break ☕")}
                             onMouseEnter={() => handleMouseEnter('remix')}
                             onMouseLeave={handleMouseLeave}
-                            className="group relative flex items-center hover:text-green-500 transition"
+                            className="group relative flex items-center md:hover:text-green-500 transition"
                         >
                             {post.reposts > 0 && (
                                 <span className="text-sm font-semibold mr-1.5">{post.reposts}</span>
@@ -290,7 +290,7 @@ const PostCard = ({ post }) => {
                             onClick={(e) => handleActionClick(e, "This post is feeling a little too private 🤫")}
                             onMouseEnter={() => handleMouseEnter('share')}
                             onMouseLeave={handleMouseLeave}
-                            className="group relative flex items-center hover:text-yellow-500 transition"
+                            className="group relative flex items-center md:hover:text-yellow-500 transition"
                         >
                             {post.shares > 0 && (
                                 <span className="text-sm font-semibold mr-1.5">{post.shares}</span>

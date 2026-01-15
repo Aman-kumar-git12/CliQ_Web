@@ -9,7 +9,7 @@ export default function Layout() {
 
     // Scroll to top on route change, except for Home (which handles its own restoration)
     useEffect(() => {
-        if (pathname !== "/home") {
+        if (pathname !== "/home" && !pathname.startsWith("/chat")) {
             window.scrollTo(0, 0);
         }
     }, [pathname]);
