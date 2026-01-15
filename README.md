@@ -104,14 +104,13 @@ Create a .env file in the project root:
 
 # Backend
 
-- PORT = 2001
-- MONGODB_URI
-- JWT_SECRET
-- NODE_ENV
-- CLOUDINARY_API_KEY
-- CLOUDINARY_API_SECRET
-- CLOUDINARY_CLOUD_NAME
+- DATABASE_URL
+- JWT_SECRET_KEY
 - FRONTEND_URL
+- CLOUD_NAME
+- CLOUD_KEY
+- CLOUD_SECRET
+
 
 
 # 📁 Project Structure
