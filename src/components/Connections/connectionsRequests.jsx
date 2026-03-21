@@ -3,11 +3,15 @@ import { Link } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
 import Confirmation from "../Confirmation";
 import RequestsShimmering from "../shimmering/RequestsShimmering";
+import Toastbar from "../Chat/Toastbar";
 
 export default function ConnectionsRequest() {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingReview, setLoadingReview] = useState(false);
+
+    // Toast state
+    const [toast, setToast] = useState(null);
 
     const [confirmation, setConfirmation] = useState({
         isOpen: false,
@@ -48,7 +52,12 @@ export default function ConnectionsRequest() {
                     })
                 );
 
-                setRequests(requestsWithUserData);
+                // 3️⃣ Sort requests to show the latest first
+                const sortedRequests = requestsWithUserData.sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
+
+                setRequests(sortedRequests);
             } catch (err) {
                 console.log(err);
             } finally {
@@ -84,8 +93,13 @@ export default function ConnectionsRequest() {
             setLoadingReview(!loadingReview);
 
             setRequests((prev) => prev.filter((req) => req.fromUserId !== userId));
+
+            // Show feedback toast
+            setToast(type === "accepted" ? "Connection Request Accepted" : "Connection Request Rejected");
+
         } catch (err) {
             console.log(err);
+            setToast("Something went wrong. Please try again.");
         } finally {
             setLoadingReview(false);
             setConfirmation({ isOpen: false, type: null, requestId: null, userId: null });
@@ -168,6 +182,15 @@ export default function ConnectionsRequest() {
                 confirmText={confirmation.type === "accepted" ? "Yes, Accept" : "Yes, Reject"}
                 confirmColor={confirmation.type === "accepted" ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}
             />
+
+            {/* Feedback Toast */}
+            {toast && (
+                <Toastbar
+                    message={toast}
+                    onClose={() => setToast(null)}
+                    duration={3000}
+                />
+            )}
         </div>
     );
 }

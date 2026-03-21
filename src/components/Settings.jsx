@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronRight, Trash2, UserCog } from "lucide-react";
+import { ChevronRight, Trash2, UserCog, Briefcase } from "lucide-react";
 import axiosClient from "../api/axiosClient";
 import Confirmation from "./Confirmation";
 
@@ -68,6 +68,24 @@ export default function Settings() {
                     <ChevronRight className="text-neutral-400" />
                 </button>
 
+                {/* Edit Expertise */}
+                <Link
+                    to="/my-experties"
+                    className="w-full flex items-center justify-between p-4 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl hover:bg-neutral-50 dark:hover:bg-neutral-800 transition group"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full text-purple-600 dark:text-purple-400">
+                            <Briefcase size={24} />
+                        </div>
+                        <div className="text-left">
+                            <h3 className="font-semibold text-black dark:text-white">Edit Expertise</h3>
+                            <p className="text-sm text-neutral-500 dark:text-neutral-400">Manage your professional skills & templates</p>
+                        </div>
+                    </div>
+                    <ChevronRight className="text-neutral-400" />
+                </Link>
+
+
                 {/* Delete Profile */}
                 <button
                     onClick={() => setShowDeleteConfirm(true)}
@@ -105,6 +123,6 @@ export default function Settings() {
                 confirmText={loading ? "Deleting..." : "Yes, Delete"}
                 confirmColor="bg-red-600 hover:bg-red-700"
             />
-        </div>
+        </div >
     );
 }

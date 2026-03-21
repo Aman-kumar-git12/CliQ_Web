@@ -24,6 +24,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import PublicProfile from "./components/PublicProfile";
 import MyConnection from "./components/MyConnection";
+import MessagesInbox from "./components/Messages";
 import ChatUI from "./components/Chat/chat";
 import SplashScreen from "./components/SplashScreen";
 import { useState, useEffect } from "react";
@@ -62,7 +63,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/home" element={<Home />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:customTab?" element={<Profile />} />
               <Route path="/edit-profile" element={<EditProfile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/find" element={<Connections />}>
@@ -78,7 +79,8 @@ function App() {
               <Route path="/create/post" element={<CreatePost />} />
               <Route path="/my-experties" element={<MyExperties />} />
               <Route path="/my-connections" element={<MyConnection />} />
-              <Route path="/chat" element={<Navigate to="/my-connections" replace />} />
+              <Route path="/messages" element={<MessagesInbox />} />
+              <Route path="/chat" element={<Navigate to="/messages" replace />} />
               <Route path="/chat/:targetuserId" element={<ChatUI />} />
               <Route path="/public-profile/:userId" element={<PublicProfile />} />
               <Route path="/user/:userId" element={<PublicProfile />} />

@@ -1,13 +1,18 @@
 import { useEffect, useState, useRef } from "react";
 import axiosClient from "../api/axiosClient";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import LogoutConfirmation from "./Confirmation";
 import MyExperties from "./MyExperties/MyExperties";
 import { Plus, Camera, Eye, Upload, X, UserCog } from "lucide-react";
 import { useUserContext } from "../context/userContext";
 import ProfileShimmering from "./shimmering/ProfileShimmering";
+import { motion, AnimatePresence } from "framer-motion";
+import ProfileConnections from "./Connections/ProfileConnections";
+
+const TABS = ["posts", "connections", "groups", "expertise"];
 
 export default function ProfilePage() {
+    const { customTab } = useParams();
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
     const { setUser: setGlobalUser } = useUserContext();
@@ -28,6 +33,64 @@ export default function ProfilePage() {
     // Expertise States
     const [showExpertiseMenu, setShowExpertiseMenu] = useState(false);
     const [showExpertiseModal, setShowExpertiseModal] = useState(false);
+
+    // Tab State
+    const [activeTab, setActiveTab] = useState(() => {
+        if (customTab === "connection=True") return "connections";
+        if (customTab === "group=True") return "groups";
+        if (customTab === "expertise=True") return "expertise";
+        return "posts";
+    });
+    const [direction, setDirection] = useState(1);
+
+    // Sync if URL changes externally
+    useEffect(() => {
+        const urlTab = customTab === "connection=True" ? "connections"
+            : customTab === "group=True" ? "groups"
+                : customTab === "expertise=True" ? "expertise"
+                    : "posts";
+
+        if (urlTab !== activeTab) {
+            const currentIndex = TABS.indexOf(activeTab);
+            const newIndex = TABS.indexOf(urlTab);
+            setDirection(newIndex > currentIndex ? 1 : -1);
+            setActiveTab(urlTab);
+        }
+    }, [customTab]);
+
+    const handleTabChange = (newTab) => {
+        if (newTab === activeTab) return;
+
+        const currentIndex = TABS.indexOf(activeTab);
+        const newIndex = TABS.indexOf(newTab);
+        setDirection(newIndex > currentIndex ? 1 : -1);
+        setActiveTab(newTab);
+
+        // Silent URL update to prevent Layout.jsx scroll-to-top
+        let newUrl = "/profile";
+        if (newTab === "connections") newUrl = "/profile/connection=True";
+        else if (newTab === "groups") newUrl = "/profile/group=True";
+        else if (newTab === "expertise") newUrl = "/profile/expertise=True";
+
+        window.history.replaceState(null, "", newUrl);
+    };
+
+    const tabVariants = {
+        initial: (direction) => ({
+            x: direction > 0 ? 30 : -30,
+            opacity: 0,
+        }),
+        animate: {
+            x: 0,
+            opacity: 1,
+            transition: { duration: 0.25, ease: "easeOut" }
+        },
+        exit: (direction) => ({
+            x: direction > 0 ? -30 : 30,
+            opacity: 0,
+            transition: { duration: 0.25, ease: "easeOut" }
+        })
+    };
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -143,61 +206,59 @@ export default function ProfilePage() {
         return <div className="text-center text-white mt-10">No user found</div>;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
+        <div className="min-h-screen bg-black text-white relative overflow-hidden transition-colors duration-300">
             {/* Background Gradients (Subtle Dark Glow) */}
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-800/20 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-900/40 rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="w-full max-w-4xl mx-auto pt-4 px-4 pb-20 relative z-10">
+            <div className="w-full max-w-4xl mx-auto pt-6 px-4 pb-20 relative z-10">
 
-                {/* GLASSMORPHIC PROFILE CARD */}
-                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl rounded-3xl">
+                {/* SOLID DARK PROFILE CARD */}
+                <div className="bg-[#111111] border border-white/5 shadow-2xl rounded-[28px]">
 
                     {/* Header Banner / Gradient Top */}
-                    <div className="h-32 bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 relative overflow-hidden rounded-t-3xl">
-                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100"></div>
+                    <div className="h-[140px] bg-[url('https://images.unsplash.com/photo-1542382156909-9ae37b3f56fd?q=80&w=2938&auto=format&fit=crop')] bg-cover bg-center rounded-t-[28px] relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-[#111111]/90"></div>
                         <button
                             onClick={() => navigate("/edit-profile")}
-                            className="absolute bottom-3 right-4 bg-black/30 hover:bg-black/50 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all border border-white/20 flex items-center gap-2"
+                            className="absolute top-5 right-5 bg-black/60 hover:bg-black/80 backdrop-blur-xl text-[#f2f2f7] px-5 py-2.5 rounded-full text-sm font-medium transition-all border border-white/10 flex items-center gap-2 shadow-xl"
                         >
-                            <UserCog size={14} /> Edit Profile
+                            <UserCog size={16} /> Edit Profile
                         </button>
                     </div>
 
                     <div className="px-6 sm:px-10 pb-10">
                         {/* AVATAR & INFO HEADER */}
-                        <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-12 mb-8 gap-6">
+                        <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-[76px] mb-8 gap-6 relative z-10">
 
                             {/* Avatar Wrapper */}
-                            <div className="relative group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-white/20 to-white/40 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-200"></div>
+                            <div className="relative group shrink-0">
                                 <img
-                                    src={user.imageUrl}
+                                    src={user.imageUrl || "https://github.com/shadcn.png"}
                                     alt="User"
-                                    className="relative w-32 h-32 rounded-full object-cover border-4 border-white dark:border-[#111] shadow-2xl"
+                                    className="relative w-[150px] h-[150px] rounded-full object-cover border-[6px] border-[#111111] bg-[#111111] shadow-2xl"
                                 />
                                 {/* Upload Button */}
                                 <button
                                     onClick={() => setShowImageMenu(!showImageMenu)}
-                                    className="absolute bottom-1 right-1 bg-white dark:bg-black text-black dark:text-white p-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-110 transition-transform z-20"
+                                    className="absolute bottom-2 right-2 bg-[#1a1a1a] text-white p-2.5 rounded-full shadow-lg border border-white/10 hover:bg-[#2a2a2a] transition-colors z-20"
                                 >
-                                    <Camera size={18} />
+                                    <Camera size={16} />
                                 </button>
 
                                 {/* Options Menu */}
                                 {showImageMenu && (
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col animate-fadeIn">
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col animate-fadeIn">
                                         <button
                                             onClick={handleOptionView}
-                                            className="px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-[#2a2a2a] flex items-center gap-2"
+                                            className="px-4 py-3 text-left hover:bg-white/5 flex items-center gap-2 text-sm font-medium"
                                         >
-                                            <Eye size={16} /> View Image
+                                            <Eye size={16} className="text-gray-400" /> View Image
                                         </button>
                                         <button
                                             onClick={handleOptionUpload}
-                                            className="px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-[#2a2a2a] flex items-center gap-2"
+                                            className="px-4 py-3 text-left hover:bg-white/5 flex items-center gap-2 text-sm font-medium"
                                         >
-                                            <Upload size={16} /> Upload Image
+                                            <Upload size={16} className="text-gray-400" /> Upload Image
                                         </button>
                                     </div>
                                 )}
@@ -211,118 +272,170 @@ export default function ProfilePage() {
                             </div>
 
                             {/* User Name & Handle */}
-                            <div className="text-center sm:text-left flex-1">
-                                <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">
+                            <div className="text-center sm:text-left flex-1 pb-2">
+                                <h1 className="text-[32px] font-bold text-white tracking-tight leading-none mb-1">
                                     {user.firstname} {user.lastname}
                                 </h1>
-                                <p className="text-gray-500 dark:text-gray-400 font-medium">@{user.firstname.toLowerCase()}_{user.lastname.toLowerCase()}</p>
+                                <p className="text-[#8e8e93] text-[16px] font-medium mb-3">@{user.firstname.toLowerCase()}_{user.lastname.toLowerCase()}</p>
+                                <p className="text-[#8e8e93] text-[15px] font-medium flex items-center justify-center sm:justify-start gap-2">
+                                    {user.bio || "Builder • Creator • Professional"}
+                                </p>
                             </div>
                         </div>
 
                         {/* STATS ROW (Grid Layout) */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-                            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
-                                <span className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Age</span>
-                                <span className="text-xl font-bold dark:text-gray-200">{user.age || "N/A"}</span>
+                        <div className="flex gap-4 mb-10 overflow-x-auto scrollbar-hide">
+                            <div className="bg-[#1a1a1a]/80 p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center min-w-[120px] flex-1 sm:flex-none">
+                                <span className="text-[#8e8e93] text-[10px] uppercase font-bold tracking-[0.1em] mb-1.5">Posts</span>
+                                <span className="text-2xl font-bold tracking-tight text-white">{posts.length}</span>
                             </div>
-                            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
-                                <span className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Posts</span>
-                                <span className="text-xl font-bold dark:text-gray-200">{posts.length}</span>
+                            <div className="bg-[#1a1a1a]/80 p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center min-w-[120px] flex-1 sm:flex-none">
+                                <span className="text-[#8e8e93] text-[10px] uppercase font-bold tracking-[0.1em] mb-1.5">Connections</span>
+                                <span className="text-2xl font-bold tracking-tight text-white">{user.connections?.length || "0"}</span>
                             </div>
-                            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center sm:col-span-2">
-                                <span className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Joined</span>
-                                <span className="text-lg font-bold dark:text-gray-200">{new Date(user.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>
+                            <div className="bg-[#1a1a1a]/80 p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center min-w-[120px] flex-1 sm:flex-none">
+                                <span className="text-[#8e8e93] text-[10px] uppercase font-bold tracking-[0.1em] mb-1.5">Groups</span>
+                                <span className="text-2xl font-bold tracking-tight text-white">0</span>
                             </div>
                         </div>
 
-                        {/* ACTION BUTTONS */}
-                        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                            <div className="relative flex-1 group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
-                                <button
-                                    onClick={() => setShowExpertiseMenu(!showExpertiseMenu)}
-                                    className="relative w-full bg-white dark:bg-black text-black dark:text-white border border-gray-200 dark:border-gray-800 rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-[#0a0a0a] transition-all"
-                                >
-                                    My Expertise
-                                </button>
-
-                                {/* Expertise Menu */}
-                                {showExpertiseMenu && (
-                                    <div className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl z-30 overflow-hidden flex flex-col animate-fadeIn">
-                                        <button
-                                            onClick={() => {
-                                                setShowExpertiseMenu(false);
-                                                navigate("/my-experties");
-                                            }}
-                                            className="px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-[#2a2a2a] border-b border-gray-100 dark:border-white/5"
-                                        >
-                                            Add Expertise
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setShowExpertiseMenu(false);
-                                                setShowExpertiseModal(true);
-                                            }}
-                                            className="px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
-                                        >
-                                            View Expertise
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="relative flex-1 group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-400 to-emerald-600 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
-                                <button
-                                    onClick={() => navigate("/my-connections")}
-                                    className="relative w-full bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl py-3.5 font-bold shadow-lg hover:shadow-emerald-500/25 transition-all flex items-center justify-center gap-2"
-                                >
-                                    My Connections
-                                </button>
-                            </div>
+                        {/* NAVIGATION TABS */}
+                        <div className="sticky top-0 z-40 bg-[#111111]/90 backdrop-blur-xl flex items-center justify-center sm:justify-start gap-1 mb-2 border-b border-white/10 py-5 -mx-6 px-6 sm:-mx-10 sm:px-10 max-w-full">
+                            <button
+                                onClick={() => handleTabChange("posts")}
+                                className={`px-6 py-2.5 rounded-full font-medium transition-all text-[15px] ${activeTab === "posts" ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-white shadow-[0_4px_30px_rgba(120,0,255,0.1)] border border-purple-500/20" : "text-[#8e8e93] hover:text-white border border-transparent"}`}
+                            >
+                                Posts
+                            </button>
+                            <div className="w-px h-6 bg-white/10 mx-2"></div>
+                            <button
+                                onClick={() => handleTabChange("connections")}
+                                className={`px-5 py-2.5 rounded-full font-medium transition-all text-[15px] ${activeTab === "connections" ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-white shadow-[0_4px_30px_rgba(120,0,255,0.1)] border border-purple-500/20" : "text-[#8e8e93] hover:text-white border border-transparent"}`}
+                            >
+                                Connections
+                            </button>
+                            <div className="w-px h-6 bg-white/10 mx-2"></div>
+                            <button
+                                onClick={() => handleTabChange("groups")}
+                                className={`px-5 py-2.5 rounded-full font-medium transition-all text-[15px] ${activeTab === "groups" ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-white shadow-[0_4px_30px_rgba(120,0,255,0.1)] border border-purple-500/20" : "text-[#8e8e93] hover:text-white border border-transparent"}`}
+                            >
+                                Groups
+                            </button>
+                            <div className="w-px h-6 bg-white/10 mx-2"></div>
+                            <button
+                                onClick={() => handleTabChange("expertise")}
+                                className={`px-5 py-2.5 rounded-full font-medium transition-all text-[15px] ${activeTab === "expertise" ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-white shadow-[0_4px_30px_rgba(120,0,255,0.1)] border border-purple-500/20" : "text-[#8e8e93] hover:text-white border border-transparent"}`}
+                            >
+                                Expertise
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                {/* POSTS SECTION */}
-                <div className="mt-12">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-black dark:text-white flex items-center gap-2">
-                            My Posts
-                            <span className="text-sm font-normal text-gray-500 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-full">{posts.length}</span>
-                        </h2>
-                    </div>
-
-                    {!loadingPosts && posts.length === 0 && (
-                        <div className="text-center py-20 bg-white/50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700">
-                            <p className="text-gray-500 dark:text-gray-400">You haven't posted anything yet.</p>
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-                        {posts.map((post) => (
-                            <Link
-                                to={`/post/${post.id}`}
-                                key={post.id}
-                                className="group relative aspect-square bg-gray-100 dark:bg-[#111] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
-                            >
-                                {post.image ? (
-                                    <>
-                                        <img
-                                            src={post.image}
-                                            alt="Post"
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                                    </>
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-400 p-4 text-center text-sm">
-                                        <p className="line-clamp-3">{post.content}</p>
+                {/* TAB CONTENT SECTION */}
+                <div className="mt-8 min-h-[1000px]">
+                    <AnimatePresence mode="popLayout" custom={direction} initial={false}>
+                        <motion.div
+                            key={activeTab}
+                            custom={direction}
+                            variants={tabVariants}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            layout
+                        >
+                            {activeTab === "posts" && (
+                                <>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                            My Posts
+                                            <span className="text-sm font-normal text-gray-500 bg-white/10 px-2 py-0.5 rounded-full">{posts.length}</span>
+                                        </h2>
                                     </div>
-                                )}
-                            </Link>
-                        ))}
-                    </div>
+
+                                    {!loadingPosts && posts.length === 0 && (
+                                        <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-gray-700">
+                                            <p className="text-gray-400">You haven't posted anything yet.</p>
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                                        {posts.map((post) => (
+                                            <Link
+                                                to={`/post/${post.id}`}
+                                                key={post.id}
+                                                className="group relative aspect-square bg-[#111] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+                                            >
+                                                {post.image ? (
+                                                    <>
+                                                        <img
+                                                            src={post.image}
+                                                            alt="Post"
+                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                        />
+                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                                                    </>
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400 p-4 text-center text-sm">
+                                                        <p className="line-clamp-3">{post.content}</p>
+                                                    </div>
+                                                )}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+
+                            {activeTab === "connections" && (
+                                <>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                            Connections
+                                        </h2>
+                                    </div>
+                                    <ProfileConnections />
+                                </>
+                            )}
+
+                            {activeTab === "groups" && (
+                                <>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                            Groups
+                                            <span className="text-sm font-normal text-gray-500 bg-white/10 px-2 py-0.5 rounded-full">0</span>
+                                        </h2>
+                                    </div>
+                                    <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10 flex flex-col items-center justify-center gap-4">
+                                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-gray-500">
+                                            <Plus size={32} />
+                                        </div>
+                                        <p className="text-gray-400 font-medium text-lg">No groups found</p>
+                                        <p className="text-gray-500 text-sm max-w-[240px]">Join or create a group to start collaborating with others.</p>
+                                    </div>
+                                </>
+                            )}
+
+                            {activeTab === "expertise" && (
+                                <>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                            My Expertise
+                                        </h2>
+                                        <button
+                                            onClick={() => setShowExpertiseModal(true)}
+                                            className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-all border border-white/10 group"
+                                            title="View Full Screen"
+                                        >
+                                            <Eye size={20} className="group-hover:scale-110 transition-transform" />
+                                        </button>
+                                    </div>
+                                    <div className="bg-white/5 rounded-3xl p-6 border border-white/10">
+                                        <MyExperties expertise={user.expertise} />
+                                    </div>
+                                </>
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
 
             </div>
@@ -369,54 +482,52 @@ export default function ProfilePage() {
                 </div>
             )}
 
-            {/* My Expertise Modal */}
-            {
-                showExpertiseModal && (
+            {/* View Expertise Modal (Matches PublicProfile exactly) */}
+            {showExpertiseModal && (
+                <div
+                    className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
+                    onClick={() => setShowExpertiseModal(false)}
+                >
                     <div
-                        className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
-                        onClick={() => setShowExpertiseModal(false)}
+                        className="bg-white dark:bg-[#0f0f0f] w-full max-w-2xl rounded-3xl p-8 shadow-2xl border border-white/10 relative overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        <div
-                            className="bg-white dark:bg-[#0f0f0f] w-full max-w-2xl rounded-3xl p-8 shadow-2xl border border-white/10 relative overflow-hidden"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* Modal Gradient Blob */}
-                            <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-purple-500/10 rounded-full blur-[60px] pointer-events-none" />
+                        {/* Modal Gradient Blob */}
+                        <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-amber-500/10 rounded-full blur-[60px] pointer-events-none" />
 
-                            <div className="flex justify-between items-center mb-8 relative z-10">
-                                <h2 className="text-3xl font-bold text-black dark:text-white">My Expertise</h2>
-                                <button
-                                    onClick={() => setShowExpertiseModal(false)}
-                                    className="bg-gray-100 dark:bg-white/5 p-2 rounded-full text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                                >
-                                    <X size={20} />
-                                </button>
-                            </div>
+                        <div className="flex justify-between items-center mb-8 relative z-10">
+                            <h2 className="text-3xl font-bold text-black dark:text-white">User Expertise</h2>
+                            <button
+                                onClick={() => setShowExpertiseModal(false)}
+                                className="bg-gray-100 dark:bg-white/5 p-2 rounded-full text-gray-500 hover:text-black dark:hover:text-white transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
 
-                            <div className="relative z-10">
-                                {user.expertise ? (
-                                    <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                                        <MyExperties expertise={user.expertise} />
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
-                                        <p className="text-gray-500 dark:text-gray-400 mb-6">Showcase your skills to the community.</p>
-                                        <button
-                                            onClick={() => {
-                                                setShowExpertiseModal(false);
-                                                navigate("/my-experties");
-                                            }}
-                                            className="bg-black dark:bg-white text-white dark:text-black px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
-                                        >
-                                            Add Skills
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                        <div className="relative z-10">
+                            {user.expertise ? (
+                                <div className="max-h-[85vh] overflow-y-auto pr-2 custom-scrollbar">
+                                    <MyExperties expertise={user.expertise} />
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
+                                    <p className="text-gray-500 dark:text-gray-400">This user hasn't added any expertise yet.</p>
+                                    <button
+                                        onClick={() => {
+                                            setShowExpertiseModal(false);
+                                            navigate("/my-experties");
+                                        }}
+                                        className="mt-6 bg-black dark:bg-white text-white dark:text-black px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
+                                    >
+                                        Add Skills
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
         </div >
     );
 }

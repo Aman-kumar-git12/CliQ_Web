@@ -7,9 +7,13 @@ import MobileTopBar from "./components/MobileviewFolder/MobileTopBar";
 export default function Layout() {
     const { pathname } = useLocation();
 
-    // Scroll to top on route change, except for Home (which handles its own restoration)
+    // Scroll to top on route change, except for Home, Profile sub-tabs, and Chat
     useEffect(() => {
-        if (pathname !== "/home" && !pathname.startsWith("/chat")) {
+        if (
+            pathname !== "/home" &&
+            !pathname.startsWith("/chat") &&
+            !pathname.startsWith("/profile")
+        ) {
             window.scrollTo(0, 0);
         }
     }, [pathname]);

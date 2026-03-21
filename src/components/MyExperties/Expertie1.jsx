@@ -19,8 +19,8 @@ export default function Expertise1({ expertise = {} }) {
     const details = safeValue(expertise.details, { email: "****", address: "****" });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-10">
-            <div className="w-full max-w-7xl mx-auto bg-white rounded-3xl shadow-2xl p-8 md:p-14 border border-gray-200">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+            <div className="w-full bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-200">
 
                 <header className="mb-8 md:mb-10 text-center">
                     <h1 className="text-3xl md:text-5xl font-extrabold text-black">{name}</h1>

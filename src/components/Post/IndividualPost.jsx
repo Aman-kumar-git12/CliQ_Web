@@ -145,6 +145,38 @@ export default function IndividualPost() {
         }
     }, [isEditing, post]);
 
+    // Check connection status
+    const [connectionStatus, setConnectionStatus] = useState("none");
+
+    useEffect(() => {
+        const checkConnection = async () => {
+            if (post?.userId && user?.id && post.userId !== user.id) {
+                try {
+                    const res = await axiosClient.get(`/user/connections/${post.userId}`, { withCredentials: true });
+                    setConnectionStatus(res.data.status);
+                } catch (error) {
+                    console.error("Error checking connection status:", error);
+                }
+            }
+        };
+        if (post) checkConnection();
+    }, [post, user]);
+
+    const handleFollow = async () => {
+        if (!post?.userId) return;
+
+        try {
+            await axiosClient.post(`/request/send/interested/${post.userId}`, {}, { withCredentials: true });
+            setConnectionStatus("interested");
+            setToastMessage("Follow request sent 🚀");
+            setShowToast(true);
+        } catch (error) {
+            console.error("Error sending follow request:", error);
+            setToastMessage("Failed to send request ❌");
+            setShowToast(true);
+        }
+    };
+
     useEffect(() => {
         if (!postId || postId === "undefined") {
             setLoading(false);
@@ -454,13 +486,16 @@ export default function IndividualPost() {
                         </Link>
                         {!isOwner && (
                             <button
-                                onClick={() => setIsFollowed(!isFollowed)}
-                                className={`px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-300 ${isFollowed
-                                    ? 'bg-transparent border-white/20 text-white hover:border-red-500/50 hover:text-red-500 group'
-                                    : 'bg-white text-black border-transparent hover:bg-gray-200 shadow-lg shadow-white/10'
+                                onClick={handleFollow}
+                                disabled={connectionStatus === 'accepted' || connectionStatus === 'interested'}
+                                className={`px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-300 ${connectionStatus === 'accepted'
+                                    ? 'bg-transparent border-emerald-500/50 text-emerald-500 cursor-default'
+                                    : connectionStatus === 'interested'
+                                        ? 'bg-transparent border-white/20 text-white/60 cursor-default'
+                                        : 'bg-white text-black border-transparent hover:bg-gray-200 shadow-lg shadow-white/10'
                                     }`}
                             >
-                                {isFollowed ? 'Following' : 'Follow'}
+                                {connectionStatus === 'accepted' ? 'Connected' : connectionStatus === 'interested' ? 'Requested' : 'Follow'}
                             </button>
                         )}
                     </div>
@@ -495,11 +530,11 @@ export default function IndividualPost() {
                         )}
 
                         {post.image && (
-                            <div className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-2xl">
+                            <div className="rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-[#121212] border border-white/10">
                                 <img
                                     src={post.image}
                                     alt="Post"
-                                    className="w-full h-auto max-h-[700px] object-contain"
+                                    className="w-full h-full object-contain"
                                 />
                             </div>
                         )}
@@ -591,13 +626,15 @@ export default function IndividualPost() {
                         )}
                     </div>
 
-                    {showToast && (
-                        <Toastbar
-                            message={toastMessage}
-                            onClose={() => setShowToast(false)}
-                        />
-                    )}
-                </article>
+                    {
+                        showToast && (
+                            <Toastbar
+                                message={toastMessage}
+                                onClose={() => setShowToast(false)}
+                            />
+                        )
+                    }
+                </article >
 
                 {showComments && (
                     <div ref={commentsRef} className="animate-slideDown">
@@ -690,8 +727,9 @@ export default function IndividualPost() {
                             )}
                         </div>
                     </div>
-                )}
-            </main>
+                )
+                }
+            </main >
 
             <Confirmation
                 isOpen={showDeleteConfirm}
@@ -724,6 +762,6 @@ export default function IndividualPost() {
                 confirmColor="bg-red-600 hover:bg-red-700"
                 isLoading={isDeletingPost}
             />
-        </div>
+        </div >
     );
 }

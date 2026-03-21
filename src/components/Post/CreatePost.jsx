@@ -96,7 +96,7 @@ const CreatePost = () => {
     if (initialLoading) return <CreatePostShimmering />;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-black text-black dark:text-white p-4 flex flex-col items-center pt-10 relative transition-colors duration-300">
+        <div className="min-h-screen bg-black text-white p-4 flex flex-col items-center pt-8 relative transition-colors duration-300">
             {/* SNACKBAR */}
             {snack && (
                 <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]
@@ -115,20 +115,30 @@ const CreatePost = () => {
                 confirmColor="bg-blue-600 hover:bg-blue-700"
             />
 
-            <div className="w-full max-w-xl">
+            <div className="w-full max-w-2xl">
+                <div className="flex items-center gap-3 mb-8">
+                    <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl border border-purple-500/20">
+                        <ImagePlus size={24} className="text-purple-400" />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl font-extrabold tracking-tight text-white leading-none">Create Post</h2>
+                        <p className="text-neutral-500 text-sm font-medium mt-1">Share your thoughts and moments</p>
+                    </div>
+                </div>
 
-                <h2 className="text-2xl font-bold mb-6 text-center">Create Post</h2>
+                <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl transition-all duration-300 relative overflow-hidden">
 
-                <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-2xl transition-all duration-300">
+                    {/* Subtle Top Glow */}
+                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
                     {/* Description */}
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                    <div className="mb-8">
+                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3">
                             Description
                         </label>
                         <textarea
-                            className="w-full bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-400 dark:focus:border-gray-500 focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all resize-none"
-                            rows={4}
+                            className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 text-white placeholder-neutral-600 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 transition-all resize-none font-medium leading-relaxed"
+                            rows={5}
                             placeholder="What's on your mind?"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
@@ -136,32 +146,33 @@ const CreatePost = () => {
                     </div>
 
                     {/* Upload Image Area */}
-                    <div className="mb-8">
-                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
-                            Image
+                    <div className="mb-10">
+                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3">
+                            Media
                         </label>
 
                         {!preview ? (
                             <div
                                 onClick={() => fileInputRef.current.click()}
-                                className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-all group"
+                                className="border-2 border-dashed border-white/10 rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer hover:border-white/30 hover:bg-white/5 transition-all group overflow-hidden relative"
                             >
-                                <div className="bg-gray-100 dark:bg-[#222] p-3 rounded-full mb-3 group-hover:bg-gray-200 dark:group-hover:bg-[#333] transition-colors">
-                                    <ImagePlus size={24} className="text-gray-500 dark:text-gray-400 group-hover:text-black dark:group-hover:text-white" />
+                                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="bg-white/5 p-4 rounded-full mb-4 group-hover:scale-110 group-hover:bg-white/10 transition-all duration-300">
+                                    <ImagePlus size={28} className="text-neutral-400 group-hover:text-white transition-colors" />
                                 </div>
-                                <p className="text-gray-500 dark:text-gray-400 font-medium group-hover:text-black dark:group-hover:text-white transition-colors">
+                                <p className="text-neutral-400 font-bold group-hover:text-white transition-colors text-lg">
                                     Upload Image
                                 </p>
-                                <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">
+                                <p className="text-xs text-neutral-600 mt-2 font-medium">
                                     PNG, JPG up to 10MB
                                 </p>
                             </div>
                         ) : (
-                            <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 group shadow-sm">
+                            <div className="relative rounded-2xl overflow-hidden border border-white/10 group shadow-2xl">
                                 <img
                                     src={preview}
                                     alt="preview"
-                                    className="w-full h-64 object-cover"
+                                    className="w-full h-[300px] object-cover group-hover:scale-[1.02] transition-transform duration-500"
                                 />
                                 <button
                                     onClick={() => {
@@ -189,7 +200,7 @@ const CreatePost = () => {
                     <div className="flex gap-4 pt-2">
                         <button
                             onClick={() => navigate(-1)}
-                            className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-[#222] dark:hover:bg-[#333] text-black dark:text-white rounded-xl font-medium transition-colors"
+                            className="flex-1 px-4 py-3.5 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold transition-all border border-transparent hover:border-white/10"
                         >
                             Cancel
                         </button>
@@ -197,15 +208,15 @@ const CreatePost = () => {
                         <button
                             onClick={handleCreatePostClick}
                             disabled={loading || !content.trim()}
-                            className="flex-1 px-4 py-3 bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold transition-colors flex items-center justify-center gap-2 shadow-lg dark:shadow-none"
+                            className="flex-1 px-4 py-3.5 bg-white text-black hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
                         >
                             {loading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white dark:border-black"></div>
+                                    <Loader2 className="animate-spin h-5 w-5" />
                                     Posting...
                                 </>
                             ) : (
-                                "Post"
+                                "Share Post"
                             )}
                         </button>
                     </div>

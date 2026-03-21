@@ -207,7 +207,7 @@ const PostCard = ({ post }) => {
                                 <div
                                     className={`
                                         flex gap-2 mb-3 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800 
-                                        ${images.length > 1 ? "h-60 sm:h-72" : "h-auto"}
+                                        ${images.length > 1 ? "h-60 sm:h-72" : "w-full h-[450px] bg-neutral-100 dark:bg-[#121212] flex items-center justify-center"}
                                     `}
                                 >
                                     {images.map((img, i) => (
@@ -215,8 +215,7 @@ const PostCard = ({ post }) => {
                                             key={i}
                                             src={img}
                                             className={`
-                                                object-cover 
-                                                ${images.length === 1 ? "w-full rounded-xl max-h-[450px]" : "w-full h-full"}
+                                                ${images.length === 1 ? "w-full h-full object-contain" : "w-full h-full object-cover"}
                                             `}
                                         />
                                     ))}

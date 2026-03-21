@@ -25,7 +25,12 @@ export default function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const isActive = (path) => location.pathname === path;
+    const isActive = (path) => {
+        if (path === "/profile") {
+            return location.pathname.startsWith("/profile");
+        }
+        return location.pathname === path;
+    };
 
     const HandleLogout = async () => {
         try {
@@ -94,7 +99,7 @@ export default function Sidebar() {
                         <NavItem to="/find/findpeople" icon={Search} label="Find" />
                         <NavItem to="/requests" icon={Heart} label="Requests" />
                         <NavItem to="/create/post" icon={PlusSquare} label="Create" />
-                        <NavItem to="/my-connections" icon={MessageSquare} label="Messages" />
+                        <NavItem to="/messages" icon={MessageSquare} label="Messages" />
                         <NavItem to="/profile" icon={User} label="Profile" />
                     </div>
                 </div>

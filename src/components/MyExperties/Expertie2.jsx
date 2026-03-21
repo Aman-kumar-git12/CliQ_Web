@@ -23,8 +23,8 @@ export default function Experties2({ expertise = {} }) {
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 p-4 md:p-8">
-            <div className="max-w-5xl mx-auto flex flex-col md:flex-row bg-white shadow-2xl rounded-xl overflow-hidden min-h-[90vh]">
+        <div className="bg-gradient-to-b from-white to-gray-100 p-2 md:p-4">
+            <div className="w-full flex flex-col md:flex-row bg-white shadow-xl rounded-xl overflow-hidden">
                 <div className="w-full md:w-72 bg-blue-600 text-white p-8 flex flex-col items-center gap-6">
                     <div className="w-24 h-24 md:w-28 md:h-28 bg-white/20 rounded-full flex items-center justify-center text-3xl font-bold">
                         {name[0]}

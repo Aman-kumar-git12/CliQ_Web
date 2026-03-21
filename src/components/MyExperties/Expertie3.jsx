@@ -23,8 +23,8 @@ export default function Experties3({ expertise = {} }) {
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-700 via-gray-800 to-black text-white p-4 md:p-10">
-            <div className="max-w-4xl mx-auto backdrop-blur-md bg-white/10 border border-white/30 rounded-2xl p-6 md:p-14 shadow-2xl">
+        <div className="bg-gradient-to-b from-gray-700 via-gray-800 to-black text-white p-4">
+            <div className="w-full backdrop-blur-md bg-white/10 border border-white/30 rounded-2xl p-6 md:p-10 shadow-2xl">
                 <header className="text-center mb-8">
                     <h1 className="text-3xl md:text-5xl font-extrabold text-indigo-200">{name}</h1>
                     <p className="mt-2 text-gray-300">{description}</p>

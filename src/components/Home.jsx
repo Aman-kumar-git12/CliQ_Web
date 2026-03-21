@@ -25,7 +25,7 @@ export default function Home() {
         if (entries[0].isIntersecting && feedHasMore) {
           setFeedPage((prevPage) => prevPage + 1);
         }
-      });
+      }, { rootMargin: '1000px' });
       if (node) observer.current.observe(node);
     },
     [loading, loadingMore, feedHasMore]
@@ -172,7 +172,18 @@ export default function Home() {
       // Use requestAnimationFrame to ensure the DOM has rendered the posts
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          // Using behavior: "instant" to override smooth scrolling CSS
+          window.scrollTo({
+            top: feedScrollY,
+            left: 0,
+            behavior: "caption" in window ? "instant" : "auto", // fallback just in case, but instant is standard
+          });
+          // Explicitly forcing instant behavior for browsers that support it
+          document.documentElement.style.scrollBehavior = 'auto';
           window.scrollTo(0, feedScrollY);
+          setTimeout(() => {
+            document.documentElement.style.scrollBehavior = '';
+          }, 0);
         });
       });
     }
