@@ -252,7 +252,7 @@ export default function PublicProfile() {
                             <div className="relative flex-1 group">
                                 <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
                                 <button
-                                    onClick={() => navigate(`/chat/${user.id}`)}
+                                    onClick={() => navigate(`/messages/${user.id}`)}
                                     className="relative w-full bg-black dark:bg-[#0a0a0a] text-white border border-gray-800 rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 hover:bg-gray-900 transition-all"
                                 >
                                     <MessageSquare size={18} /> Chat

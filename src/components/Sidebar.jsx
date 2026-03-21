@@ -29,6 +29,9 @@ export default function Sidebar() {
         if (path === "/profile") {
             return location.pathname.startsWith("/profile");
         }
+        if (path === "/messages") {
+            return location.pathname.startsWith("/messages");
+        }
         return location.pathname === path;
     };
 
@@ -52,8 +55,8 @@ export default function Sidebar() {
             to={to}
             className={`p-3 rounded-xl transition-all duration-300 group relative flex items-center justify-center
                 ${isActive(to)
-                    ? "bg-black text-white dark:bg-white dark:text-black shadow-lg scale-105"
-                    : "text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white"
+                    ? "bg-black text-white dark:bg-white dark:text-black shadow-lg scale-110 shadow-white/10"
+                    : "text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white hover:scale-110"
                 }`}
         >
             <Icon size={26} strokeWidth={isActive(to) ? 2.5 : 2} />

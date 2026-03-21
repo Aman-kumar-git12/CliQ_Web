@@ -96,7 +96,7 @@ const ChatList = () => {
                         {filteredConversations.map((conv) => (
                             <div
                                 key={conv.id}
-                                onClick={() => navigate(`/chat/${conv.targetUserId}`)}
+                                onClick={() => navigate(`/messages/${conv.targetUserId}`)}
                                 className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-[#1c1c1e] transition-colors active:bg-[#2c2c2e] group"
                             >
                                 {/* Avatar */}

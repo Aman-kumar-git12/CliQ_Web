@@ -72,7 +72,7 @@ export default function ProfileConnections() {
                     {/* Right Section - Action Buttons */}
                     <div className="flex items-center gap-3 ml-4">
                         <button
-                            onClick={() => navigate(`/chat/${user.id}`)}
+                            onClick={() => navigate(`/messages/${user.id}`)}
                             className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-neutral-200 text-black rounded-full text-sm font-semibold transition-colors shrink-0 shadow-sm"
                         >
                             <MessageSquare size={16} className="fill-black/5" />

@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronDown, Trash2, Pencil, Ban, Plus, Smile, Mic, SendHorizontal, FileText, Download, Image as ImageIcon, Loader2, X, Play, Pause, CornerUpLeft, CheckCircle2, Check } from "lucide-react";
+import { ArrowLeft, ChevronDown, Trash2, Pencil, Ban, Plus, Smile, Mic, SendHorizontal, FileText, Download, Image as ImageIcon, Loader2, X, Play, Pause, CornerUpLeft, CheckCircle2, Check, Copy } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import createSocketConnection from "./socket";
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -128,6 +128,7 @@ const ChatUI = () => {
     const [deleteConfirmation, setDeleteConfirmation] = useState({ isOpen: false, messageId: null, isMe: false });
     const [replyTo, setReplyTo] = useState(null);
     const [toast, setToast] = useState(null);
+
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -170,6 +171,7 @@ const ChatUI = () => {
     const observerRef = useRef(null);
     const emojiPickerRef = useRef(null);
     const fileInputRef = useRef(null);
+    const inputRef = useRef(null);
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
     const recordingTimerRef = useRef(null);
@@ -177,6 +179,12 @@ const ChatUI = () => {
 
     // Fetch Target User
     useEffect(() => {
+        // Reset selection state when switching users
+        setIsSelectMode(false);
+        setSelectedMessages(new Set());
+        setReplyTo(null);
+        setNewMessage("");
+
         const fetchTargetUser = async () => {
             if (!targetuserId) return;
             try {
@@ -193,8 +201,12 @@ const ChatUI = () => {
     useEffect(() => {
         const fetchHistory = async () => {
             if (!targetuserId || !user?.id) return;
+
+            setLoading(true);
+
             try {
                 const res = await axiosClient.get(`/chat/history/${targetuserId}`);
+
                 const mappedMessages = res.data.map(msg => ({
                     id: msg.id,
                     text: msg.isDelete ? "This message is deleted" : msg.text,
@@ -411,6 +423,10 @@ const ChatUI = () => {
                 setMessages(prev => prev.map(msg =>
                     msg.id === tempId ? { ...msg, id: response.id } : msg
                 ));
+                // Notify Inbox to move this user to top
+                window.dispatchEvent(new CustomEvent('chatUpdated', {
+                    detail: { targetId: targetuserId, lastMessage: text || (image ? "Image" : "File") }
+                }));
             }
         });
         setTimeout(() => scrollToBottom(), 50);
@@ -492,6 +508,12 @@ const ChatUI = () => {
                 imageUrl: targetUser?.imageUrl,
                 parentMessage: data.parentMessage
             }]);
+
+            // Notify Inbox to move this user to top
+            window.dispatchEvent(new CustomEvent('chatUpdated', {
+                detail: { targetId: data.senderId, lastMessage: data.text || (data.image ? "Image" : "File") }
+            }));
+
             setTimeout(() => scrollToBottom('smooth'), 100);
         };
 
@@ -529,6 +551,7 @@ const ChatUI = () => {
             const currentMsgId = updateMessage;
             setUpdateMessage(null);
             setNewMessage("");
+            if (inputRef.current) inputRef.current.style.height = 'auto';
             await axiosClient.put(`/chat/message/${currentMsgId}`, { text: newMessage });
         } catch (error) {
             console.error("Error updating message:", error);
@@ -569,11 +592,17 @@ const ChatUI = () => {
                         msg.id === tempId ? { ...msg, id: response.id } : msg
                     ));
                     localStorage.setItem(`lastSeen_${user.id}_${targetuserId}`, response.id);
+
+                    // Notify Inbox to move this user to top
+                    window.dispatchEvent(new CustomEvent('chatUpdated', {
+                        detail: { targetId: targetuserId, lastMessage: text }
+                    }));
                 }
             });
 
             setNewMessage("");
             setReplyTo(null);
+            if (inputRef.current) inputRef.current.style.height = 'auto';
             setTimeout(() => scrollToBottom(), 50);
         }
     };
@@ -614,6 +643,12 @@ const ChatUI = () => {
         setUpdateMessage(id);
         setNewMessage(text);
         setOpenMenuId(null);
+        setTimeout(() => {
+            if (inputRef.current) {
+                inputRef.current.focus();
+                inputRef.current.setSelectionRange(text.length, text.length);
+            }
+        }, 10);
     };
 
     const handleDeleteStart = (id, isMe, isDeleted = false) => {
@@ -682,18 +717,18 @@ const ChatUI = () => {
     if (loading) return <LoadingChat />;
 
     return (
-        <div className="h-screen bg-[#000000] text-white flex flex-col relative overflow-hidden" onClick={() => setOpenMenuId(null)}>
+        <div className="h-full bg-black text-white flex flex-col relative overflow-hidden" onClick={() => setOpenMenuId(null)}>
             <div className="absolute inset-0 opacity-[0.08] pointer-events-none z-0"
                 style={{ backgroundImage: `url('https://w0.peakpx.com/wallpaper/580/671/HD-wallpaper-whatsapp-doodle-pattern-whatsapp-pattern-doodle.jpg')`, backgroundSize: '400px' }}>
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 bg-[#1c1c1e]/90 backdrop-blur-xl border-b border-neutral-800/50 sticky top-0 z-20 h-[60px]">
-                <div className="flex items-center gap-1 group">
-                    <button onClick={() => navigate('/my-connections')} className="p-1 -ml-1 text-[#007aff] hover:bg-white/5 rounded-full transition-colors active:scale-90">
-                        <ArrowLeft size={24} />
+            <div className="flex items-center justify-between px-4 py-2 bg-[#1c1c1e]/90 backdrop-blur-xl border-b border-neutral-800/50 sticky top-0 z-20 h-[65px]">
+                <div className="flex items-center gap-2">
+                    <button onClick={() => navigate('/messages')} className="p-2 -ml-2 mr-1 text-white hover:bg-white/10 rounded-full transition-colors">
+                        <ArrowLeft size={22} className="text-white" />
                     </button>
-                    <div className="flex items-center gap-3 ml-1">
+                    <div className="flex items-center gap-3">
                         <div className="relative">
                             <img src={targetUser?.imageUrl || "https://cdn-icons-png.flaticon.com/512/219/219969.png"} alt="User" className="w-10 h-10 rounded-full object-cover border border-white/10" />
                             {isTargetOnline && <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-[#1c1c1e] rounded-full"></div>}
@@ -721,16 +756,19 @@ const ChatUI = () => {
                     <div className="h-full flex flex-col items-center justify-center gap-6 animate-in fade-in zoom-in duration-500">
                         <div
                             onClick={() => sendDirectMessage(stickerMessage)}
-                            className="relative group cursor-pointer active:scale-95 transition-transform"
+                            className="relative group cursor-pointer active:scale-95 transition-all duration-300"
                         >
-                            <div className="absolute -inset-4 bg-[#007aff]/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            {/* Animated Background Highlight */}
+                            <div className="absolute -inset-8 bg-[#007aff]/30 blur-3xl rounded-full animate-pulse z-0"></div>
+                            <div className="absolute -inset-4 bg-[#007aff]/20 blur-xl rounded-full z-0 group-hover:scale-110 transition-transform duration-500"></div>
+
                             <img
                                 src={randomSticker.url}
                                 alt="Say Hi"
-                                className="w-32 h-32 relative z-10 drop-shadow-2xl"
+                                className="w-32 h-32 relative z-10 drop-shadow-[0_0_15px_rgba(0,122,255,0.4)] group-hover:rotate-6 transition-transform duration-300"
                             />
-                            <div className="absolute -top-2 -right-2 bg-emerald-500 p-1.5 rounded-full text-white shadow-lg animate-bounce duration-1000">
-                                <Plus size={16} strokeWidth={3} />
+                            <div className="absolute -top-2 -right-2 bg-pink-500 p-2 rounded-full text-white shadow-[0_0_15px_rgba(236,72,153,0.5)] animate-bounce duration-1000 z-20 border-2 border-black">
+                                <Plus size={18} strokeWidth={4} />
                             </div>
                         </div>
                         <div className="text-center space-y-1">
@@ -745,7 +783,7 @@ const ChatUI = () => {
                         const showDate = msgDate !== prevMsgDate;
 
                         return (
-                            <div key={msg.id} data-id={msg.id} className="message-bubble-wrapper">
+                            <div key={msg.id} data-id={msg.id} className="message-bubble-wrapper animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 {showDate && (
                                     <div className="flex justify-center my-6">
                                         <div className="bg-[#1c1c1e]/80 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-neutral-400 border border-white/5 uppercase tracking-wider shadow-sm">
@@ -765,7 +803,13 @@ const ChatUI = () => {
                                     isSelectMode={isSelectMode}
                                     isSelected={selectedMessages.has(msg.id)}
                                     onToggleSelect={toggleMessageSelection}
-                                    onEnterSelectMode={(id) => { setIsSelectMode(true); toggleMessageSelection(id); }}
+                                    onEnterSelectMode={(id) => { 
+                                        setIsSelectMode(true); 
+                                        toggleMessageSelection(id); 
+                                    }}
+                                    setToast={setToast}
+                                    setOpenMenuId={setOpenMenuId}
+                                    setSelectedMessages={setSelectedMessages}
                                 />
                             </div>
                         );
@@ -775,7 +819,7 @@ const ChatUI = () => {
             </div>
 
             {/* Input Bar */}
-            <div className="relative z-20 flex flex-col pt-2 bg-[#1c1c1e] border-t border-neutral-800/50 p-2 pb-[calc(env(safe-area-inset-bottom)+8px)]">
+            <div className="relative z-20 flex flex-col bg-[#1c1c1e] border-t border-neutral-800/50 p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] min-h-[85px] justify-center shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
                 {replyTo && (
                     <div className="mx-3 mb-2 px-3 py-2 bg-[#2c2c2e] border-l-4 border-[#007aff] rounded-lg flex items-center justify-between">
                         <div className="flex flex-col overflow-hidden">
@@ -790,13 +834,15 @@ const ChatUI = () => {
                 <div className="flex items-end gap-2">
                     {!isRecording ? (
                         <>
-                            <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="p-2 text-[#007aff] hover:bg-white/5 rounded-full active:scale-90">
-                                {isUploading && !audioBlob ? <Loader2 size={26} className="animate-spin" /> : <Plus size={26} strokeWidth={2.5} />}
+                            <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="p-3 text-[#007aff] hover:bg-white/5 rounded-full active:scale-90 transition-colors">
+                                {isUploading && !audioBlob ? <Loader2 size={28} className="animate-spin" /> : <Plus size={28} strokeWidth={2.5} />}
                             </button>
                             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt" />
 
-                            <div className="flex-1 relative flex items-center bg-[#2c2c2e] rounded-[22px] min-h-[40px] px-3 py-1 border border-white/5">
+                            <div onClick={() => inputRef.current?.focus()} className="flex-1 relative flex items-center bg-[#2c2c2e] rounded-[24px] min-h-[48px] px-4 py-2 border border-white/5 shadow-inner cursor-text">
                                 <textarea
+                                    ref={inputRef}
+                                    autoFocus
                                     rows={1}
                                     value={newMessage}
                                     onChange={(e) => {
@@ -832,7 +878,7 @@ const ChatUI = () => {
                     )}
 
                     <button
-                        className={`rounded-full p-2.5 active:scale-90 transition-all ${isRecording || newMessage.trim() || updateMessage || (isUploading && audioBlob) ? "bg-[#007aff]" : "bg-emerald-600"} text-white ${(isRecording || (isUploading && audioBlob)) ? "animate-pulse ring-4 ring-blue-500/20" : ""}`}
+                        className={`rounded-full p-3 active:scale-90 transition-all ${isRecording || newMessage.trim() || updateMessage || (isUploading && audioBlob) ? "bg-[#007aff]" : "bg-pink-600"} text-white ${(isRecording || (isUploading && audioBlob)) ? "animate-pulse ring-4 ring-pink-500/20" : "shadow-lg"}`}
                         onClick={isUploading ? null : (isRecording ? stopRecording : (newMessage.trim() || updateMessage ? sendMessage : startRecording))}
                         disabled={isUploading && !audioBlob}
                     >
@@ -844,21 +890,24 @@ const ChatUI = () => {
             {/* Bottom Selection Bar */}
             {isSelectMode && (
                 <div className="absolute bottom-0 left-0 right-0 z-[100] animate-in slide-in-from-bottom duration-300">
-                    <div className="bg-[#1c1c1e] border-t border-neutral-800/50 p-2 pb-[calc(env(safe-area-inset-bottom)+8px)] shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
-                        <div className="max-w-4xl mx-auto flex items-center justify-between min-h-[44px] px-2">
+                    <div className="bg-[#1c1c1e] border-t border-neutral-800/50 p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] min-h-[85px] flex flex-col justify-center shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+                        <div className="w-full flex items-center justify-between px-4">
                             <div className="flex items-center gap-4">
                                 <button onClick={exitSelectMode} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors">
                                     <X size={24} />
                                 </button>
                                 <span className="text-lg font-semibold text-white">{selectedMessages.size} selected</span>
                             </div>
-                            <button
-                                onClick={handleBulkDelete}
-                                disabled={selectedMessages.size === 0 || isBulkDeleting}
-                                className={`p-2.5 rounded-full transition-all ${selectedMessages.size > 0 ? "text-red-500 hover:bg-red-500/10 active:scale-95" : "text-neutral-600"} ${isBulkDeleting ? "animate-pulse" : ""}`}
-                            >
-                                {isBulkDeleting ? <Loader2 size={26} className="animate-spin" /> : <Trash2 size={26} />}
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleBulkDelete}
+                                    disabled={selectedMessages.size === 0 || isBulkDeleting}
+                                    className={`p-2.5 rounded-full transition-all ${selectedMessages.size > 0 ? "text-red-500 hover:bg-red-500/10 active:scale-95" : "text-neutral-600"} ${isBulkDeleting ? "animate-pulse" : ""}`}
+                                    title="Delete"
+                                >
+                                    {isBulkDeleting ? <Loader2 size={26} className="animate-spin" /> : <Trash2 size={26} />}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -897,6 +946,8 @@ const ChatUI = () => {
             )}
 
             {toast && <Toastbar message={toast} onClose={() => setToast(null)} />}
+
+
 
             {/* WhatsApp-style Image/File Preview Overlay */}
             {selectedFile && (
@@ -974,13 +1025,13 @@ const downloadFile = async (url, filename) => {
     }
 };
 
-const MessageBubble = ({ msg, targetUser, openMenuId, toggleMenu, handleEdit, handleDelete, handleReply, menuDirection, isSelectMode, isSelected, onToggleSelect, onEnterSelectMode }) => {
+const MessageBubble = ({ msg, targetUser, openMenuId, toggleMenu, handleEdit, handleDelete, handleReply, menuDirection, isSelectMode, isSelected, onToggleSelect, onEnterSelectMode, setToast, setOpenMenuId, setSelectedMessages }) => {
     const { user } = useUserContext();
     const displayImage = !msg.isMe ? (targetUser?.imageUrl || msg.imageUrl) : msg.imageUrl;
     const displayName = !msg.isMe ? (targetUser?.firstname || msg.firstname) : msg.firstname;
 
     return (
-        <div className={`flex w-full items-center gap-2 mb-0.5 group px-1 sm:px-4 py-1.5 transition-all duration-200 ${isSelected ? "bg-[#007aff]/10" : "hover:bg-white/5"}`}>
+        <div className={`flex w-full items-center gap-2 mb-0.5 group px-1 sm:px-4 py-1.5 transition-all duration-200 ${isSelected ? "bg-[#007aff]/10" : ""}`}>
             {isSelectMode && (
                 <div
                     onClick={() => onToggleSelect(msg.id)}
@@ -1066,8 +1117,10 @@ const MessageBubble = ({ msg, targetUser, openMenuId, toggleMenu, handleEdit, ha
                     {openMenuId === msg.id && (
                         <div className={`absolute ${menuDirection === 'up' ? "bottom-full mb-1" : "top-full mt-1"} z-[100] bg-[#2c2c2e] shadow-2xl rounded-xl min-w-[150px] py-1 border border-neutral-700 ${msg.isMe ? "right-0" : "left-0"}`}>
                             {!msg.isDelete && <button onClick={() => handleReply(msg)} className="w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm flex items-center gap-2 transition-all active:scale-95"><CornerUpLeft size={16} /> Reply</button>}
+
+                            {msg.text && !msg.isDelete && <button onClick={() => { navigator.clipboard.writeText(msg.text); setToast("Message copied"); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm flex items-center gap-2 transition-all active:scale-95"><Copy size={16} /> Copy</button>}
                             {msg.isMe && !msg.isDelete && <button onClick={() => handleEdit(msg.id, msg.text)} className="w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm flex items-center gap-2 transition-all active:scale-95"><Pencil size={16} /> Edit</button>}
-                            <button onClick={() => onEnterSelectMode(msg.id)} className="w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm text-red-500 flex items-center gap-2 transition-all active:scale-95"><Trash2 size={16} /> Delete</button>
+                             <button onClick={() => { onEnterSelectMode(msg.id); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm text-red-500 flex items-center gap-2 transition-all active:scale-95"><Trash2 size={16} /> Delete</button>
                         </div>
                     )}
                 </div>

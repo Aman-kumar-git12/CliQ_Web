@@ -39,11 +39,21 @@ const LoadingChat = () => {
             </div>
 
             {/* Input Bar Skeleton */}
-            <div className="flex items-center gap-4 p-3 bg-[#202c33]">
-                <div className="w-6 h-6 bg-neutral-800 rounded-full"></div>
-                <div className="w-6 h-6 bg-neutral-800 rounded-full"></div>
-                <div className="flex-1 h-10 bg-[#2a3942] rounded-2xl"></div>
-                <div className="w-10 h-10 bg-emerald-600 rounded-full opacity-50"></div>
+            <div className="relative z-20 flex flex-col bg-[#1c1c1e] border-t border-neutral-800/50 p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] min-h-[85px] justify-center shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+                <div className="flex items-end gap-2">
+                    {/* Plus Icon Skeleton */}
+                    <div className="p-3 shrink-0">
+                        <div className="w-7 h-7 bg-neutral-800/80 rounded-full"></div>
+                    </div>
+                    
+                    {/* Input Field Skeleton */}
+                    <div className="flex-1 relative flex items-center bg-[#2c2c2e] rounded-[24px] min-h-[48px] px-4 border border-white/5 shadow-inner">
+                        <div className="h-3.5 w-32 bg-neutral-700/50 rounded-full"></div>
+                    </div>
+                    
+                    {/* Mic Button Skeleton */}
+                    <div className="rounded-full w-[46px] h-[46px] bg-pink-600/40 animate-pulse shadow-lg shrink-0"></div>
+                </div>
             </div>
         </div>
     );

@@ -80,7 +80,7 @@ export default function MobileTopBar() {
                         {/* Right: Menu & Chat */}
                         <div className="flex items-center gap-1">
                             <Link
-                                to="/my-connections"
+                                to="/messages"
                                 className="p-2 rounded-full hover:bg-neutral-800 transition text-white"
                             >
                                 <MessageSquare size={24} />
