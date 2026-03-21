@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axiosClient from "../api/axiosClient";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import LogoutConfirmation from "./Confirmation";
@@ -8,14 +8,16 @@ import { useUserContext } from "../context/userContext";
 import ProfileShimmering from "./shimmering/ProfileShimmering";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileConnections from "./Connections/ProfileConnections";
+import ProfileHoverCard from "./Post/ProfileHoverCard";
 
-const TABS = ["posts", "connections", "groups", "expertise"];
+const TABS = ["posts", "expertise", "connections", "groups"];
 
 export default function ProfilePage() {
     const { customTab } = useParams();
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
-    const { setUser: setGlobalUser } = useUserContext();
+    const { setUser: setGlobalUser, user: currentUser } = useUserContext(); // Added currentUser from context
+    const containerRef = useRef(null); // Added containerRef
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
@@ -42,6 +44,47 @@ export default function ProfilePage() {
         return "posts";
     });
     const [direction, setDirection] = useState(1);
+
+    // Hover Card State
+    const [showHoverCard, setShowHoverCard] = useState(false);
+    const [hoverAnchorRect, setHoverAnchorRect] = useState(null);
+    const hoverTimeoutRef = useRef(null);
+    const [hoverUserId, setHoverUserId] = useState(null); // Added hoverUserId state
+
+    const handleProfileMouseEnter = (e, userId) => { // Updated signature
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        const rect = e.currentTarget.getBoundingClientRect();
+        const parentRect = containerRef.current.getBoundingClientRect(); // Added parentRect
+
+        hoverTimeoutRef.current = setTimeout(() => {
+            setHoverUserId(userId); // Added setHoverUserId
+            setHoverAnchorRect({
+                top: rect.top - parentRect.top,
+                bottom: rect.bottom - parentRect.top,
+                left: rect.left - parentRect.left,
+                right: rect.right - parentRect.left,
+                width: rect.width,
+                height: rect.height
+            });
+            setShowHoverCard(true);
+        }, 500);
+    };
+
+    const handleProfileMouseLeave = () => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = setTimeout(() => {
+            setShowHoverCard(false);
+        }, 200);
+    };
+
+    const handleCardMouseEnter = () => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    };
+
+    const handleCardMouseLeave = () => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        setShowHoverCard(false);
+    };
 
     // Sync if URL changes externally
     useEffect(() => {
@@ -140,7 +183,8 @@ export default function ProfilePage() {
     };
 
     const handleEditProfile = () => {
-        setShowEditConfirm(false);
+        // Assuming setShowEditConfirm is a state variable that was removed or is not in the provided snippet
+        // setShowEditConfirm(false); 
         navigate("/edit-profile");
     };
 
@@ -206,7 +250,7 @@ export default function ProfilePage() {
         return <div className="text-center text-white mt-10">No user found</div>;
 
     return (
-        <div className="min-h-screen bg-black text-white relative overflow-hidden transition-colors duration-300">
+        <div ref={containerRef} className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-300 relative">
             {/* Background Gradients (Subtle Dark Glow) */}
             <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-900/40 rounded-full blur-[120px] pointer-events-none" />
 
@@ -231,7 +275,11 @@ export default function ProfilePage() {
                         <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-[76px] mb-8 gap-6 relative z-10">
 
                             {/* Avatar Wrapper */}
-                            <div className="relative group shrink-0">
+                            <div
+                                className="relative group/avatar cursor-pointer"
+                                onMouseEnter={(e) => handleProfileMouseEnter(e, user.id)}
+                                onMouseLeave={handleProfileMouseLeave}
+                            >
                                 <img
                                     src={user.imageUrl || "https://github.com/shadcn.png"}
                                     alt="User"
@@ -276,7 +324,7 @@ export default function ProfilePage() {
                                 <h1 className="text-[32px] font-bold text-white tracking-tight leading-none mb-1">
                                     {user.firstname} {user.lastname}
                                 </h1>
-                                <p className="text-[#8e8e93] text-[16px] font-medium mb-3">@{user.firstname.toLowerCase()}_{user.lastname.toLowerCase()}</p>
+                                <p className="text-[#8e8e93] text-[16px] font-medium mb-3">@{user.firstname?.toLowerCase()}_{user.lastname?.toLowerCase()}</p>
                                 <p className="text-[#8e8e93] text-[15px] font-medium flex items-center justify-center sm:justify-start gap-2">
                                     {user.bio || "Builder • Creator • Professional"}
                                 </p>
@@ -287,47 +335,52 @@ export default function ProfilePage() {
                         <div className="flex gap-4 mb-10 overflow-x-auto scrollbar-hide">
                             <div className="bg-[#1a1a1a]/80 p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center min-w-[120px] flex-1 sm:flex-none">
                                 <span className="text-[#8e8e93] text-[10px] uppercase font-bold tracking-[0.1em] mb-1.5">Posts</span>
-                                <span className="text-2xl font-bold tracking-tight text-white">{posts.length}</span>
+                                <span className="text-2xl font-bold tracking-tight text-white">{user.postsCount || posts.length}</span>
                             </div>
                             <div className="bg-[#1a1a1a]/80 p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center min-w-[120px] flex-1 sm:flex-none">
                                 <span className="text-[#8e8e93] text-[10px] uppercase font-bold tracking-[0.1em] mb-1.5">Connections</span>
-                                <span className="text-2xl font-bold tracking-tight text-white">{user.connections?.length || "0"}</span>
+                                <span className="text-2xl font-bold tracking-tight text-white">{user.connectionsCount || "0"}</span>
                             </div>
                             <div className="bg-[#1a1a1a]/80 p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center min-w-[120px] flex-1 sm:flex-none">
                                 <span className="text-[#8e8e93] text-[10px] uppercase font-bold tracking-[0.1em] mb-1.5">Groups</span>
-                                <span className="text-2xl font-bold tracking-tight text-white">0</span>
+                                <span className="text-2xl font-bold tracking-tight text-white">{user.groupsCount || "0"}</span>
                             </div>
                         </div>
 
-                        {/* NAVIGATION TABS */}
-                        <div className="sticky top-0 z-40 bg-[#111111]/90 backdrop-blur-xl flex items-center justify-center sm:justify-start gap-1 mb-2 border-b border-white/10 py-5 -mx-6 px-6 sm:-mx-10 sm:px-10 max-w-full">
-                            <button
-                                onClick={() => handleTabChange("posts")}
-                                className={`px-6 py-2.5 rounded-full font-medium transition-all text-[15px] ${activeTab === "posts" ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-white shadow-[0_4px_30px_rgba(120,0,255,0.1)] border border-purple-500/20" : "text-[#8e8e93] hover:text-white border border-transparent"}`}
-                            >
-                                Posts
-                            </button>
-                            <div className="w-px h-6 bg-white/10 mx-2"></div>
-                            <button
-                                onClick={() => handleTabChange("connections")}
-                                className={`px-5 py-2.5 rounded-full font-medium transition-all text-[15px] ${activeTab === "connections" ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-white shadow-[0_4px_30px_rgba(120,0,255,0.1)] border border-purple-500/20" : "text-[#8e8e93] hover:text-white border border-transparent"}`}
-                            >
-                                Connections
-                            </button>
-                            <div className="w-px h-6 bg-white/10 mx-2"></div>
-                            <button
-                                onClick={() => handleTabChange("groups")}
-                                className={`px-5 py-2.5 rounded-full font-medium transition-all text-[15px] ${activeTab === "groups" ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-white shadow-[0_4px_30px_rgba(120,0,255,0.1)] border border-purple-500/20" : "text-[#8e8e93] hover:text-white border border-transparent"}`}
-                            >
-                                Groups
-                            </button>
-                            <div className="w-px h-6 bg-white/10 mx-2"></div>
-                            <button
-                                onClick={() => handleTabChange("expertise")}
-                                className={`px-5 py-2.5 rounded-full font-medium transition-all text-[15px] ${activeTab === "expertise" ? "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-white shadow-[0_4px_30px_rgba(120,0,255,0.1)] border border-purple-500/20" : "text-[#8e8e93] hover:text-white border border-transparent"}`}
-                            >
-                                Expertise
-                            </button>
+                        {/* STICKY NAVIGATION TABS */}
+                        <div className="sticky top-0 z-50 flex justify-center py-4 mb-8">
+                            <div className="flex items-center p-1.5 rounded-full border border-white/10 bg-[#0A0A0A]/80 backdrop-blur-md max-w-fit mx-auto shadow-sm">
+                                {[
+                                    { id: "posts", label: "Posts" },
+                                    { id: "expertise", label: "Expertise" },
+                                    { id: "connections", label: "Connections" },
+                                    { id: "groups", label: "Groups" }
+                                ].map((tab, idx, arr) => (
+                                    <React.Fragment key={tab.id}>
+                                        {idx !== 0 && (
+                                            <div className={`w-[1px] h-4 mx-1 shrink-0 transition-colors duration-300 ${
+                                                activeTab === tab.id || activeTab === arr[idx - 1].id 
+                                                ? "bg-transparent" 
+                                                : "bg-white/10"
+                                            }`}></div>
+                                        )}
+                                        <button
+                                            onClick={() => handleTabChange(tab.id)}
+                                            className={`relative px-6 sm:px-8 py-2 rounded-full text-[15px] font-medium transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                                                activeTab === tab.id 
+                                                ? "text-white bg-white/[0.04] border border-white/10 shadow-[inset_0_1px_4px_rgba(255,255,255,0.02)]" 
+                                                : "text-[#8e8e93] hover:text-gray-200 border border-transparent"
+                                            }`}
+                                        >
+                                            {activeTab === tab.id && (
+                                                <div className="absolute bottom-0 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-blue-500/0 via-purple-400 to-indigo-500/0 shadow-[0_0_12px_2px_rgba(168,85,247,0.7)]" />
+                                            )}
+                                            <span className="relative z-10 tracking-wide">{tab.label}</span>
+                                        </button>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                            <div className="mt-3 w-full h-[1px] bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
                         </div>
                     </div>
                 </div>
@@ -373,7 +426,7 @@ export default function ProfilePage() {
                                                             alt="Post"
                                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                         />
-                                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                                                        <div className="absolute -inset-0.5 bg-gradient-to-r from-white/20 to-white/40 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-200 pointer-events-none"></div>
                                                     </>
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400 p-4 text-center text-sm">
@@ -528,6 +581,13 @@ export default function ProfilePage() {
                     </div>
                 </div>
             )}
+            <ProfileHoverCard
+                userId={user?.id}
+                isVisible={showHoverCard}
+                anchorRect={hoverAnchorRect}
+                onMouseEnter={handleCardMouseEnter}
+                onMouseLeave={handleCardMouseLeave}
+            />
         </div >
     );
 }

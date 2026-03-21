@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axiosClient from "../../api/axiosClient";
-import { X, Check } from "lucide-react";
+import { X, Check, ShieldCheck } from "lucide-react";
 import { Link } from 'react-router-dom';
-import { motion, useMotionValue, useTransform, useAnimation, animate, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useTransform, useAnimation, animate, AnimatePresence, useSpring } from "framer-motion";
 import MyExperties from "../MyExperties/MyExperties";
 
 export default function GetConnections() {
@@ -14,13 +14,21 @@ export default function GetConnections() {
 
     const x = useMotionValue(0);
     const dragX = useMotionValue(0);
+    
+    // Parallax Tilt Values
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+    const rotateX = useTransform(mouseY, [-300, 300], [10, -10]);
+    const rotateY = useTransform(mouseX, [-300, 300], [-10, 10]);
+    const springRotateX = useSpring(rotateX, { stiffness: 100, damping: 30 });
+    const springRotateY = useSpring(rotateY, { stiffness: 100, damping: 30 });
 
     const rotate = useTransform(dragX, [-300, 300], [-45, 45]);
 
     const bg = useTransform(
         dragX,
         [-300, 0, 300],
-        ["rgb(254, 202, 202)", "rgb(255, 255, 255)", "rgb(167, 243, 208)"]
+        ["#fecaca", "#ffffff", "#a7f3d0"] // Soft red, white, soft green
     );
 
     const transformOrigin = useTransform(dragX, (x) =>
@@ -87,6 +95,8 @@ export default function GetConnections() {
         setShowExpertise(false);
         controls.set({ x: 0, opacity: 1, y: 100, scale: 0.8 });
         dragX.set(0);
+        mouseX.set(0);
+        mouseY.set(0);
 
         if (nextUser) {
             const currentUser = nextUser; // The one we are about to show
@@ -111,6 +121,20 @@ export default function GetConnections() {
     useEffect(() => {
         initializeUsers();
     }, []);
+
+    const handleMouseMove = (e) => {
+        if (sending) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        mouseX.set(e.clientX - centerX);
+        mouseY.set(e.clientY - centerY);
+    };
+
+    const handleMouseLeave = () => {
+        mouseX.set(0);
+        mouseY.set(0);
+    };
 
     const [snack, setSnack] = useState("");
 
@@ -243,105 +267,216 @@ export default function GetConnections() {
             {/* User Card */}
             <AnimatePresence>
                 {!loading && user && (
-                    <motion.div
-                        key={user.id}
-                        drag="x"
-                        onDrag={(e, info) => dragX.set(info.offset.x)}
-                        onDragEnd={handleDragEnd}
-                        whileTap={{ scale: 0.98 }}
-                        variants={{
-                            hidden: { scale: 0.8, opacity: 0, y: 100, x: 0 },
-                            visible: {
-                                scale: 1,
-                                opacity: 1,
-                                y: 0,
-                                x: 0,
-                                rotate: 0,
-                                transition: { type: "spring", stiffness: 260, damping: 20 }
-                            },
-                            exitLeft: { x: -500, opacity: 0, transition: { duration: 0.3 } },
-                            exitRight: { x: 500, opacity: 0, transition: { duration: 0.3 } }
-                        }}
-                        initial="hidden"
-                        animate={sending ? controls : "visible"}
-                        style={{ x: dragX, rotate, transformOrigin, touchAction: "none" }}
-                        className="
-                            w-full
-                            max-w-[22rem] sm:max-w-sm
-                            bg-white dark:bg-neutral-900
-                            border border-neutral-200 dark:border-neutral-800
-                            shadow-2xl
-                            rounded-[3rem]
-                            p-6
-                            flex flex-col items-center
-                            relative
-                            cursor-grab active:cursor-grabbing
-                            select-none overflow-hidden
-                            col-start-1 row-start-1
-                        "
+                    <div 
+                        className="relative w-full max-w-[24rem] sm:max-w-md perspective-1000 z-20 group"
+                        onMouseMove={handleMouseMove}
+                        onMouseLeave={handleMouseLeave}
                     >
+                        {/* Outer Glow */}
+                        <div className="absolute -inset-4 bg-gradient-to-tr from-blue-500/10 via-purple-500/5 to-transparent rounded-[40px] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-glow-pulse" />
+
+                        <motion.div
+                            key={user.id}
+                            drag="x"
+                            onDrag={(e, info) => dragX.set(info.offset.x)}
+                            onDragEnd={handleDragEnd}
+                            whileTap={{ scale: 0.98 }}
+                            variants={{
+                                hidden: { scale: 0.8, opacity: 0, y: 100, x: 0 },
+                                visible: {
+                                    scale: 1,
+                                    opacity: 1,
+                                    y: 0,
+                                    x: 0,
+                                    rotate: 0,
+                                    transition: { type: "spring", stiffness: 260, damping: 20 }
+                                },
+                            }}
+                            initial="hidden"
+                            animate={sending ? controls : "visible"}
+                            style={{ 
+                                x: dragX, 
+                                rotate, 
+                                rotateX: springRotateX, 
+                                rotateY: springRotateY,
+                                transformOrigin, 
+                                touchAction: "none" 
+                            }}
+                            className="
+                                w-full
+                                bg-white/60 dark:bg-black/60
+                                backdrop-blur-3xl
+                                border border-white/40 dark:border-white/20
+                                shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]
+                                rounded-[34px]
+                                relative
+                                cursor-grab active:cursor-grabbing
+                                select-none overflow-hidden
+                                flex flex-col
+                                transition-shadow duration-500
+                                group-hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)]
+                            "
+                        >
+                        {/* Animated Mesh Gradient Header */}
+                        <div className="absolute top-0 left-0 w-full h-44 overflow-hidden pointer-events-none opacity-50">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 via-purple-600/20 to-transparent animate-mesh" />
+                            <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1),transparent_50%)] animate-mesh" style={{ animationDelay: '-5s' }} />
+                        </div>
+                        
+                        {/* Aesthetic Floating Background Words */}
+                        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20 dark:opacity-10">
+                            <motion.span 
+                                animate={{ y: [0, -10, 0], x: [0, 5, 0] }}
+                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute top-[20%] left-[-10%] text-4xl font-black tracking-tighter text-neutral-400 dark:text-white uppercase rotate-[-15deg]"
+                            >
+                                Network
+                            </motion.span>
+                            <motion.span 
+                                animate={{ y: [0, 10, 0], x: [0, -5, 0] }}
+                                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                className="absolute bottom-[30%] right-[-5%] text-5xl font-black tracking-tighter text-neutral-400 dark:text-white uppercase rotate-[10deg]"
+                            >
+                                Growth
+                            </motion.span>
+                            <motion.span 
+                                animate={{ y: [0, -8, 0], scale: [1, 1.05, 1] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                                className="absolute top-[50%] left-[5%] text-2xl font-black tracking-widest text-neutral-400 dark:text-white uppercase opacity-50"
+                            >
+                                Explore
+                            </motion.span>
+                            <motion.span 
+                                animate={{ rotate: [5, -5, 5] }}
+                                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute bottom-[5%] left-[20%] text-3xl font-black text-neutral-400 dark:text-white uppercase tracking-tighter opacity-30"
+                            >
+                                Connect
+                            </motion.span>
+                        </div>
+
                         {/* Visual Indicators (Stamps) */}
                         <motion.div
                             style={{ opacity: likeOpacity }}
-                            className="absolute top-10 left-10 z-50 pointer-events-none"
+                            className="absolute top-8 left-8 z-50 pointer-events-none"
                         >
-                            <div className="border-4 border-emerald-500 rounded-lg px-4 py-1 -rotate-12">
-                                <span className="text-3xl font-black text-emerald-500 tracking-tighter uppercase">LIKE</span>
+                            <div className="bg-emerald-500 text-white rounded-2xl px-6 py-2 shadow-lg shadow-emerald-500/30 -rotate-12 border-2 border-white/20">
+                                <span className="text-2xl font-black tracking-tight uppercase">LIKE</span>
                             </div>
                         </motion.div>
 
                         <motion.div
                             style={{ opacity: nopeOpacity }}
-                            className="absolute top-10 right-10 z-50 pointer-events-none"
+                            className="absolute top-8 right-8 z-50 pointer-events-none"
                         >
-                            <div className="border-4 border-red-500 rounded-lg px-4 py-1 rotate-12">
-                                <span className="text-3xl font-black text-red-500 tracking-tighter uppercase">NOPE</span>
+                            <div className="bg-red-500 text-white rounded-2xl px-6 py-2 shadow-lg shadow-red-500/30 rotate-12 border-2 border-white/20">
+                                <span className="text-2xl font-black tracking-tight uppercase">NOPE</span>
                             </div>
                         </motion.div>
 
+                        {/* Card Content */}
+                        <div className="relative z-10 p-8 flex flex-col h-full">
+                            {/* Header Section */}
+                                <div className="flex flex-col items-center mb-6">
+                                    <motion.div 
+                                        className="relative p-1.5 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 shadow-xl mb-4 group-hover:shadow-blue-500/20 transition-shadow duration-500"
+                                        whileHover={{ scale: 1.05 }}
+                                    >
+                                        <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-white/20 relative">
+                                            <img 
+                                                src={avatar(user.imageUrl)} 
+                                                className="w-full h-full object-cover" 
+                                                draggable="false"
+                                            />
+                                            {/* Online Indicator */}
+                                            <div className="absolute bottom-1 right-2 w-5 h-5 bg-emerald-500 border-2 border-white dark:border-black rounded-full" />
+                                        </div>
+                                    </motion.div>
+                                    
+                                    <div className="text-center">
+                                        <div className="flex items-center justify-center gap-1.5">
+                                            <h2 className="text-3xl font-black text-neutral-900 dark:text-white tracking-tight leading-tight drop-shadow-sm">
+                                                {user.firstname} {user.lastname}
+                                            </h2>
+                                            <ShieldCheck size={24} className="text-blue-500 fill-blue-500/10" />
+                                        </div>
+                                        <div className="flex items-center justify-center gap-2 mt-1">
+                                            <span className="text-lg text-neutral-700 dark:text-neutral-300 font-bold">
+                                                {user.age ? `${user.age}` : "New"}
+                                            </span>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                            <span className="text-[11px] text-neutral-600 dark:text-neutral-400 uppercase tracking-[0.2em] font-black">Years Old</span>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-neutral-100 to-transparent dark:from-neutral-800/50 pointer-events-none"></div>
+                            {/* Skills Section */}
+                            {user.expertise?.skills && user.expertise.skills.length > 0 && (
+                                <div className="mb-6">
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                            {user.expertise.skills.slice(0, 4).map((skill, i) => (
+                                                <span 
+                                                    key={skill + i} 
+                                                    className="px-3.5 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 backdrop-blur-md text-[10px] font-black text-neutral-800 dark:text-neutral-100 uppercase tracking-widest border border-black/5 dark:border-white/10 shadow-sm transition-all hover:bg-white/20 hover:scale-105"
+                                                >
+                                                    {skill}
+                                                </span>
+                                            ))}
+                                    </div>
+                                </div>
+                            )}
 
-                        <div className="w-32 h-32 rounded-full overflow-hidden shadow-xl border-4 border-white dark:border-neutral-800 z-10 mb-4 pointer-events-none">
-                            <img src={avatar(user.imageUrl)} className="w-full h-full object-cover" />
+                            {/* Bio/About Section */}
+                            <div className="flex-grow text-center mb-10">
+                                <div className="inline-block relative">
+                                    <p className="text-[15px] font-medium text-neutral-800 dark:text-neutral-200 leading-relaxed line-clamp-3 italic px-4 drop-shadow-sm">
+                                        "{user.expertise?.aboutYou || user.expertise?.description || "Looking for great connections and opportunities. Let's build something amazing together!"}"
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Actions Group */}
+                            <div className="mt-auto space-y-6">
+                                <div className="flex justify-center">
+                                    <button
+                                        onClick={() => setShowExpertise(true)}
+                                        className="group relative px-8 py-3 rounded-full overflow-hidden transition-all active:scale-95 shadow-lg border border-white/20"
+                                    >
+                                        <div className="absolute inset-0 bg-neutral-900 dark:bg-white group-hover:bg-black dark:group-hover:bg-neutral-200 transition-colors" />
+                                        <span className="relative z-10 text-[11px] font-black text-white dark:text-black uppercase tracking-[0.2em]">
+                                            View Full Expertise
+                                        </span>
+                                    </button>
+                                </div>
+
+                                <div
+                                    className="flex items-center gap-8 w-full justify-center"
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                >
+                                    <button
+                                        onClick={handleIgnore}
+                                        disabled={sending}
+                                        className="w-16 h-16 flex items-center justify-center rounded-full bg-white dark:bg-neutral-900 border-2 border-neutral-100 dark:border-neutral-800 text-neutral-400 hover:text-red-500 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-300 shadow-xl hover:shadow-red-500/20 hover:-translate-y-1 disabled:opacity-50"
+                                    >
+                                        <X size={30} strokeWidth={2.5} />
+                                    </button>
+
+                                    <button
+                                        onClick={handleInterested}
+                                        disabled={sending}
+                                        className="w-20 h-20 flex items-center justify-center rounded-full bg-black dark:bg-white text-white dark:text-black hover:scale-110 active:scale-95 transition-all duration-300 shadow-[0_20px_40px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_40px_rgba(255,255,255,0.15)] hover:shadow-blue-500/30 disabled:opacity-50 relative group"
+                                    >
+                                        <div className="absolute inset-0 rounded-full bg-blue-500 opacity-0 group-hover:opacity-30 blur-2xl transition-opacity animate-pulse" />
+                                        <Check size={40} strokeWidth={3} className="relative z-10" />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <h2 className="text-center text-2xl font-bold text-black dark:text-white pointer-events-none">
-                            {user.firstname} {user.lastname}
-                        </h2>
-
-                        <p className="text-center text-neutral-500 text-lg mt-1 mb-4 pointer-events-none">
-                            {user.age ? `${user.age} years old` : "New User"}
-                        </p>
-
-                        <button
-                            onClick={() => setShowExpertise(true)}
-                            className="px-6 py-2 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-medium text-sm mb-8 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors pointer-events-auto"
-                        >
-                            View Expertise
-                        </button>
-
-                        <div
-                            className="flex items-center gap-6 w-full justify-center"
-                            onPointerDown={(e) => e.stopPropagation()}
-                        >
-                            <button
-                                onClick={handleIgnore}
-                                disabled={sending}
-                                className="w-14 h-14 flex items-center justify-center rounded-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-400 hover:text-red-500 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 shadow-sm hover:shadow-md hover:scale-110 disabled:opacity-50"
-                            >
-                                <X size={28} />
-                            </button>
-
-                            <button
-                                onClick={handleInterested}
-                                disabled={sending}
-                                className="w-16 h-16 flex items-center justify-center rounded-full bg-black dark:bg-white text-white dark:text-black hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50"
-                            >
-                                <Check size={32} />
-                            </button>
-                        </div>
-                    </motion.div>
+                            {/* Bottom Decoration */}
+                            <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-30" />
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 

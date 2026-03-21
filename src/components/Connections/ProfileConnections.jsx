@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import axiosClient from "../../api/axiosClient";
 import { Link, useNavigate } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
+import { useUserContext } from "../../context/userContext";
 
 export default function ProfileConnections() {
     const navigate = useNavigate();
     const [connections, setConnections] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { user: currentUser } = useUserContext();
 
     useEffect(() => {
         const fetchConnections = async () => {
@@ -50,7 +52,10 @@ export default function ProfileConnections() {
                     className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-900 transition-colors border border-transparent hover:border-neutral-800 group"
                 >
                     {/* Left Section - Profile Info */}
-                    <Link to={`/public-profile/${user.id}`} className="flex items-center gap-4 min-w-0 flex-1">
+                    <Link 
+                        to={currentUser?.id === user.id ? "/profile" : `/public-profile/${user.id}`} 
+                        className="flex items-center gap-4 min-w-0 flex-1"
+                    >
                         <div className="w-14 h-14 rounded-full overflow-hidden bg-neutral-800 border-[2px] border-neutral-800 group-hover:border-neutral-700 transition-colors shrink-0">
                             <img
                                 src={avatar(user?.imageUrl)}

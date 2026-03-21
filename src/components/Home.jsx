@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useNavigationType } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import PostCard from "./Postcard";
+import HomeSidebar from "./HomeSidebar";
 import { useFeedContext } from "../context/FeedContext";
 import HomeShimmering from "./shimmering/HomeShimmering";
 
@@ -12,6 +14,7 @@ export default function Home() {
     feedScrollY, setFeedScrollY
   } = useFeedContext();
 
+  const navType = useNavigationType();
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
@@ -166,24 +169,14 @@ export default function Home() {
     };
   }, [setFeedScrollY]);
 
-  // Restore scroll position on mount
+  // Restore scroll position instantly on mount if we have data
   useEffect(() => {
     if (feedPosts.length > 0 && feedScrollY > 0) {
-      // Use requestAnimationFrame to ensure the DOM has rendered the posts
+      // Small delay to ensure items are rendered
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          // Using behavior: "instant" to override smooth scrolling CSS
-          window.scrollTo({
-            top: feedScrollY,
-            left: 0,
-            behavior: "caption" in window ? "instant" : "auto", // fallback just in case, but instant is standard
-          });
-          // Explicitly forcing instant behavior for browsers that support it
-          document.documentElement.style.scrollBehavior = 'auto';
-          window.scrollTo(0, feedScrollY);
-          setTimeout(() => {
-            document.documentElement.style.scrollBehavior = '';
-          }, 0);
+        window.scrollTo({
+          top: feedScrollY,
+          behavior: "instant"
         });
       });
     }
@@ -206,62 +199,40 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full pt-4">
-      {/* Create Post Input */}
-      {/* <div className="flex gap-4 p-4 border-b border-neutral-200 dark:border-neutral-800 mb-2">
-        <div className="w-10 h-10 rounded-full bg-neutral-200 dark:bg-neutral-800 overflow-hidden shrink-0">
-          <img
-            src="https://github.com/shadcn.png"
-            className="w-full h-full object-cover"
-          />
-        </div>
+    <div className="flex justify-center gap-12 w-full pt-8 px-4">
+      {/* FEED COLUMN */}
+      <div className="flex-grow max-w-[600px] w-full">
+        {feedPosts.map((post, index) => {
+          if (feedPosts.length === index + 1) {
+            return (
+              <div ref={lastPostElementRef} key={post.id}>
+                <PostCard post={post} />
+              </div>
+            );
+          } else {
+            return <PostCard key={post.id} post={post} />;
+          }
+        })}
 
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-black dark:text-white">
-              Start a thread...
-            </span>
+        {loadingMore && (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white"></div>
           </div>
+        )}
 
-          <input
-            type="text"
-            placeholder="What's new?"
-            className="w-full bg-transparent text-black dark:text-white placeholder-neutral-500 focus:outline-none text-[15px] mb-3"
-          />
-
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-neutral-400">Anyone can reply</span>
-            <button className="px-4 py-1.5 rounded-3xl bg-black dark:bg-white text-white dark:text-black font-semibold text-sm hover:opacity-90 transition-opacity">
-              Post
-            </button>
+        {!feedHasMore && feedPosts.length > 0 && (
+          <div className="p-8 text-center bg-white/5 rounded-3xl border border-dashed border-neutral-800 mt-4 mb-20">
+            <p className="text-neutral-500 text-sm font-medium italic">
+              ✨ You've reached the end of the universe! ✨
+            </p>
           </div>
-        </div>
-      </div> */}
+        )}
+      </div>
 
-      {/* FEED POSTS */}
-      {feedPosts.map((post, index) => {
-        if (feedPosts.length === index + 1) {
-          return (
-            <div ref={lastPostElementRef} key={post.id}>
-              <PostCard post={post} />
-            </div>
-          );
-        } else {
-          return <PostCard key={post.id} post={post} />;
-        }
-      })}
-
-      {loadingMore && (
-        <div className="flex justify-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white"></div>
-        </div>
-      )}
-
-      {!feedHasMore && feedPosts.length > 0 && (
-        <p className="text-center text-neutral-500 py-4 text-sm">
-          You've reached the end!
-        </p>
-      )}
+      {/* RIGHT SIDEBAR COLUMN */}
+      <div className="hidden lg:block w-[320px] shrink-0 sticky top-8 h-fit">
+        <HomeSidebar />
+      </div>
     </div>
   );
 }

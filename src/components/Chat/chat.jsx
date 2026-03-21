@@ -613,10 +613,32 @@ const ChatUI = () => {
         try {
             setDeleteConfirmation({ isOpen: false, messageId: null, isMe: false });
             if (type === 'everyone') {
-                setMessages(prev => prev.map(msg => msg.id === id ? { ...msg, isDelete: true, text: "This message is deleted" } : msg));
+                setMessages(prev => {
+                    const updated = prev.map(msg => msg.id === id ? { ...msg, isDelete: true, text: "This message is deleted" } : msg);
+                    // Notify Inbox of new last message
+                    const lastVisible = updated.filter(m => !m.isDelete).at(-1);
+                    window.dispatchEvent(new CustomEvent('chatUpdated', {
+                        detail: { 
+                            targetId: targetuserId, 
+                            lastMessage: lastVisible ? lastVisible.text : "No messages yet" 
+                        }
+                    }));
+                    return updated;
+                });
                 await axiosClient.put(`/chat/message/${id}`, { isDelete: true });
-            } else {
-                setMessages(prev => prev.filter(msg => msg.id !== id));
+             } else {
+                setMessages(prev => {
+                    const filtered = prev.filter(msg => msg.id !== id);
+                    // Notify Inbox of new last message
+                    const lastVisible = filtered.filter(m => !m.isDelete).at(-1);
+                    window.dispatchEvent(new CustomEvent('chatUpdated', {
+                        detail: { 
+                            targetId: targetuserId, 
+                            lastMessage: lastVisible ? lastVisible.text : "No messages yet" 
+                        }
+                    }));
+                    return filtered;
+                });
                 await axiosClient.delete(`/chat/message/${id}`);
             }
         } catch (error) {
@@ -688,6 +710,15 @@ const ChatUI = () => {
 
                 setToast(`Deleted ${selectedMessages.size} messages`);
                 exitSelectMode();
+
+                // Notify Inbox of new last message
+                const lastVisible = messages.filter(m => !selectedMessages.has(m.id) && !m.isDelete).at(-1);
+                window.dispatchEvent(new CustomEvent('chatUpdated', {
+                    detail: { 
+                        targetId: targetuserId, 
+                        lastMessage: lastVisible ? lastVisible.text : "No messages yet" 
+                    }
+                }));
             }
         } catch (error) {
             console.error("Bulk delete failed:", error);

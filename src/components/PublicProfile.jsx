@@ -1,84 +1,82 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import MyExperties from "./MyExperties/MyExperties";
+import { X, ArrowLeft, MessageSquare, Heart, ChevronRight, Share2, MoreVertical, ShieldCheck, Mail, MapPin, Calendar, Globe, Award, Sparkles } from "lucide-react";
+import ProfileHoverCard from "./Post/ProfileHoverCard";
+import { useUserContext } from "../context/userContext";
+import { motion, AnimatePresence } from "framer-motion";
+import ProfileShimmering from "./shimmering/ProfileShimmering";
 
-import { X, ArrowLeft, MessageSquare } from "lucide-react";
+const TABS = ["posts", "connections", "groups", "expertise"];
 
-export default function PublicProfile() {
-    const { userId } = useParams();
+const PublicProfile = () => {
+    const { userId: userIdFromUrl } = useParams();
     const navigate = useNavigate();
+    const containerRef = useRef(null);
+    const { user: currentUser } = useUserContext();
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
+    const [connections, setConnections] = useState([]);
+    const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingPosts, setLoadingPosts] = useState(true);
-    const [showExpertiseModal, setShowExpertiseModal] = useState(false);
+    const [loadingConnections, setLoadingConnections] = useState(true);
+    const [loadingGroups, setLoadingGroups] = useState(true);
     const [snack, setSnack] = useState("");
 
-    // Initialize state from localStorage if available
+    const [activeTab, setActiveTab] = useState("posts");
+    const [direction, setDirection] = useState(1);
+
+    // Hover card state
+    const [showHoverCard, setShowHoverCard] = useState(false);
+    const [hoverAnchorRect, setHoverAnchorRect] = useState(null);
+    const hoverTimerRef = useRef(null);
+
+    const handleProfileMouseEnter = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setHoverAnchorRect(rect);
+        hoverTimerRef.current = setTimeout(() => {
+            setShowHoverCard(true);
+        }, 500);
+    };
+
+    const handleProfileMouseLeave = () => {
+        if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = setTimeout(() => {
+            setShowHoverCard(false);
+        }, 300);
+    };
+
+    const handleCardMouseEnter = () => {
+        if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+        setShowHoverCard(true);
+    };
+
+    const handleCardMouseLeave = () => {
+        hoverTimerRef.current = setTimeout(() => {
+            setShowHoverCard(false);
+        }, 300);
+    };
+
     const [connectionStatus, setConnectionStatus] = useState(() => {
-        return localStorage.getItem(`connection_status_${userId}`) || "none";
+        return localStorage.getItem(`connection_status_${userIdFromUrl}`) || "none";
     });
 
-    // Check connection status - Depends on 'user' being loaded to ensure we have the DB ID
     useEffect(() => {
-        if (!user) return;
-
-        const fetchConnectionStatus = async () => {
+        const fetchUser = async () => {
             try {
-                const res = await axiosClient.get(`/user/connections/${user.id}`);
-
-                // Assuming response structure: { status: "accepted" | "interested" | ... }
-                // or { connection: { status: ... } }
-                const status = res.data.status || (res.data.connection && res.data.connection.status);
-
-                if (status) {
-                    if (status === "accepted") {
-                        setConnectionStatus("following");
-                        localStorage.setItem(`connection_status_${user.id}`, "following");
-                    } else if (status === "interested") {
-                        setConnectionStatus("interested");
-                        localStorage.setItem(`connection_status_${user.id}`, "interested");
-                    } else {
-                        setConnectionStatus(status);
-                        localStorage.setItem(`connection_status_${user.id}`, status);
-                    }
-                } else {
-                    // If no status returned, assume none
-                    setConnectionStatus("none");
-                    localStorage.removeItem(`connection_status_${user.id}`);
-                }
-            } catch (error) {
-                if (error.response && error.response.status === 404) {
-                    // No connection found
-                    setConnectionStatus("none");
-                    localStorage.removeItem(`connection_status_${user.id}`);
-                } else {
-                    console.error("Error fetching connection status:", error);
-                }
-            }
-        };
-
-        fetchConnectionStatus();
-    }, [user]);
-
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const res = await axiosClient.get(`/user/${userId}`);
+                const res = await axiosClient.get(`/user/${userIdFromUrl}`);
                 setUser(res.data.user);
-                // Note: We prioritize localStorage for immediate UI consistency, 
-                // but ideally API should return this status.
             } catch (error) {
-                console.error("Error fetching profile:", error);
+                console.error("Error fetching user:", error);
             } finally {
                 setLoading(false);
             }
         };
-
-        if (userId) fetchProfile();
-    }, [userId]);
+        fetchUser();
+    }, [userIdFromUrl]);
 
     useEffect(() => {
         if (!user) return;
@@ -86,14 +84,39 @@ export default function PublicProfile() {
         const fetchPosts = async () => {
             try {
                 const res = await axiosClient.get(`/user/posts/${user.id}`);
-                setPosts(Array.isArray(res.data) ? res.data : []);
+                setPosts(res.data.posts || []);
             } catch (error) {
                 console.error("Error fetching posts:", error);
             } finally {
                 setLoadingPosts(false);
             }
         };
+
+        const fetchConnections = async () => {
+            try {
+                const res = await axiosClient.get(`/user/public/connections/${user.id}`);
+                setConnections(res.data.connections || []);
+            } catch (error) {
+                console.error("Error fetching connections:", error);
+            } finally {
+                setLoadingConnections(false);
+            }
+        };
+
+        const fetchGroups = async () => {
+            try {
+                const res = await axiosClient.get(`/chat/public/groups/${user.id}`);
+                setGroups(res.data.groups || []);
+            } catch (error) {
+                console.error("Error fetching groups:", error);
+            } finally {
+                setLoadingGroups(false);
+            }
+        };
+
         fetchPosts();
+        fetchConnections();
+        fetchGroups();
     }, [user]);
 
     const showSnack = (msg) => {
@@ -101,47 +124,63 @@ export default function PublicProfile() {
         setTimeout(() => setSnack(""), 2000);
     };
 
-    const handleButtonClick = () => {
-        if (connectionStatus === "none" || connectionStatus === "ignored") {
-            handleFollow();
-        }
+    const handleTabChange = (newTab) => {
+        if (newTab === activeTab) return;
+        const currentIndex = TABS.indexOf(activeTab);
+        const newIndex = TABS.indexOf(newTab);
+        setDirection(newIndex > currentIndex ? 1 : -1);
+        setActiveTab(newTab);
+    };
+
+    const tabVariants = {
+        initial: (direction) => ({
+            x: direction > 0 ? 30 : -30,
+            opacity: 0,
+        }),
+        animate: {
+            x: 0,
+            opacity: 1,
+            transition: { duration: 0.25, ease: "easeOut" }
+        },
+        exit: (direction) => ({
+            x: direction > 0 ? -30 : 30,
+            opacity: 0,
+            transition: { duration: 0.25, ease: "easeOut" }
+        })
+    };
+
+    const scrollToSection = (tabName) => {
+        handleTabChange(tabName);
     };
 
     const handleFollow = async () => {
         try {
-            console.log("Sending follow request to:", user.id);
             await axiosClient.post(`/request/send/interested/${user.id}`);
-
             setConnectionStatus("interested");
-            localStorage.setItem(`connection_status_${userId}`, "interested");
-
+            localStorage.setItem(`connection_status_${userIdFromUrl}`, "interested");
             showSnack("Request sent successfully");
         } catch (error) {
             console.error("Follow failed:", error);
-
             if (error.response && error.response.status === 409) {
                 const existing = error.response.data.existing;
                 if (existing) {
                     if (existing.status === "ignored") {
-                        // If ignored, delete the connection and retry
                         try {
                             await axiosClient.delete(`/user/connections/cancel/${user.id}`);
-                            // Retry follow
                             await axiosClient.post(`/request/send/interested/${user.id}`);
                             setConnectionStatus("interested");
-                            localStorage.setItem(`connection_status_${userId}`, "interested");
+                            localStorage.setItem(`connection_status_${userIdFromUrl}`, "interested");
                             showSnack("Request sent successfully");
                         } catch (retryError) {
-                            console.error("Retry follow failed:", retryError);
                             showSnack("Failed to send request");
                         }
                     } else if (existing.status === "interested") {
                         setConnectionStatus("interested");
-                        localStorage.setItem(`connection_status_${userId}`, "interested");
+                        localStorage.setItem(`connection_status_${userIdFromUrl}`, "interested");
                         showSnack("Request already sent");
                     } else if (existing.status === "accepted") {
                         setConnectionStatus("following");
-                        localStorage.setItem(`connection_status_${userId}`, "following");
+                        localStorage.setItem(`connection_status_${userIdFromUrl}`, "following");
                         showSnack("You are already following this user");
                     }
                 }
@@ -151,44 +190,42 @@ export default function PublicProfile() {
         }
     };
 
-    if (loading)
-        return <div className="text-center text-white mt-10">Loading...</div>;
+    const handleButtonClick = () => {
+        if (connectionStatus === "none" || connectionStatus === "ignored") {
+            handleFollow();
+        }
+    };
 
-    if (!user)
-        return <div className="text-center text-white mt-10">User not found</div>;
+    if (loading) return <ProfileShimmering />;
+    if (!user) return <div className="text-center text-white mt-10 font-bold">User not found</div>;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-black text-black dark:text-white relative overflow-hidden transition-colors duration-300">
-            {/* Background Gradients (Subtle Dark Glow) */}
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-800/20 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-300 relative">
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-800/10 dark:bg-neutral-800/20 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-900/5 dark:bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="w-full max-w-4xl mx-auto pt-4 px-4 pb-20 relative z-10">
-
-                {/* BACK BUTTON - Hidden on Desktop */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex md:hidden items-center gap-2 text-gray-500 hover:text-black dark:hover:text-white mb-4 transition-colors p-2 bg-white/50 dark:bg-black/50 backdrop-blur-md rounded-full w-fit"
+                    className="flex md:hidden items-center gap-2 text-gray-500 hover:text-black dark:hover:text-white mb-4 transition-colors p-2 bg-white/50 dark:bg-black/50 backdrop-blur-md rounded-full w-fit group"
                 >
-                    <ArrowLeft size={20} />
-                    <span>Back</span>
+                    <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-sm font-bold">Back</span>
                 </button>
 
-                {/* GLASSMORPHIC PROFILE CARD */}
-                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl rounded-3xl overflow-hidden">
-
-                    {/* Header Banner / Gradient Top */}
+                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl rounded-3xl overflow-hidden mb-8">
                     <div className="h-32 bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 p-6 flex justify-end relative overflow-hidden">
                         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100"></div>
                     </div>
 
                     <div className="px-6 sm:px-10 pb-10">
-                        {/* AVATAR & INFO HEADER */}
                         <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-12 mb-8 gap-6">
-
-                            {/* Avatar Wrapper */}
-                            <div className="relative group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-white/20 to-white/40 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-200"></div>
+                            <div
+                                className="relative group cursor-pointer"
+                                onMouseEnter={handleProfileMouseEnter}
+                                onMouseLeave={handleProfileMouseLeave}
+                            >
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-30 group-hover:opacity-100 transition duration-300 pointer-events-none"></div>
                                 <img
                                     src={user.imageUrl || "https://github.com/shadcn.png"}
                                     alt="User"
@@ -196,37 +233,33 @@ export default function PublicProfile() {
                                 />
                             </div>
 
-                            {/* User Name & Handle */}
                             <div className="text-center sm:text-left flex-1">
-                                <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">
+                                <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight flex items-center justify-center sm:justify-start gap-2">
                                     {user.firstname} {user.lastname}
+                                    <ShieldCheck className="text-blue-500" size={20} />
                                 </h1>
-                                <p className="text-gray-500 dark:text-gray-400 font-medium">@{user.username || `${user.firstname.toLowerCase()}_${user.lastname.toLowerCase()}`}</p>
+                                <p className="text-gray-500 dark:text-gray-400 font-medium tracking-wide">@{user.username || `${user.firstname.toLowerCase()}_${user.lastname.toLowerCase()}`}</p>
                             </div>
                         </div>
 
-                        {/* STATS ROW (Grid Layout) */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-                            {user.age && (
-                                <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
-                                    <span className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Age</span>
-                                    <span className="text-xl font-bold dark:text-gray-200">{user.age}</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+                            {[
+                                { label: "Posts", val: user.postsCount || posts.length, color: "blue", tab: "posts" },
+                                { label: "Connections", val: user.connectionsCount || connections.length, color: "green", tab: "connections" },
+                                { label: "Groups", val: user.groupsCount || groups.length, color: "purple", tab: "groups" }
+                            ].map(stat => (
+                                <div 
+                                    key={stat.label}
+                                    onClick={() => scrollToSection(stat.tab)}
+                                    className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-all group/stat"
+                                >
+                                    <span className={`text-gray-400 text-[10px] uppercase font-black tracking-widest mb-1 group-hover/stat:text-${stat.color}-500 transition-colors`}>{stat.label}</span>
+                                    <span className="text-xl font-black dark:text-gray-200 group-hover/stat:scale-110 transition-transform">{stat.val}</span>
                                 </div>
-                            )}
-                            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center">
-                                <span className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Posts</span>
-                                <span className="text-xl font-bold dark:text-gray-200">{posts.length}</span>
-                            </div>
-                            <div className={`bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center ${user.age ? 'sm:col-span-2' : 'col-span-2 sm:col-span-3'}`}>
-                                <span className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">Joined</span>
-                                <span className="text-lg font-bold dark:text-gray-200">{new Date(user.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>
-                            </div>
+                            ))}
                         </div>
 
-                        {/* ACTION BUTTONS */}
-                        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-
-                            {/* Follow Button */}
+                        <div className="flex flex-col sm:flex-row gap-4">
                             <div className="relative flex-1 group">
                                 <div className={`absolute -inset-0.5 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200 ${connectionStatus === "following" ? "bg-green-500" :
                                     connectionStatus === "interested" ? "bg-gray-500" :
@@ -235,12 +268,12 @@ export default function PublicProfile() {
                                 <button
                                     onClick={handleButtonClick}
                                     disabled={connectionStatus === "following" || connectionStatus === "interested"}
-                                    className={`relative w-full py-3.5 rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2
+                                    className={`relative w-full py-3.5 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg transition-all flex items-center justify-center gap-2
                                         ${connectionStatus === "interested"
-                                            ? "bg-neutral-800 text-gray-400 cursor-default"
+                                            ? "bg-neutral-800 text-gray-500 cursor-default"
                                             : connectionStatus === "following"
                                                 ? "bg-green-600 text-white cursor-default"
-                                                : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-blue-500/25"
+                                                : "bg-white text-black hover:bg-neutral-100 active:scale-95"
                                         }`}
                                 >
                                     {connectionStatus === "interested" ? "Request Sent" :
@@ -248,121 +281,222 @@ export default function PublicProfile() {
                                 </button>
                             </div>
 
-                            {/* Chat Button */}
                             <div className="relative flex-1 group">
                                 <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
                                 <button
                                     onClick={() => navigate(`/messages/${user.id}`)}
-                                    className="relative w-full bg-black dark:bg-[#0a0a0a] text-white border border-gray-800 rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 hover:bg-gray-900 transition-all"
+                                    className="relative w-full bg-black dark:bg-white text-white dark:text-black rounded-xl py-3.5 font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all"
                                 >
-                                    <MessageSquare size={18} /> Chat
+                                    <MessageSquare size={16} /> Chat
                                 </button>
                             </div>
-
-                            {/* Expertise Button */}
-                            <div className="relative flex-1 group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
-                                <button
-                                    onClick={() => setShowExpertiseModal(true)}
-                                    className="relative w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl py-3.5 font-semibold shadow-lg hover:shadow-orange-500/25 transition-all"
-                                >
-                                    Expertise
-                                </button>
-                            </div>
-
                         </div>
                     </div>
                 </div>
 
-                {/* POSTS SECTION */}
-                <div className="mt-12">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-black dark:text-white flex items-center gap-2">
-                            Posts
-                            <span className="text-sm font-normal text-gray-500 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-full">{posts.length}</span>
-                        </h2>
-                    </div>
-
-                    {!loadingPosts && posts.length === 0 && (
-                        <div className="text-center py-20 bg-white/50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700">
-                            <p className="text-gray-500 dark:text-gray-400">This user hasn't posted anything yet.</p>
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-                        {posts.map((post) => (
-                            <Link
-                                to={`/post/${post.id}`}
-                                key={post.id}
-                                className="group relative aspect-square bg-gray-100 dark:bg-[#111] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
-                            >
-                                {post.image ? (
-                                    <>
-                                        <img
-                                            src={post.image}
-                                            alt="Post"
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                                    </>
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-400 p-4 text-center text-sm">
-                                        <p className="line-clamp-3">{post.content}</p>
-                                    </div>
-                                )}
-                            </Link>
+                {/* STICKY TAB BAR */}
+                <div className="sticky top-0 z-50 -mx-4 px-4 bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-xl border-b border-gray-100 dark:border-white/10 mb-8 overflow-x-auto no-scrollbar scroll-smooth">
+                    <div className="flex items-center justify-center gap-1 py-4 max-w-4xl mx-auto">
+                        {TABS.map((tab, idx) => (
+                            <React.Fragment key={tab}>
+                                <button
+                                    onClick={() => handleTabChange(tab)}
+                                    className={`px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === tab 
+                                        ? "bg-black dark:bg-white text-white dark:text-black shadow-xl scale-105" 
+                                        : "text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"}`}
+                                >
+                                    {tab}
+                                </button>
+                                {idx !== TABS.length - 1 && <div className="w-[3px] h-[3px] rounded-full bg-gray-200 dark:bg-white/20 mx-2 shrink-0"></div>}
+                            </React.Fragment>
                         ))}
                     </div>
                 </div>
 
-            </div>
-
-            {/* View Expertise Modal */}
-            {showExpertiseModal && (
-                <div
-                    className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
-                    onClick={() => setShowExpertiseModal(false)}
-                >
-                    <div
-                        className="bg-white dark:bg-[#0f0f0f] w-full max-w-2xl rounded-3xl p-8 shadow-2xl border border-white/10 relative overflow-hidden"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Modal Gradient Blob */}
-                        <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-amber-500/10 rounded-full blur-[60px] pointer-events-none" />
-
-                        <div className="flex justify-between items-center mb-8 relative z-10">
-                            <h2 className="text-3xl font-bold text-black dark:text-white">User Expertise</h2>
-                            <button
-                                onClick={() => setShowExpertiseModal(false)}
-                                className="bg-gray-100 dark:bg-white/5 p-2 rounded-full text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <div className="relative z-10">
-                            {user.expertise ? (
-                                <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                                    <MyExperties expertise={user.expertise} />
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 bg-gray-50 dark:bg-white/5 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
-                                    <p className="text-gray-500 dark:text-gray-400">This user hasn't added any expertise yet.</p>
+                {/* TAB CONTENT */}
+                <div className="min-h-[400px]">
+                    <AnimatePresence mode="popLayout" custom={direction} initial={false}>
+                        <motion.div
+                            key={activeTab}
+                            custom={direction}
+                            variants={tabVariants}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            layout
+                            className="w-full"
+                        >
+                            {activeTab === "posts" && (
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xl font-black uppercase tracking-tighter text-black dark:text-white flex items-center gap-2">
+                                            Recent Posts
+                                            <span className="text-[10px] font-bold text-gray-500 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-full">{posts.length}</span>
+                                        </h2>
+                                    </div>
+                                    {!loadingPosts && posts.length === 0 ? (
+                                        <div className="text-center py-20 bg-gray-50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800">
+                                            <p className="text-gray-500 dark:text-gray-400 text-sm font-bold">This user hasn't posted anything yet.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {posts.map((post) => (
+                                                <Link
+                                                    to={`/post/${post.id}`}
+                                                    key={post.id}
+                                                    className="group relative aspect-square bg-gray-100 dark:bg-[#111] rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-1"
+                                                >
+                                                    {post.image ? (
+                                                        <>
+                                                            <img src={post.image} alt="Post" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                <div className="p-3 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white scale-0 group-hover:scale-100 transition-transform duration-500">
+                                                                    <Share2 size={20} />
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 p-6 text-center text-xs bg-gradient-to-br from-gray-50 to-gray-200 dark:from-[#111] dark:to-[#1a1a1a]">
+                                                            <p className="line-clamp-4 leading-relaxed font-bold italic">"{post.content}"</p>
+                                                        </div>
+                                                    )}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* SNACKBAR */}
-            {snack && (
-                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]
-                                px-6 py-3 bg-white dark:bg-[#222] text-black dark:text-white text-sm font-medium
-                                rounded-full shadow-2xl border border-gray-200 dark:border-gray-800 animate-fadeIn pointer-events-none whitespace-nowrap">
-                    {snack}
+                            {activeTab === "connections" && (
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xl font-black uppercase tracking-tighter text-black dark:text-white flex items-center gap-2">
+                                            Network
+                                            <span className="text-[10px] font-bold text-gray-500 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-full">{connections.length}</span>
+                                        </h2>
+                                    </div>
+                                    {loadingConnections ? (
+                                        <div className="space-y-3">
+                                            {[1, 2, 3, 4].map(i => (
+                                                <div key={i} className="h-20 bg-gray-100 dark:bg-white/5 rounded-3xl animate-pulse" />
+                                            ))}
+                                        </div>
+                                    ) : connections.length === 0 ? (
+                                        <div className="text-center py-20 bg-gray-50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800">
+                                            <p className="text-gray-500 dark:text-gray-400 text-sm font-bold">No public connections found.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {connections.map((conn) => (
+                                                <Link
+                                                    to={conn.id === currentUser?.id ? "/profile" : `/user/${conn.id}`}
+                                                    key={conn.id}
+                                                    className="group relative flex items-center justify-between p-4 bg-gray-50/50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl transition-all duration-500 hover:bg-white dark:hover:bg-white/10 hover:shadow-xl hover:-translate-y-0.5"
+                                                >
+                                                    <div className="flex items-center gap-4 min-w-0">
+                                                        <div className="relative shrink-0">
+                                                            <div className="absolute -inset-0.5 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full blur-sm opacity-0 group-hover:opacity-40 transition-opacity" />
+                                                            <img src={conn.imageUrl || "https://github.com/shadcn.png"} alt={conn.firstname} className="relative w-12 h-12 rounded-full object-cover border-2 border-white dark:border-white/10 shadow-lg" />
+                                                        </div>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <h3 className="text-sm font-black text-black dark:text-white truncate uppercase tracking-tighter">
+                                                                {conn.firstname} {conn.lastname}
+                                                            </h3>
+                                                            <p className="text-[10px] text-gray-400 uppercase font-black tracking-tighter mt-0.5">
+                                                                {conn.expertise?.skills?.[0] || "Network Innovator"}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <button className="px-5 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full text-[9px] font-black uppercase tracking-[0.1em] hover:scale-105 active:scale-95 transition-all shadow-lg opacity-0 group-hover:opacity-100">
+                                                        View Profile
+                                                    </button>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === "groups" && (
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xl font-black uppercase tracking-tighter text-black dark:text-white flex items-center gap-2">
+                                            Communnities
+                                            <span className="text-[10px] font-bold text-gray-500 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-full">{groups.length}</span>
+                                        </h2>
+                                    </div>
+                                    {loadingGroups ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {[1, 2].map(i => (
+                                                <div key={i} className="h-24 bg-gray-100 dark:bg-white/5 rounded-3xl animate-pulse" />
+                                            ))}
+                                        </div>
+                                    ) : groups.length === 0 ? (
+                                        <div className="text-center py-20 bg-gray-50 dark:bg-white/5 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800">
+                                            <p className="text-gray-500 dark:text-gray-400 text-sm font-bold">No public groups found.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {groups.map((group) => (
+                                                <div key={group.id} className="group relative flex items-center gap-4 p-5 bg-gray-50/50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl transition-all duration-500 hover:bg-white dark:hover:bg-white/10 hover:shadow-xl">
+                                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-lg shrink-0 overflow-hidden">
+                                                        {group.image ? <img src={group.image} alt={group.name} className="w-full h-full object-cover" /> : group.name?.charAt(0) || "G"}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-black text-xs text-black dark:text-white truncate uppercase tracking-tighter">{group.name || "Unnamed Group"}</h3>
+                                                        <p className="text-[10px] text-gray-400 font-bold mt-0.5">{group.participantIds?.length || 0} Members</p>
+                                                    </div>
+                                                    <button className="px-5 py-2 bg-black dark:bg-white text-white dark:text-black rounded-full text-[9px] font-black uppercase tracking-[0.15em] hover:scale-105 active:scale-95 transition-all shadow-lg">Join</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {activeTab === "expertise" && (
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xl font-black uppercase tracking-tighter text-black dark:text-white">Professional Stack</h2>
+                                    </div>
+                                    <div className="bg-white/50 dark:bg-white/5 backdrop-blur-md border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-8 md:p-10 transition-all duration-500">
+                                        {user.expertise ? (
+                                            <MyExperties expertise={user.expertise} />
+                                        ) : (
+                                            <div className="text-center py-12">
+                                                <p className="text-gray-500 dark:text-gray-400 text-sm font-bold">This user hasn't added any expertise yet.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
+            </div>
+
+            <ProfileHoverCard
+                userId={user?.id}
+                isVisible={showHoverCard}
+                anchorRect={hoverAnchorRect}
+                onMouseEnter={handleCardMouseEnter}
+                onMouseLeave={handleCardMouseLeave}
+            />
+
+            {snack && (
+                <AnimatePresence>
+                    <motion.div 
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 50 }}
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-3 bg-black dark:bg-white text-white dark:text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-2xl animate-pulse pointer-events-none whitespace-nowrap"
+                    >
+                        {snack}
+                    </motion.div>
+                </AnimatePresence>
             )}
         </div>
     );
-}
+};
+
+export default PublicProfile;

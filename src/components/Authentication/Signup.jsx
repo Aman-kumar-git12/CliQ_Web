@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Mail, Lock, Calendar } from "lucide-react";
+import { User, Mail, Lock, Calendar, Eye, EyeOff } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
 import { useUserContext } from "../../context/userContext";
 
@@ -14,6 +14,7 @@ export default function Signup() {
         terms: false,
     });
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
     const { setUser } = useUserContext();
     const [error, setError] = useState(null);
     const [showErr, setShowErr] = useState(false);
@@ -119,16 +120,23 @@ export default function Signup() {
                 {/* PASSWORD + AGE */}
                 <div className="flex gap-2">
                     {/* Password */}
-                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2">
-                        <Lock className="text-gray-400 mr-2" size={18} />
+                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2 group focus-within:border-white transition-colors">
+                        <Lock className="text-gray-400 mr-2 group-focus-within:text-white" size={18} />
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             name="password"
                             placeholder="Password"
                             value={formData.password}
                             onChange={handleChange}
                             className="bg-transparent outline-none text-gray-200 w-full"
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="text-gray-400 hover:text-white transition-colors"
+                        >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
                     </div>
 
                     {/* Age */}

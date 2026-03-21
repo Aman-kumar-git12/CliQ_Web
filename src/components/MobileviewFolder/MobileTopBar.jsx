@@ -53,14 +53,16 @@ export default function MobileTopBar() {
                     <>
                         <button
                             onClick={() => navigate(-1)}
-                            className="p-2 -ml-2 rounded-full hover:bg-neutral-800 transition text-white"
+                            className="p-2 -ml-2 rounded-full hover:bg-neutral-800 transition text-white relative z-[60]"
                         >
                             <ArrowLeft size={24} />
                         </button>
 
-                        <span className="text-lg font-bold text-white absolute left-14">
+                        <div className="absolute left-1/2 -translate-x-1/2 text-lg font-bold text-white">
                             Post
-                        </span>
+                        </div>
+
+                        <div className="w-10"></div> {/* Spacer for symmetry */}
                     </>
                 ) : (
                     /* DEFAULT HEADER */

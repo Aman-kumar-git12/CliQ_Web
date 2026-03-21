@@ -19,14 +19,18 @@ import { useFeedContext } from "../../context/FeedContext";
 import Confirmation from "../Confirmation";
 import Toastbar from "../Chat/Toastbar";
 import ReportModal from "../ReportModal";
+import ProfileHoverCard from "./ProfileHoverCard";
+import LikesHoverCard from "./LikesHoverCard";
 import { AnimatePresence } from "framer-motion";
+
 
 export default function IndividualPost() {
     const { postId } = useParams();
+    const containerRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
-    const { user } = useUserContext();
+    const { user: currentUser } = useUserContext(); // Renamed user to currentUser
     const { updateFeedPost } = useFeedContext();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -56,6 +60,86 @@ export default function IndividualPost() {
     const [activeTooltip, setActiveTooltip] = useState(null);
     const tooltipTimeoutRef = useRef(null);
     const commentsRef = useRef(null);
+
+    // Hover Card State
+    const [hoverUserId, setHoverUserId] = useState(null);
+    const [showHoverCard, setShowHoverCard] = useState(false);
+    const [hoverAnchorRect, setHoverAnchorRect] = useState(null);
+    const hoverTimeoutRef = useRef(null);
+
+    const handleProfileMouseEnter = (e, userId) => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        const rect = e.currentTarget.getBoundingClientRect();
+        const parentRect = containerRef.current.getBoundingClientRect();
+
+        hoverTimeoutRef.current = setTimeout(() => {
+            setHoverUserId(userId);
+            setHoverAnchorRect({
+                top: rect.top - parentRect.top,
+                bottom: rect.bottom - parentRect.top,
+                left: rect.left - parentRect.left,
+                right: rect.right - parentRect.left,
+                width: rect.width,
+                height: rect.height
+            });
+            setShowHoverCard(true);
+        }, 500);
+    };
+
+    const handleProfileMouseLeave = () => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = setTimeout(() => {
+            setShowHoverCard(false);
+        }, 200);
+    };
+
+    const handleCardMouseEnter = () => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    };
+
+    const handleCardMouseLeave = () => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        setShowHoverCard(false);
+    };
+
+    // Likes Hover Card State
+    const [showLikesHover, setShowLikesHover] = useState(false);
+    const [likesAnchorRect, setLikesAnchorRect] = useState(null);
+    const likesHoverTimeoutRef = useRef(null);
+
+    const handleLikesMouseEnter = (e) => {
+        if (likesHoverTimeoutRef.current) clearTimeout(likesHoverTimeoutRef.current);
+        const rect = e.currentTarget.getBoundingClientRect();
+        const parentRect = containerRef.current.getBoundingClientRect();
+
+        likesHoverTimeoutRef.current = setTimeout(() => {
+            setLikesAnchorRect({
+                top: rect.top - parentRect.top,
+                bottom: rect.bottom - parentRect.top,
+                left: rect.left - parentRect.left,
+                right: rect.right - parentRect.left,
+                width: rect.width,
+                height: rect.height
+            });
+            setShowLikesHover(true);
+        }, 500);
+    };
+
+    const handleLikesMouseLeave = () => {
+        if (likesHoverTimeoutRef.current) clearTimeout(likesHoverTimeoutRef.current);
+        likesHoverTimeoutRef.current = setTimeout(() => {
+            setShowLikesHover(false);
+        }, 200);
+    };
+
+    const handleLikesCardMouseEnter = () => {
+        if (likesHoverTimeoutRef.current) clearTimeout(likesHoverTimeoutRef.current);
+    };
+
+    const handleLikesCardMouseLeave = () => {
+        if (likesHoverTimeoutRef.current) clearTimeout(likesHoverTimeoutRef.current);
+        setShowLikesHover(false);
+    };
 
     const handleMouseEnter = (name) => {
         if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
@@ -149,18 +233,18 @@ export default function IndividualPost() {
     const [connectionStatus, setConnectionStatus] = useState("none");
 
     useEffect(() => {
-        const checkConnection = async () => {
-            if (post?.userId && user?.id && post.userId !== user.id) {
+        if (post?.userId && currentUser?.id && post.userId !== currentUser.id) {
+            const checkConnection = async () => {
                 try {
                     const res = await axiosClient.get(`/user/connections/${post.userId}`, { withCredentials: true });
                     setConnectionStatus(res.data.status);
                 } catch (error) {
                     console.error("Error checking connection status:", error);
                 }
-            }
-        };
-        if (post) checkConnection();
-    }, [post, user]);
+            };
+            checkConnection();
+        }
+    }, [post, currentUser]);
 
     const handleFollow = async () => {
         if (!post?.userId) return;
@@ -225,8 +309,8 @@ export default function IndividualPost() {
             // Add new comment to UI immediately
             const commentToAdd = {
                 ...res.data,
-                username: user.firstname + " " + user.lastname,
-                avatar: user.imageUrl,
+                username: currentUser.firstname + " " + currentUser.lastname,
+                avatar: currentUser.imageUrl,
                 createdAt: new Date().toISOString()
             };
             setComments([commentToAdd, ...comments]);
@@ -402,73 +486,86 @@ export default function IndividualPost() {
         </div>
     );
 
-    const isOwner = user?.id === post.userId;
+    const isOwner = currentUser?.id === post.userId; // Changed user to currentUser
 
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30">
-            {/* Header */}
-            <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10 px-4 py-3">
-                <div className="max-w-2xl mx-auto flex items-center justify-between">
+        <div ref={containerRef} className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-300 relative">
+
+            {/* Header: Fixed at top to prevent jumping against Layout's constant pt-16 */}
+            <header className="fixed top-0 left-0 md:left-28 right-0 h-16 z-50 bg-black/99 backdrop-blur-md border-b border-neutral-800 flex items-center px-4 transition-colors duration-300 shadow-xl">
+                <div className="max-w-2xl mx-auto flex-1 flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                         <button
                             onClick={() => navigate(-1)}
-                            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                            className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors text-white"
                         >
-                            <ArrowLeft size={20} />
+                            <ArrowLeft size={24} />
                         </button>
-                        <h1 className="text-xl font-bold">Post</h1>
+                        <h1 className="text-xl font-bold text-white tracking-tight">Post</h1>
                     </div>
-                    {isOwner ? (
-                        <div className="flex space-x-2">
-                            {!isEditing && (
-                                <>
-                                    <button
-                                        onClick={() => navigate(`/post/${postId}/edit`)}
-                                        className="p-2 hover:bg-white/10 rounded-full text-blue-400"
-                                    >
-                                        <Edit2 size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => setShowDeletePostConfirm(true)}
-                                        className="p-2 hover:bg-white/10 rounded-full text-red-500"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="relative post-menu-container">
-                            <button
-                                onClick={() => setShowPostMenu(!showPostMenu)}
-                                className="p-2 hover:bg-white/10 rounded-full text-gray-400 flex items-center justify-center transition-colors"
-                            >
-                                <MoreHorizontal size={20} />
-                            </button>
-                            {showPostMenu && (
-                                <div className="absolute right-0 mt-2 w-48 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-fadeIn">
-                                    <button
-                                        onClick={reportedPost ? null : () => openReportModal('post', postId)}
-                                        disabled={reportedPost}
-                                        className={`w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors ${reportedPost ? 'text-gray-500 cursor-default' : 'text-red-500 hover:bg-white/5'
-                                            }`}
-                                    >
-                                        <Flag size={18} className={reportedPost ? 'text-gray-500' : 'text-red-500'} />
-                                        <span className="font-medium text-sm">{reportedPost ? 'Reported' : 'Report Post'}</span>
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {isOwner ? (
+                            <div className="flex space-x-2">
+                                {!isEditing && (
+                                    <>
+                                        <button
+                                            onClick={() => navigate(`/post/${postId}/edit`)}
+                                            className="p-2 hover:bg-white/10 rounded-full text-blue-400 transition-colors"
+                                        >
+                                            <Edit2 size={20} />
+                                        </button>
+                                        <button
+                                            onClick={() => setShowDeletePostConfirm(true)}
+                                            className="p-2 hover:bg-white/10 rounded-full text-red-500 transition-colors"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="relative post-menu-container">
+                                <button
+                                    onClick={() => setShowPostMenu(!showPostMenu)}
+                                    className="p-2 hover:bg-white/10 rounded-full text-gray-400 flex items-center justify-center transition-colors"
+                                >
+                                    <MoreHorizontal size={24} />
+                                </button>
+                                {showPostMenu && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
+                                        <button
+                                            onClick={reportedPost ? null : () => openReportModal('post', postId)}
+                                            disabled={reportedPost}
+                                            className={`w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors ${reportedPost
+                                                ? 'text-gray-500 cursor-default'
+                                                : 'text-red-500 hover:bg-white/5'
+                                                }`}
+                                        >
+                                            <Flag size={18} className={reportedPost ? 'text-gray-500' : 'text-red-500'} />
+                                            <span className="font-medium text-sm">{reportedPost ? 'Reported' : 'Report Post'}</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </header>
+
+            {/* Content Spacer to account for fixed header */}
+            <div className="h-16 w-full"></div>
 
             <main className="max-w-2xl mx-auto pb-24">
                 {/* Post Body */}
                 <article className="px-4 py-2 space-y-3">
                     {/* User Profile Info */}
                     <div className="flex items-center justify-between">
-                        <Link to={`/public-profile/${post.userId}`} className="flex items-center space-x-3 group">
+                        <Link
+                            to={currentUser?.id === post.userId ? "/profile" : `/public-profile/${post.userId}`}
+                            className="flex items-center space-x-3 group"
+                            onMouseEnter={(e) => handleProfileMouseEnter(e, post.userId)}
+                            onMouseLeave={handleProfileMouseLeave}
+                        >
                             <div className="relative">
                                 <div className="absolute -inset-0.5 bg-gradient-to-tr from-emerald-500 to-cyan-500 rounded-full blur opacity-30 group-hover:opacity-100 transition duration-300"></div>
                                 <img
@@ -530,7 +627,7 @@ export default function IndividualPost() {
                         )}
 
                         {post.image && (
-                            <div className="rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-[#121212] border border-white/10">
+                            <div className="rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-[#121212] border border-white/10 mb-6">
                                 <img
                                     src={post.image}
                                     alt="Post"
@@ -563,8 +660,14 @@ export default function IndividualPost() {
                             <>
                                 <button
                                     onClick={toggleLike}
-                                    onMouseEnter={() => handleMouseEnter('like')}
-                                    onMouseLeave={handleMouseLeave}
+                                    onMouseEnter={(e) => {
+                                        handleMouseEnter('like');
+                                        handleLikesMouseEnter(e);
+                                    }}
+                                    onMouseLeave={() => {
+                                        handleMouseLeave();
+                                        handleLikesMouseLeave();
+                                    }}
                                     className={`flex items-center group relative transition-colors ${liked ? 'text-rose-500' : 'text-gray-500 md:hover:text-rose-500'}`}
                                 >
                                     {likesCount > 0 && <span className="text-sm font-bold mr-1">{likesCount}</span>}
@@ -641,7 +744,11 @@ export default function IndividualPost() {
                         {/* Comment Input */}
                         <div className="p-4 border-t border-white/10 bg-black/50 sticky bottom-0 backdrop-blur-sm z-10">
                             <form onSubmit={handleAddComment} className="flex items-center space-x-3">
-                                <Link to={`/public-profile/${user?.id}`}>
+                                <Link
+                                    to="/profile"
+                                    onMouseEnter={(e) => handleProfileMouseEnter(e, user?.id)}
+                                    onMouseLeave={handleProfileMouseLeave}
+                                >
                                     <img src={user?.imageUrl || "https://github.com/shadcn.png"} className="w-9 h-9 rounded-full object-cover hover:opacity-80 transition-opacity" alt="Me" />
                                 </Link>
                                 <div className="flex-1 relative">
@@ -667,11 +774,24 @@ export default function IndividualPost() {
                             {comments.length > 0 ? (
                                 comments.map((comment) => (
                                     <div key={comment.id} className="p-4 flex space-x-3 hover:bg-white/[0.02] transition-colors">
-                                        <img src={comment.avatar || "https://github.com/shadcn.png"} alt="" className="w-10 h-10 rounded-full object-cover" />
+                                        <Link
+                                            to={user?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
+                                            onMouseEnter={(e) => handleProfileMouseEnter(e, comment.userId)}
+                                            onMouseLeave={handleProfileMouseLeave}
+                                        >
+                                            <img src={comment.avatar || "https://github.com/shadcn.png"} alt="" className="w-10 h-10 rounded-full object-cover" />
+                                        </Link>
                                         <div className="flex-1 space-y-1">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-2">
-                                                    <span className="font-bold text-sm text-white">{comment.username || "Anonymous"}</span>
+                                                    <Link
+                                                        to={user?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
+                                                        className="font-bold text-sm text-white hover:text-emerald-400 transition-colors"
+                                                        onMouseEnter={(e) => handleProfileMouseEnter(e, comment.userId)}
+                                                        onMouseLeave={handleProfileMouseLeave}
+                                                    >
+                                                        {comment.username || "Anonymous"}
+                                                    </Link>
                                                     <span className="text-gray-500 text-xs">·</span>
                                                     <span className="text-gray-500 text-xs">{new Date(comment.createdAt).toLocaleDateString()}</span>
                                                 </div>
@@ -762,6 +882,22 @@ export default function IndividualPost() {
                 confirmColor="bg-red-600 hover:bg-red-700"
                 isLoading={isDeletingPost}
             />
-        </div >
+
+            <ProfileHoverCard
+                userId={hoverUserId}
+                isVisible={showHoverCard}
+                anchorRect={hoverAnchorRect}
+                onMouseEnter={handleCardMouseEnter}
+                onMouseLeave={handleCardMouseLeave}
+            />
+
+            <LikesHoverCard
+                postId={post.id}
+                isVisible={showLikesHover}
+                anchorRect={likesAnchorRect}
+                onMouseEnter={handleLikesCardMouseEnter}
+                onMouseLeave={handleLikesCardMouseLeave}
+            />
+        </div>
     );
 }

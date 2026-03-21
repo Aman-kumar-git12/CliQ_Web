@@ -3,8 +3,10 @@ import { Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
 import FindPeopleShimmering from "../shimmering/FindPeopleShimmering";
+import { useUserContext } from "../../context/userContext";
 
 export default function FindPeople() {
+    const { user: currentUser } = useUserContext();
     const [search, setSearch] = useState("");
     const [suggestions, setSuggestions] = useState([]);
     const [results, setResults] = useState([]);
@@ -178,8 +180,8 @@ export default function FindPeople() {
     const getButtonStyle = (userId) => {
         const status = connectionStatuses[userId]?.status;
         if (status === "connected") return "bg-green-100 text-green-700 border-green-200 cursor-default";
-        if (status === "interested") return "bg-neutral-100 text-neutral-500 border-neutral-200 cursor-default";
-        return "bg-black dark:bg-white text-white dark:text-black hover:opacity-80";
+        if (status === "interested") return "bg-neutral-800 text-neutral-500 cursor-default";
+        return "bg-white text-black rounded-full hover:bg-neutral-200";
     };
 
     return (
@@ -213,10 +215,13 @@ export default function FindPeople() {
                 {(search ? results : suggestions).map((user) => (
                     <div
                         key={user.id}
-                        className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-900/50 transition-colors"
+                        className="flex items-center justify-between p-4 rounded-2xl hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5 transition-all duration-300 group"
                     >
                         {/* Left Section */}
-                        <Link to={`/public-profile/${user.id}`} className="flex items-center gap-3 min-w-0 flex-1">
+                        <Link
+                            to={currentUser?.id === user.id ? "/profile" : `/public-profile/${user.id}`}
+                            className="flex items-center gap-3 min-w-0 flex-1"
+                        >
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-neutral-200 dark:bg-neutral-800">
                                 <img
                                     src={avatar(user.imageUrl)}
@@ -236,15 +241,17 @@ export default function FindPeople() {
                         </Link>
 
                         {/* FOLLOW BUTTON */}
-                        <button
-                            onClick={() => handleFollow(user.id)}
-                            disabled={connectionStatuses[user.id]?.status === "connected" || connectionStatuses[user.id]?.status === "interested"}
-                            className={`px-4 sm:px-6 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 
-                                       text-sm font-semibold transition-all duration-200
-                                       ${getButtonStyle(user.id)}`}
-                        >
-                            {getButtonText(user.id)}
-                        </button>
+                        {currentUser?.id !== user.id && (
+                            <button
+                                onClick={() => handleFollow(user.id)}
+                                disabled={connectionStatuses[user.id]?.status === "connected" || connectionStatuses[user.id]?.status === "interested"}
+                                className={`px-4 sm:px-6 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 
+                                           text-sm font-semibold transition-all duration-200
+                                           ${getButtonStyle(user.id)}`}
+                            >
+                                {getButtonText(user.id)}
+                            </button>
+                        )}
                     </div>
                 ))
                 }
