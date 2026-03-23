@@ -5,6 +5,7 @@ import PostCard from "./Postcard";
 import HomeSidebar from "./HomeSidebar";
 import { useFeedContext } from "../context/FeedContext";
 import HomeShimmering from "./shimmering/HomeShimmering";
+import Chatbot from "./Chatbot/Chatbot";
 
 export default function Home() {
   const {
@@ -233,6 +234,9 @@ export default function Home() {
       <div className="hidden lg:block w-[320px] shrink-0 sticky top-8 h-fit">
         <HomeSidebar />
       </div>
+
+      {/* Floating Chatbot Extension */}
+      <Chatbot />
     </div>
   );
 }
