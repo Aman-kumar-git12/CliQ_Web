@@ -53,6 +53,7 @@ const PostCard = ({ post }) => {
                 bottom: rect.bottom - parentRect.top,
                 left: rect.left - parentRect.left,
                 right: rect.right - parentRect.left,
+                viewportTop: rect.top,
                 width: rect.width,
                 height: rect.height
             });
@@ -92,6 +93,7 @@ const PostCard = ({ post }) => {
                 bottom: rect.bottom - parentRect.top,
                 left: rect.left - parentRect.left,
                 right: rect.right - parentRect.left,
+                viewportTop: rect.top,
                 width: rect.width,
                 height: rect.height
             });
@@ -131,6 +133,7 @@ const PostCard = ({ post }) => {
                 bottom: rect.bottom - parentRect.top,
                 left: rect.left - parentRect.left,
                 right: rect.right - parentRect.left,
+                viewportTop: rect.top,
                 width: rect.width,
                 height: rect.height
             });
@@ -251,7 +254,7 @@ const PostCard = ({ post }) => {
     const text = post.text || post.content || "";
 
     return (
-        <div ref={containerRef} className="flex flex-col mb-8 bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-hidden relative group p-4">
+        <div ref={containerRef} className="flex flex-col mb-8 bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-lg relative group p-4">
             <div className="flex gap-4">
 
                 {/* LEFT: Avatar + Line */}

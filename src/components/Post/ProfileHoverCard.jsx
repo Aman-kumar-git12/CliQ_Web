@@ -49,12 +49,34 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
 
     if (!anchorRect) return null;
 
-    // Calculate position dynamically
-    // Coordinates are now relative to the parent, so no need for scrollY/scrollX
-    const showBelow = anchorRect.top < 300; // Increased threshold for better upward positioning
+    // Robust Viewport Logic
+    const estHeight = 520; // Estimated max height of profile card
+    const spaceBelow = window.innerHeight - anchorRect.viewportTop - anchorRect.height;
+    const spaceAbove = anchorRect.viewportTop;
     
-    const top = showBelow ? anchorRect.bottom + 10 : anchorRect.top - 10;
+    // Choose direction based on more available space or if it fits
+    const showBelow = spaceBelow > spaceAbove || spaceBelow > estHeight;
+    
+    let top = showBelow ? anchorRect.bottom + 10 : anchorRect.top - 10;
     const left = anchorRect.left + (anchorRect.width / 2);
+
+    // Clamping: Ensure card doesn't go off-screen vertically
+    // If showing below, viewport bottom would be viewportTop + height + gap + cardHeight
+    // If showing above, viewport top would be viewportTop - gap - cardHeight
+    if (showBelow) {
+        if (anchorRect.viewportTop + anchorRect.height + 10 + estHeight > window.innerHeight) {
+            // If it hits bottom, we can't easily clamp without it overlapping the trigger,
+            // but for absolute positioning, we just ensure it's at least not below innerHeight
+        }
+    } else {
+        // If showing above, and it hits the top (0)
+        const viewportTopPos = anchorRect.viewportTop - 10 - estHeight;
+        if (viewportTopPos < 10) {
+            // Push it down to 10px from top
+            const diff = 10 - viewportTopPos;
+            top += diff;
+        }
+    }
 
     return (
         <AnimatePresence>
@@ -71,16 +93,14 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                         transform: `translateX(-50%) ${showBelow ? "" : "translateY(-100%)"}`,
                         zIndex: 1000,
                         pointerEvents: "auto",
+                        maxHeight: "max-content"
                     }}
-                    className="w-80 overflow-hidden"
+                    className="w-[380px] overflow-hidden"
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                 >
-                    {/* Arrow / Tail (Top) */}
-                    {showBelow && (
-                        <div className="w-4 h-4 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-t border-l border-neutral-200 dark:border-neutral-800 rotate-45 mx-auto -mb-2 z-[1] shadow-2xl relative top-2"></div>
-                    )}
-                    
+                    {/* Arrow / Tail (Top)                        {/* Arrow removed for "perfect box" look */}
+
                     <div className="bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl overflow-hidden p-5">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-10">
@@ -92,7 +112,7 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                         ) : (
                             <>
                                 {/* Header with Avatar and Names */}
-                                <Link 
+                                <Link
                                     to={data.isMe ? "/profile" : `/public-profile/${userId}`}
                                     className="flex items-center gap-4 mb-5 group/header"
                                 >
@@ -157,11 +177,11 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                                         onClick={handleFollow}
                                         disabled={connectionStatus === "interested" || connectionStatus === "accepted"}
                                         className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg
-                                            ${connectionStatus === "accepted" 
-                                                ? "bg-green-600 text-white cursor-default" 
-                                                : connectionStatus === "interested" 
-                                                ? "bg-neutral-800 text-gray-400 cursor-default" 
-                                                : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-blue-500/25 active:scale-[0.98]"
+                                            ${connectionStatus === "accepted"
+                                                ? "bg-green-600 text-white cursor-default"
+                                                : connectionStatus === "interested"
+                                                    ? "bg-neutral-800 text-gray-400 cursor-default"
+                                                    : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-blue-500/25 active:scale-[0.98]"
                                             }`}
                                     >
                                         {connectionStatus === "accepted" ? (
@@ -173,10 +193,10 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                                         )}
                                     </button>
                                 )}
-                                
+
                                 {data.isMe && (
-                                    <Link 
-                                        to="/profile" 
+                                    <Link
+                                        to="/profile"
                                         className="block w-full py-2.5 bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white rounded-xl font-bold text-sm text-center transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-700"
                                     >
                                         Edit Profile
@@ -185,11 +205,8 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                             </>
                         )}
                     </div>
-                    
-                    {/* Arrow / Tail (Bottom) */}
-                    {!showBelow && (
-                        <div className="w-4 h-4 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-r border-b border-neutral-200 dark:border-neutral-800 rotate-45 mx-auto -mt-2 z-[-1] shadow-2xl"></div>
-                    )}
+
+                    {/* Arrow / Tail (Bottom)                        {/* Arrow removed for "perfect box" look */}
                 </motion.div>
             )}
         </AnimatePresence>

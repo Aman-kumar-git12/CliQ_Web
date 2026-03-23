@@ -84,7 +84,7 @@ const PublicProfile = () => {
         const fetchPosts = async () => {
             try {
                 const res = await axiosClient.get(`/user/posts/${user.id}`);
-                setPosts(res.data.posts || []);
+                setPosts(res.data || []);
             } catch (error) {
                 console.error("Error fetching posts:", error);
             } finally {
@@ -242,16 +242,16 @@ const PublicProfile = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+                        <div className="flex flex-row gap-4 mb-10 w-full">
                             {[
                                 { label: "Posts", val: user.postsCount || posts.length, color: "blue", tab: "posts" },
                                 { label: "Connections", val: user.connectionsCount || connections.length, color: "green", tab: "connections" },
                                 { label: "Groups", val: user.groupsCount || groups.length, color: "purple", tab: "groups" }
                             ].map(stat => (
-                                <div 
+                                <div
                                     key={stat.label}
                                     onClick={() => scrollToSection(stat.tab)}
-                                    className="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-all group/stat"
+                                    className="flex-1 bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-all group/stat min-w-0"
                                 >
                                     <span className={`text-gray-400 text-[10px] uppercase font-black tracking-widest mb-1 group-hover/stat:text-${stat.color}-500 transition-colors`}>{stat.label}</span>
                                     <span className="text-xl font-black dark:text-gray-200 group-hover/stat:scale-110 transition-transform">{stat.val}</span>
@@ -301,8 +301,8 @@ const PublicProfile = () => {
                             <React.Fragment key={tab}>
                                 <button
                                     onClick={() => handleTabChange(tab)}
-                                    className={`px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === tab 
-                                        ? "bg-black dark:bg-white text-white dark:text-black shadow-xl scale-105" 
+                                    className={`px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all whitespace-nowrap ${activeTab === tab
+                                        ? "bg-black dark:bg-white text-white dark:text-black shadow-xl scale-105"
                                         : "text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"}`}
                                 >
                                     {tab}
@@ -485,7 +485,7 @@ const PublicProfile = () => {
 
             {snack && (
                 <AnimatePresence>
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}

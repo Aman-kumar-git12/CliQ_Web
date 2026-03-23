@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ProfileConnections from "./Connections/ProfileConnections";
 import ProfileHoverCard from "./Post/ProfileHoverCard";
 
-const TABS = ["posts", "expertise", "connections", "groups"];
+const TABS = ["posts", "connections", "groups", "expertise"];
 
 export default function ProfilePage() {
     const { customTab } = useParams();
@@ -243,6 +243,10 @@ export default function ProfilePage() {
         setShowImageViewer(true);
     };
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     if (loading)
         return <ProfileShimmering />;
 
@@ -352,25 +356,23 @@ export default function ProfilePage() {
                             <div className="flex items-center p-1.5 rounded-full border border-white/10 bg-[#0A0A0A]/80 backdrop-blur-md max-w-fit mx-auto shadow-sm">
                                 {[
                                     { id: "posts", label: "Posts" },
-                                    { id: "expertise", label: "Expertise" },
                                     { id: "connections", label: "Connections" },
-                                    { id: "groups", label: "Groups" }
+                                    { id: "groups", label: "Groups" },
+                                    { id: "expertise", label: "Expertise" }
                                 ].map((tab, idx, arr) => (
                                     <React.Fragment key={tab.id}>
                                         {idx !== 0 && (
-                                            <div className={`w-[1px] h-4 mx-1 shrink-0 transition-colors duration-300 ${
-                                                activeTab === tab.id || activeTab === arr[idx - 1].id 
-                                                ? "bg-transparent" 
-                                                : "bg-white/10"
-                                            }`}></div>
+                                            <div className={`w-[1px] h-4 mx-1 shrink-0 transition-colors duration-300 ${activeTab === tab.id || activeTab === arr[idx - 1].id
+                                                    ? "bg-transparent"
+                                                    : "bg-white/10"
+                                                }`}></div>
                                         )}
                                         <button
                                             onClick={() => handleTabChange(tab.id)}
-                                            className={`relative px-6 sm:px-8 py-2 rounded-full text-[15px] font-medium transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                                                activeTab === tab.id 
-                                                ? "text-white bg-white/[0.04] border border-white/10 shadow-[inset_0_1px_4px_rgba(255,255,255,0.02)]" 
-                                                : "text-[#8e8e93] hover:text-gray-200 border border-transparent"
-                                            }`}
+                                            className={`relative px-6 sm:px-8 py-2 rounded-full text-[15px] font-medium transition-all duration-300 whitespace-nowrap overflow-hidden ${activeTab === tab.id
+                                                    ? "text-white bg-white/[0.04] border border-white/10 shadow-[inset_0_1px_4px_rgba(255,255,255,0.02)]"
+                                                    : "text-[#8e8e93] hover:text-gray-200 border border-transparent"
+                                                }`}
                                         >
                                             {activeTab === tab.id && (
                                                 <div className="absolute bottom-0 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-blue-500/0 via-purple-400 to-indigo-500/0 shadow-[0_0_12px_2px_rgba(168,85,247,0.7)]" />

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import axiosClient from "../../api/axiosClient";
-import { X, Check, ShieldCheck } from "lucide-react";
+import { X, Check, ShieldCheck, Zap, Sparkles } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { motion, useMotionValue, useTransform, useAnimation, animate, AnimatePresence, useSpring } from "framer-motion";
 import MyExperties from "../MyExperties/MyExperties";
+import MatchCardShimmering from "../shimmering/MatchCardShimmering";
 
 export default function GetConnections() {
     const [user, setUser] = useState(null);
@@ -14,77 +15,65 @@ export default function GetConnections() {
 
     const x = useMotionValue(0);
     const dragX = useMotionValue(0);
-    
+
     // Parallax Tilt Values
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
-    const rotateX = useTransform(mouseY, [-300, 300], [10, -10]);
-    const rotateY = useTransform(mouseX, [-300, 300], [-10, 10]);
-    const springRotateX = useSpring(rotateX, { stiffness: 100, damping: 30 });
-    const springRotateY = useSpring(rotateY, { stiffness: 100, damping: 30 });
+    const rotateX = useTransform(mouseY, [-300, 300], [8, -8]);
+    const rotateY = useTransform(mouseX, [-300, 300], [-8, 8]);
+    const springRotateX = useSpring(rotateX, { stiffness: 150, damping: 35 });
+    const springRotateY = useSpring(rotateY, { stiffness: 150, damping: 35 });
 
-    const rotate = useTransform(dragX, [-300, 300], [-45, 45]);
+    const rotate = useTransform(dragX, [-300, 300], [-35, 35]);
 
-    const bg = useTransform(
+    const bgGlow = useTransform(
         dragX,
-        [-300, 0, 300],
-        ["#fecaca", "#ffffff", "#a7f3d0"] // Soft red, white, soft green
+        [-150, 0, 150],
+        ["rgba(239, 68, 68, 0.08)", "rgba(255, 255, 255, 0)", "rgba(34, 197, 94, 0.08)"]
     );
 
     const transformOrigin = useTransform(dragX, (x) =>
         x >= 0 ? "bottom right" : "bottom left"
     );
 
+    const likeScale = useTransform(dragX, [0, 150], [0.8, 1.2]);
+    const nopeScale = useTransform(dragX, [-150, 0], [1.2, 0.8]);
+
+    // Stamp opacities — MUST be top-level hooks, NOT inside JSX
     const likeOpacity = useTransform(dragX, [50, 150], [0, 1]);
     const nopeOpacity = useTransform(dragX, [-150, -50], [1, 0]);
 
     const controls = useAnimation();
+    const SWIPE_THRESHOLD = 180;
 
-    const SWIPE_THRESHOLD = 200;
-
-    const avatar = (img) =>
-        img || "https://cdn-icons-png.flaticon.com/512/219/219969.png";
+    const avatar = (img) => img || "https://cdn-icons-png.flaticon.com/512/219/219969.png";
 
     const fetchNextUser = async () => {
         try {
             const res = await axiosClient.get("/request/user");
             return res.data;
         } catch (err) {
-            if (err.response && err.response.status === 404) {
-                return null;
-            }
             console.error("Error fetching next user:", err);
             return null;
         }
     };
 
-    // Helper to fetch a user distinct from the current one
     const fetchDistinctUser = async (excludeInfo) => {
         let attempts = 0;
         let candidate = null;
-
-        while (attempts < 5) { // Try 5 times to get a different user
+        while (attempts < 3) {
             candidate = await fetchNextUser();
-            if (!candidate) break; // Network error or no users
-
-            // If we have an exclusion and it matches, retry
-            if (excludeInfo && candidate.id === excludeInfo.id) {
-                attempts++;
-                continue;
-            }
-
-            return candidate; // Found a good one
+            if (!candidate || !excludeInfo || candidate.id !== excludeInfo.id) return candidate;
+            attempts++;
         }
-        return null; // Could not find a distinct user
+        return null;
     };
 
     const initializeUsers = async () => {
         setLoading(true);
         const firstUser = await fetchNextUser();
         setUser(firstUser);
-
         if (firstUser) {
-            // Buffer the next user, ensuring it's not the same as the first
             const secondUser = await fetchDistinctUser(firstUser);
             setNextUser(secondUser);
         }
@@ -93,24 +82,20 @@ export default function GetConnections() {
 
     const advanceToNextUser = async () => {
         setShowExpertise(false);
-        controls.set({ x: 0, opacity: 1, y: 100, scale: 0.8 });
+        controls.set({ x: 0, opacity: 1, scale: 0.9, y: 50 });
         dragX.set(0);
         mouseX.set(0);
         mouseY.set(0);
 
         if (nextUser) {
-            const currentUser = nextUser; // The one we are about to show
+            const currentUser = nextUser;
             setUser(currentUser);
             setNextUser(null);
-
-            // Refill buffer in background, excluding the user we just showed
             const newNext = await fetchDistinctUser(currentUser);
             setNextUser(newNext);
         } else {
-            // Fallback - heavy load (no loading spinner to avoid flash)
             const newUser = await fetchNextUser();
             setUser(newUser);
-
             if (newUser) {
                 const second = await fetchDistinctUser(newUser);
                 setNextUser(second);
@@ -137,7 +122,6 @@ export default function GetConnections() {
     };
 
     const [snack, setSnack] = useState("");
-
     const showSnack = (msg) => {
         setSnack(msg);
         setTimeout(() => setSnack(""), 2000);
@@ -146,13 +130,10 @@ export default function GetConnections() {
     const handleIgnore = async () => {
         if (!user || sending) return;
         setSending(true);
-
-        await controls.start({ x: -500, opacity: 0, transition: { duration: 0.3 } });
-
+        await controls.start({ x: -600, opacity: 0, transition: { duration: 0.4, ease: "anticipate" } });
         try {
             await axiosClient.post(`/request/send/ignored/${user.id}`);
-            showSnack("Ignored user");
-
+            showSnack("Ignored");
             await advanceToNextUser();
         } catch (err) {
             console.error("Failed to ignore:", err);
@@ -165,47 +146,13 @@ export default function GetConnections() {
     const handleInterested = async () => {
         if (!user || sending) return;
         setSending(true);
-
         try {
-            // Check if connection already exists
-            let shouldDeleteIgnored = false;
-            try {
-                const res = await axiosClient.get(`/user/connections/${user.id}`);
-                const status = res.data.status || (res.data.connection && res.data.connection.status);
-
-                if (status === "ignored") {
-                    shouldDeleteIgnored = true;
-                } else if (status && status !== "none") {
-                    showSnack("Connection already exists");
-                    setSending(false);
-                    return;
-                }
-            } catch (error) {
-                // If 404 or error, connection likely doesn't exist, proceed
-                if (error.response && error.response.status !== 404) {
-                    console.error("Error checking connection:", error);
-                }
-            }
-
-            if (shouldDeleteIgnored) {
-                try {
-                    await axiosClient.delete(`/user/connections/cancel/${user.id}`);
-                } catch (delErr) {
-                    console.error("Failed to delete ignored connection:", delErr);
-                }
-            }
-
-            await controls.start({ x: 500, opacity: 0, transition: { duration: 0.3 } });
-
+            await controls.start({ x: 600, opacity: 0, transition: { duration: 0.4, ease: "anticipate" } });
             await axiosClient.post(`/request/send/interested/${user.id}`);
-            localStorage.setItem(`connection_status_${user.id}`, "interested");
-            showSnack("Request sent successfully");
-
+            showSnack("Request Sent");
             await advanceToNextUser();
         } catch (err) {
             console.error("Failed to send interest:", err);
-            showSnack("Failed to send request");
-            // Reset animation if failed
             controls.set({ x: 0, opacity: 1, scale: 1, y: 0 });
         } finally {
             setSending(false);
@@ -215,314 +162,172 @@ export default function GetConnections() {
     const handleDragEnd = async (_, info) => {
         const swipe = info.offset.x;
         const velocity = info.velocity.x;
-
-        if (swipe > SWIPE_THRESHOLD || velocity > 800) {
+        if (swipe > SWIPE_THRESHOLD || velocity > 500) {
             handleInterested();
-            return;
-        }
-
-        if (swipe < -SWIPE_THRESHOLD || velocity < -800) {
+        } else if (swipe < -SWIPE_THRESHOLD || velocity < -500) {
             handleIgnore();
-            return;
+        } else {
+            animate(dragX, 0, { type: "spring", stiffness: 400, damping: 25 });
         }
-
-        animate(dragX, 0, { type: "spring", stiffness: 300, damping: 20 });
     };
+
+    if (loading) return <div className="grid place-items-center py-20"><MatchCardShimmering /></div>;
 
     return (
         <motion.div
-            style={{ backgroundColor: bg }}
-            className="
-                grid place-items-center
-                pt-8 pb-8
-                px-4
-                overflow-hidden
-                min-h-[500px]
-                rounded-3xl
-                transition-colors duration-200
-                relative
-                w-full
-            "
+            style={{ backgroundColor: bgGlow }}
+            className="w-full relative min-h-[700px] grid place-items-center pt-8 pb-12 px-4 overflow-hidden rounded-[40px] transition-colors duration-500 bg-[#16161f]"
         >
-            {/* Loading Overlay */}
-            {loading && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-black/50 backdrop-blur-sm">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black dark:border-white"></div>
-                </div>
-            )}
-
-            {/* No User State */}
-            {!loading && !user && (
-                <div className="flex flex-col items-center justify-center py-20 text-neutral-500 z-10 col-start-1 row-start-1">
-                    <p>No more suggestions available.</p>
-                    <button
-                        onClick={initializeUsers}
-                        className="mt-4 text-blue-500 hover:underline"
-                    >
-                        Refresh
-                    </button>
-                </div>
-            )}
-
-            {/* User Card */}
             <AnimatePresence>
-                {!loading && user && (
-                    <div 
-                        className="relative w-full max-w-[24rem] sm:max-w-md perspective-1000 z-20 group"
-                        onMouseMove={handleMouseMove}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        {/* Outer Glow */}
-                        <div className="absolute -inset-4 bg-gradient-to-tr from-blue-500/10 via-purple-500/5 to-transparent rounded-[40px] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-glow-pulse" />
+                {!user ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 text-neutral-500 text-center">
+                        <Sparkles size={48} className="mb-4 text-neutral-700" />
+                        <p className="text-xl font-black uppercase tracking-widest italic">All connections evaluated.</p>
+                        <button onClick={initializeUsers} className="mt-6 px-10 py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl">Re-Init Range</button>
+                    </motion.div>
+                ) : (
+                    <div className="relative w-full max-w-[24rem] sm:max-w-md z-20 group" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
+                        {/* Dynamic Background Words */}
+                        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-5 transition-opacity group-hover:opacity-10">
+                            <span className="absolute top-[20%] left-[-10%] text-6xl font-black text-white italic -rotate-12">DISCOVERY</span>
+                            <span className="absolute bottom-[20%] right-[-10%] text-6xl font-black text-white italic rotate-12">NETWORK</span>
+                        </div>
 
                         <motion.div
                             key={user.id}
                             drag="x"
-                            onDrag={(e, info) => dragX.set(info.offset.x)}
                             onDragEnd={handleDragEnd}
                             whileTap={{ scale: 0.98 }}
-                            variants={{
-                                hidden: { scale: 0.8, opacity: 0, y: 100, x: 0 },
-                                visible: {
-                                    scale: 1,
-                                    opacity: 1,
-                                    y: 0,
-                                    x: 0,
-                                    rotate: 0,
-                                    transition: { type: "spring", stiffness: 260, damping: 20 }
-                                },
-                            }}
-                            initial="hidden"
-                            animate={sending ? controls : "visible"}
-                            style={{ 
-                                x: dragX, 
-                                rotate, 
-                                rotateX: springRotateX, 
-                                rotateY: springRotateY,
-                                transformOrigin, 
-                                touchAction: "none" 
-                            }}
-                            className="
-                                w-full
-                                bg-white/60 dark:bg-black/60
-                                backdrop-blur-3xl
-                                border border-white/40 dark:border-white/20
-                                shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]
-                                rounded-[34px]
-                                relative
-                                cursor-grab active:cursor-grabbing
-                                select-none overflow-hidden
-                                flex flex-col
-                                transition-shadow duration-500
-                                group-hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.6)]
-                            "
+                            animate={sending ? controls : { scale: 1, opacity: 1, y: 0, x: 0 }}
+                            initial={{ scale: 0.9, opacity: 0, y: 50 }}
+                            style={{ x: dragX, rotate, rotateX: springRotateX, rotateY: springRotateY, transformOrigin, touchAction: "none" }}
+                            className="w-full relative rounded-[32px] overflow-hidden flex flex-col cursor-grab active:cursor-grabbing h-[520px] border border-white/[0.07] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.7)]"
                         >
-                        {/* Animated Mesh Gradient Header */}
-                        <div className="absolute top-0 left-0 w-full h-44 overflow-hidden pointer-events-none opacity-50">
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 via-purple-600/20 to-transparent animate-mesh" />
-                            <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1),transparent_50%)] animate-mesh" style={{ animationDelay: '-5s' }} />
-                        </div>
-                        
-                        {/* Aesthetic Floating Background Words */}
-                        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20 dark:opacity-10">
-                            <motion.span 
-                                animate={{ y: [0, -10, 0], x: [0, 5, 0] }}
-                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute top-[20%] left-[-10%] text-4xl font-black tracking-tighter text-neutral-400 dark:text-white uppercase rotate-[-15deg]"
-                            >
-                                Network
-                            </motion.span>
-                            <motion.span 
-                                animate={{ y: [0, 10, 0], x: [0, -5, 0] }}
-                                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                                className="absolute bottom-[30%] right-[-5%] text-5xl font-black tracking-tighter text-neutral-400 dark:text-white uppercase rotate-[10deg]"
-                            >
-                                Growth
-                            </motion.span>
-                            <motion.span 
-                                animate={{ y: [0, -8, 0], scale: [1, 1.05, 1] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                                className="absolute top-[50%] left-[5%] text-2xl font-black tracking-widest text-neutral-400 dark:text-white uppercase opacity-50"
-                            >
-                                Explore
-                            </motion.span>
-                            <motion.span 
-                                animate={{ rotate: [5, -5, 5] }}
-                                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute bottom-[5%] left-[20%] text-3xl font-black text-neutral-400 dark:text-white uppercase tracking-tighter opacity-30"
-                            >
-                                Connect
-                            </motion.span>
-                        </div>
+                            {/* Pure dark glassmorphism background */}
+                            <div className="absolute inset-0 bg-[#0d0d0f] z-0" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/50 via-transparent to-violet-950/30 z-0" />
 
-                        {/* Visual Indicators (Stamps) */}
-                        <motion.div
-                            style={{ opacity: likeOpacity }}
-                            className="absolute top-8 left-8 z-50 pointer-events-none"
-                        >
-                            <div className="bg-emerald-500 text-white rounded-2xl px-6 py-2 shadow-lg shadow-emerald-500/30 -rotate-12 border-2 border-white/20">
-                                <span className="text-2xl font-black tracking-tight uppercase">LIKE</span>
-                            </div>
-                        </motion.div>
+                            {/* Ambient top glow */}
+                            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-40 bg-violet-600/20 rounded-full blur-[60px] pointer-events-none z-0" />
 
-                        <motion.div
-                            style={{ opacity: nopeOpacity }}
-                            className="absolute top-8 right-8 z-50 pointer-events-none"
-                        >
-                            <div className="bg-red-500 text-white rounded-2xl px-6 py-2 shadow-lg shadow-red-500/30 rotate-12 border-2 border-white/20">
-                                <span className="text-2xl font-black tracking-tight uppercase">NOPE</span>
-                            </div>
-                        </motion.div>
+                            {/* Swipe Stamps */}
+                            <motion.div style={{ opacity: likeOpacity }} className="absolute top-6 left-5 z-50 -rotate-12 bg-emerald-500 shadow-[0_0_24px_rgba(34,197,94,0.6)] text-white px-5 py-1.5 rounded-xl font-black text-sm tracking-[0.1em] uppercase border border-emerald-400/30 pointer-events-none">LIKE</motion.div>
+                            <motion.div style={{ opacity: nopeOpacity }} className="absolute top-6 right-5 z-50 rotate-12 bg-red-500 shadow-[0_0_24px_rgba(239,68,68,0.6)] text-white px-5 py-1.5 rounded-xl font-black text-sm tracking-[0.1em] uppercase border border-red-400/30 pointer-events-none">NOPE</motion.div>
 
-                        {/* Card Content */}
-                        <div className="relative z-10 p-8 flex flex-col h-full">
-                            {/* Header Section */}
-                                <div className="flex flex-col items-center mb-6">
-                                    <motion.div 
-                                        className="relative p-1.5 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 shadow-xl mb-4 group-hover:shadow-blue-500/20 transition-shadow duration-500"
-                                        whileHover={{ scale: 1.05 }}
-                                    >
-                                        <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-white/20 relative">
-                                            <img 
-                                                src={avatar(user.imageUrl)} 
-                                                className="w-full h-full object-cover" 
-                                                draggable="false"
-                                            />
-                                            {/* Online Indicator */}
-                                            <div className="absolute bottom-1 right-2 w-5 h-5 bg-emerald-500 border-2 border-white dark:border-black rounded-full" />
-                                        </div>
-                                    </motion.div>
-                                    
-                                    <div className="text-center">
-                                        <div className="flex items-center justify-center gap-1.5">
-                                            <h2 className="text-3xl font-black text-neutral-900 dark:text-white tracking-tight leading-tight drop-shadow-sm">
-                                                {user.firstname} {user.lastname}
-                                            </h2>
-                                            <ShieldCheck size={24} className="text-blue-500 fill-blue-500/10" />
-                                        </div>
-                                        <div className="flex items-center justify-center gap-2 mt-1">
-                                            <span className="text-lg text-neutral-700 dark:text-neutral-300 font-bold">
-                                                {user.age ? `${user.age}` : "New"}
-                                            </span>
-                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                                            <span className="text-[11px] text-neutral-600 dark:text-neutral-400 uppercase tracking-[0.2em] font-black">Years Old</span>
+                            {/* Content */}
+                            <div className="relative z-10 flex flex-col items-center h-full pt-10 px-7 pb-7">
+
+                                {/* Large nbulela glow avatar */}
+                                <div className="relative mb-6 shrink-0">
+                                    {/* Nebula rings */}
+                                    <div className="absolute inset-[-12px] rounded-full bg-gradient-to-tr from-cyan-500/30 via-violet-500/40 to-pink-500/30 blur-[18px] animate-pulse" />
+                                    <div className="absolute inset-[-6px] rounded-full bg-gradient-to-tl from-blue-400/20 via-purple-500/30 to-fuchsia-400/20 blur-[10px]" />
+
+                                    {/* Avatar ring */}
+                                    <div className="w-32 h-32 rounded-full p-[2px] bg-gradient-to-tr from-cyan-400 via-violet-500 to-fuchsia-500 shadow-[0_0_30px_rgba(139,92,246,0.4)] relative z-10">
+                                        <div className="w-full h-full rounded-full bg-[#0d0d0f] p-[2px]">
+                                            <div className="w-full h-full rounded-full overflow-hidden">
+                                                <img src={avatar(user.imageUrl)} alt="user" className="w-full h-full object-cover" draggable="false" />
+                                            </div>
                                         </div>
                                     </div>
+
+                                    {/* Online dot */}
+                                    <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-400 border-[3px] border-[#0d0d0f] rounded-full z-20 shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
                                 </div>
 
-                            {/* Skills Section */}
-                            {user.expertise?.skills && user.expertise.skills.length > 0 && (
-                                <div className="mb-6">
-                                    <div className="flex flex-wrap justify-center gap-2">
-                                            {user.expertise.skills.slice(0, 4).map((skill, i) => (
-                                                <span 
-                                                    key={skill + i} 
-                                                    className="px-3.5 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 backdrop-blur-md text-[10px] font-black text-neutral-800 dark:text-neutral-100 uppercase tracking-widest border border-black/5 dark:border-white/10 shadow-sm transition-all hover:bg-white/20 hover:scale-105"
-                                                >
-                                                    {skill}
-                                                </span>
-                                            ))}
-                                    </div>
+                                {/* Name — editorial large */}
+                                <div className="text-center mb-1">
+                                    <h2 className="text-[28px] font-black text-white tracking-[0.05em] uppercase leading-none" style={{ fontVariant: 'small-caps' }}>
+                                        {user.firstname} {user.lastname}
+                                    </h2>
                                 </div>
-                            )}
 
-                            {/* Bio/About Section */}
-                            <div className="flex-grow text-center mb-10">
-                                <div className="inline-block relative">
-                                    <p className="text-[15px] font-medium text-neutral-800 dark:text-neutral-200 leading-relaxed line-clamp-3 italic px-4 drop-shadow-sm">
-                                        "{user.expertise?.aboutYou || user.expertise?.description || "Looking for great connections and opportunities. Let's build something amazing together!"}"
+                                {/* Tags row */}
+                                <div className="flex items-center gap-2 mb-5">
+                                    {user.expertise?.skills?.[0] && (
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-400/90 bg-amber-400/10 border border-amber-400/20 px-2.5 py-0.5 rounded-full">
+                                            {user.expertise.skills[0]}
+                                        </span>
+                                    )}
+                                    {user.age && (
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-300/80 bg-violet-500/10 border border-violet-400/20 px-2.5 py-0.5 rounded-full">
+                                            {user.age} Yrs
+                                        </span>
+                                    )}
+                                    <ShieldCheck size={16} className="text-blue-400 ml-0.5" />
+                                </div>
+
+                                {/* Bio */}
+                                <div className="flex-1 flex items-center justify-center w-full px-3">
+                                    <p className="text-[13px] text-neutral-400 leading-[1.65] italic text-center line-clamp-3">
+                                        &ldquo;{user.expertise?.aboutYou || "Looking for meaningful connections and opportunities to grow together."}&rdquo;
                                     </p>
                                 </div>
-                            </div>
 
-                            {/* Actions Group */}
-                            <div className="mt-auto space-y-6">
-                                <div className="flex justify-center">
-                                    <button
-                                        onClick={() => setShowExpertise(true)}
-                                        className="group relative px-8 py-3 rounded-full overflow-hidden transition-all active:scale-95 shadow-lg border border-white/20"
-                                    >
-                                        <div className="absolute inset-0 bg-neutral-900 dark:bg-white group-hover:bg-black dark:group-hover:bg-neutral-200 transition-colors" />
-                                        <span className="relative z-10 text-[11px] font-black text-white dark:text-black uppercase tracking-[0.2em]">
-                                            View Full Expertise
-                                        </span>
-                                    </button>
-                                </div>
+                                {/* Actions — single row */}
+                                <div className="w-full mt-4 flex items-center justify-between gap-3" onPointerDown={(e) => e.stopPropagation()}>
 
-                                <div
-                                    className="flex items-center gap-8 w-full justify-center"
-                                    onPointerDown={(e) => e.stopPropagation()}
-                                >
-                                    <button
+                                    {/* NOPE — most highlighted */}
+                                    <motion.button
+                                        style={{ scale: nopeScale }}
                                         onClick={handleIgnore}
                                         disabled={sending}
-                                        className="w-16 h-16 flex items-center justify-center rounded-full bg-white dark:bg-neutral-900 border-2 border-neutral-100 dark:border-neutral-800 text-neutral-400 hover:text-red-500 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-300 shadow-xl hover:shadow-red-500/20 hover:-translate-y-1 disabled:opacity-50"
+                                        whileHover={{ scale: 1.12, boxShadow: "0 0 24px rgba(239,68,68,0.4)" }}
+                                        whileTap={{ scale: 0.82 }}
+                                        className="w-14 h-14 flex items-center justify-center rounded-full text-red-400 border border-red-500/40 bg-red-500/10 transition-all duration-200 disabled:opacity-40 cursor-pointer shadow-[0_0_12px_rgba(239,68,68,0.2)]"
                                     >
-                                        <X size={30} strokeWidth={2.5} />
+                                        <X size={22} strokeWidth={2.5} />
+                                    </motion.button>
+
+                                    {/* View Intel — small pill, right-leaning */}
+                                    <button
+                                        onClick={() => setShowExpertise(true)}
+                                        className="px-4 py-2 rounded-lg text-[8px] font-black uppercase tracking-[0.3em] text-violet-400/80 hover:text-violet-200 transition-all duration-200 active:scale-95"
+                                        style={{
+                                            background: "rgba(139,92,246,0.08)",
+                                            border: "1px solid rgba(139,92,246,0.25)",
+                                        }}
+                                    >
+                                        View Intel
                                     </button>
 
-                                    <button
+                                    {/* LIKE */}
+                                    <motion.button
+                                        style={{ scale: likeScale }}
                                         onClick={handleInterested}
                                         disabled={sending}
-                                        className="w-20 h-20 flex items-center justify-center rounded-full bg-black dark:bg-white text-white dark:text-black hover:scale-110 active:scale-95 transition-all duration-300 shadow-[0_20px_40px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_40px_rgba(255,255,255,0.15)] hover:shadow-blue-500/30 disabled:opacity-50 relative group"
+                                        whileHover={{ scale: 1.12, boxShadow: "0 0 35px rgba(255,255,255,0.35)" }}
+                                        whileTap={{ scale: 0.82 }}
+                                        className="w-14 h-14 flex items-center justify-center rounded-full bg-white text-black shadow-[0_4px_25px_rgba(255,255,255,0.2)] disabled:opacity-40 cursor-pointer"
                                     >
-                                        <div className="absolute inset-0 rounded-full bg-blue-500 opacity-0 group-hover:opacity-30 blur-2xl transition-opacity animate-pulse" />
-                                        <Check size={40} strokeWidth={3} className="relative z-10" />
-                                    </button>
+                                        <Check size={22} strokeWidth={3} />
+                                    </motion.button>
                                 </div>
-                            </div>
-                        </div>
 
-                            {/* Bottom Decoration */}
-                            <div className="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-30" />
+                            </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
 
-            {/* EXPERTISE MODAL */}
             <AnimatePresence>
                 {showExpertise && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="bg-white dark:bg-neutral-900 w-full max-w-4xl max-h-[85vh] rounded-3xl overflow-hidden shadow-2xl relative flex flex-col"
-                        >
-                            <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center bg-white dark:bg-neutral-900 z-10">
-                                <h3 className="text-lg font-bold text-black dark:text-white">User Expertise</h3>
-                                <button
-                                    onClick={() => setShowExpertise(false)}
-                                    className="p-2 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
-                                >
-                                    <X size={20} className="text-black dark:text-white" />
-                                </button>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="bg-neutral-900 w-full max-w-4xl max-h-[85vh] rounded-[40px] overflow-hidden shadow-3xl relative flex flex-col border border-white/5">
+                            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-neutral-900/50 backdrop-blur-md">
+                                <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">Full Identity Intel</h3>
+                                <button onClick={() => setShowExpertise(false)} className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors"><X size={20} className="text-white" /></button>
                             </div>
-                            <div className="flex-1 overflow-y-auto p-0">
-                                <MyExperties expertise={user?.expertise} />
-                            </div>
+                            <div className="flex-1 overflow-y-auto"><MyExperties expertise={user?.expertise} /></div>
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* SNACKBAR */}
             <AnimatePresence>
                 {snack && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        className="fixed bottom-24 translate-x-1 z-[100]
-                                    px-6 py-3 bg-black/90 text-white text-sm font-medium
-                                    rounded-full shadow-2xl pointer-events-none whitespace-nowrap"
-                    >
+                    <motion.div initial={{ opacity: 0, y: 30, x: "-50%" }} animate={{ opacity: 1, y: 0, x: "-50%" }} exit={{ opacity: 0, y: 30, x: "-50%" }} className="fixed bottom-12 left-1/2 z-[100] px-10 py-5 bg-white text-black text-[10px] font-black uppercase italic tracking-[0.2em] rounded-2xl shadow-3xl pointer-events-none border border-white/20">
                         {snack}
                     </motion.div>
                 )}

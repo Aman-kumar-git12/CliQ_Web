@@ -30,10 +30,25 @@ const LikesHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMouseLe
 
     if (!anchorRect) return null;
 
-    // Use relative positioning logic
-    const showBelow = anchorRect.top < 300; // Increased threshold for better upward positioning
-    const top = showBelow ? anchorRect.bottom + 10 : anchorRect.top - 10;
+    // Robust Viewport Logic
+    const estHeight = 250; // Estimated height for likes preview
+    const spaceBelow = window.innerHeight - anchorRect.viewportTop - anchorRect.height;
+    const spaceAbove = anchorRect.viewportTop;
+    
+    // Choose direction based on more available space or if it fits
+    const showBelow = spaceBelow > spaceAbove || spaceBelow > estHeight;
+    
+    let top = showBelow ? anchorRect.bottom + 10 : anchorRect.top - 10;
     const left = anchorRect.left + (anchorRect.width / 2);
+
+    // Clamping
+    if (!showBelow) {
+        const viewportTopPos = anchorRect.viewportTop - 10 - estHeight;
+        if (viewportTopPos < 60) {
+            const diff = 60 - viewportTopPos;
+            top += diff;
+        }
+    }
 
     return (
         <AnimatePresence>
@@ -55,9 +70,7 @@ const LikesHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMouseLe
                     onMouseEnter={onMouseEnter}
                     onMouseLeave={onMouseLeave}
                 >
-                    {showBelow && (
-                        <div className="w-4 h-4 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl border-t border-l border-neutral-200 dark:border-neutral-800 rotate-45 mx-auto -mb-2 z-[1] shadow-2xl relative top-2"></div>
-                    )}
+                    {/* Arrow removed for "perfect box" look */}
                     
                     <div className="bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl overflow-hidden p-3">
                         <div className="flex items-center gap-2 mb-3 border-b border-neutral-100 dark:border-neutral-800 pb-2">
@@ -92,9 +105,7 @@ const LikesHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMouseLe
                         )}
                     </div>
                     
-                    {!showBelow && (
-                        <div className="w-4 h-4 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl border-r border-b border-neutral-200 dark:border-neutral-800 rotate-45 mx-auto -mt-2 z-[-1] shadow-2xl"></div>
-                    )}
+                    {/* Arrow removed for "perfect box" look */}
                 </motion.div>
             )}
         </AnimatePresence>
