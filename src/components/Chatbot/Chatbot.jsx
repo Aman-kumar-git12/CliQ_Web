@@ -162,7 +162,7 @@ export default function Chatbot() {
 
             // 2. Stream generation
             // The python backend config expects unique strings to avoid memory collisions.
-            const llmBaseUrl = import.meta.env.VITE_LLM_API_URL || 'http://localhost:8000';
+            const llmBaseUrl = import.meta.env.VITE_LLM_API_URL;
             const response = await fetch(`${llmBaseUrl}/api/chat/stream`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -343,26 +343,58 @@ export default function Chatbot() {
                             /* Chat Body View */
                             <>
                                 <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-4 bg-[#0d0d12]">
-                                    {messages.map((msg) => (
-                                        <div 
-                                            key={msg.id} 
-                                            className={`p-3 max-w-[85%] rounded-xl text-[13.5px] leading-relaxed shadow-sm ${
-                                                msg.role === 'user' 
-                                                    ? 'bg-violet-600 text-white rounded-tr-sm self-end shadow-violet-900/20'
-                                                    : 'bg-white/5 border border-white/5 text-neutral-300 rounded-tl-sm self-start whitespace-pre-wrap'
-                                            }`}
-                                        >
-                                            {msg.role === 'user' ? (
-                                                msg.text
-                                            ) : (
-                                                <div className="prose prose-invert prose-p:leading-relaxed prose-p:mb-2 last:prose-p:mb-0 prose-strong:text-white prose-a:text-violet-400 prose-ul:list-disc prose-ul:pl-4 prose-ol:list-decimal prose-ol:pl-4 max-w-none text-[13.5px]">
-                                                    <ReactMarkdown>
-                                                        {msg.text}
-                                                    </ReactMarkdown>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                                    {messages.map((msg) => {
+                                        // Try to parse JSON step responses
+                                        let parsedStep = null;
+                                        if (msg.role === 'ai' && msg.text) {
+                                            try {
+                                                // Find first JSON object in the text (handles streaming artifacts)
+                                                const match = msg.text.match(/\{[\s\S]*"steps"[\s\S]*\}/);
+                                                if (match) {
+                                                    const parsed = JSON.parse(match[0]);
+                                                    if (parsed.title && Array.isArray(parsed.steps)) {
+                                                        parsedStep = parsed;
+                                                    }
+                                                }
+                                            } catch (e) { /* not JSON, render normally */ }
+                                        }
+
+                                        return (
+                                            <div
+                                                key={msg.id}
+                                                className={`p-3 max-w-[85%] rounded-xl text-[13.5px] leading-relaxed shadow-sm ${
+                                                    msg.role === 'user'
+                                                        ? 'bg-violet-600 text-white rounded-tr-sm self-end shadow-violet-900/20'
+                                                        : 'bg-white/5 border border-white/5 text-neutral-300 rounded-tl-sm self-start whitespace-pre-wrap'
+                                                }`}
+                                            >
+                                                {msg.role === 'user' ? (
+                                                    msg.text
+                                                ) : parsedStep ? (
+                                                    <div className="flex flex-col gap-2">
+                                                        <p className="text-white font-semibold text-[13.5px]">{parsedStep.title}</p>
+                                                        <ol className="flex flex-col gap-2 mt-1">
+                                                            {parsedStep.steps.map((step, i) => (
+                                                                <li key={i} className="flex items-start gap-2">
+                                                                    <span className="min-w-[22px] h-[22px] rounded-full bg-violet-600/80 text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                                        {i + 1}
+                                                                    </span>
+                                                                    <span className="text-neutral-300 text-[13px] leading-relaxed">{step}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ol>
+                                                    </div>
+                                                ) : (
+                                                    <div className="prose prose-invert prose-p:leading-relaxed prose-p:mb-2 last:prose-p:mb-0 prose-strong:text-white prose-a:text-violet-400 prose-ul:list-disc prose-ul:pl-4 prose-ol:list-decimal prose-ol:pl-4 max-w-none text-[13.5px]">
+                                                        <ReactMarkdown>
+                                                            {msg.text}
+                                                        </ReactMarkdown>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+
                                     {isLoading && (
                                         <div className="bg-white/5 border border-white/5 rounded-xl rounded-tl-sm p-4 max-w-[85%] self-start flex gap-1.5 items-center">
                                             <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" />
