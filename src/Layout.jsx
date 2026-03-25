@@ -24,7 +24,11 @@ export default function Layout() {
             <Sidebar />
 
             <main className={`w-full md:pl-28 md:pt-0 min-h-screen ${pathname.startsWith("/chat") ? "" : "pt-16"}`}>
-                <div className={`${pathname === "/home" ? "max-w-5xl" : "max-w-2xl"} mx-auto border-x border-neutral-200 dark:border-neutral-800 min-h-screen transition-all duration-500`}>
+                <div className={`${
+                    pathname === "/home" ? "max-w-5xl" : 
+                    pathname === "/my-experties" ? "max-w-none" : 
+                    "max-w-2xl"
+                } mx-auto ${pathname === "/my-experties" ? "" : "border-x border-neutral-200 dark:border-neutral-800"} min-h-screen transition-all duration-500`}>
                     <Outlet />
                 </div>
             </main>

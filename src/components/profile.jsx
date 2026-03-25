@@ -247,6 +247,18 @@ export default function ProfilePage() {
         window.scrollTo(0, 0);
     }, []);
 
+    useEffect(() => {
+        const isModalOpen = showExpertiseModal || showImageViewer || showLogoutPopup || showUploadConfirm;
+        if (isModalOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [showExpertiseModal, showImageViewer, showLogoutPopup, showUploadConfirm]);
+
     if (loading)
         return <ProfileShimmering />;
 
@@ -258,7 +270,7 @@ export default function ProfilePage() {
             {/* Background Gradients (Subtle Dark Glow) */}
             <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-900/40 rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="w-full max-w-4xl mx-auto pt-6 px-4 pb-20 relative z-10">
+            <div className={`w-full max-w-2xl mx-auto pt-6 px-4 pb-20 relative z-10 transition-all duration-500`}>
 
                 {/* SOLID DARK PROFILE CARD */}
                 <div className="bg-[#111111] border border-white/5 shadow-2xl rounded-[28px]">

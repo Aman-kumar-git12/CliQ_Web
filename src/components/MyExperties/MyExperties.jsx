@@ -12,11 +12,13 @@ export default function MyExperties({ expertise }) {
     const format = expertise.format || 1;
 
     return (
-        <>
-            {format === 1 && <Expertise1 expertise={expertise} />}
-            {format === 2 && <Expertise2 expertise={expertise} />}
-            {format === 3 && <Expertise3 expertise={expertise} />}
-            {format === 4 && <Expertise4 expertise={expertise} />}
-        </>
+        <div className="w-full max-h-[800px] overflow-y-auto overflow-x-hidden custom-scrollbar rounded-2xl">
+            <div className="origin-top transition-transform duration-500 transform-gpu">
+                {format === 1 && <Expertise1 expertise={expertise} />}
+                {format === 2 && <Expertise2 expertise={expertise} />}
+                {format === 3 && <Expertise3 expertise={expertise} />}
+                {format === 4 && <Expertise4 expertise={expertise} />}
+            </div>
+        </div>
     );
 }

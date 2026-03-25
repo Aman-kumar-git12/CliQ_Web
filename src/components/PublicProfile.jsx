@@ -204,7 +204,7 @@ const PublicProfile = () => {
             <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-800/10 dark:bg-neutral-800/20 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-900/5 dark:bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="w-full max-w-4xl mx-auto pt-4 px-4 pb-20 relative z-10">
+            <div className={`w-full ${activeTab === "expertise" ? "max-w-7xl" : "max-w-5xl"} mx-auto pt-4 px-4 pb-20 relative z-10 transition-all duration-500`}>
                 <button
                     onClick={() => navigate(-1)}
                     className="flex md:hidden items-center gap-2 text-gray-500 hover:text-black dark:hover:text-white mb-4 transition-colors p-2 bg-white/50 dark:bg-black/50 backdrop-blur-md rounded-full w-fit group"
