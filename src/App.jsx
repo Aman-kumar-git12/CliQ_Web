@@ -75,7 +75,7 @@ function App() {
               <Route path="/find" element={<Connections />}>
                 <Route index element={<Navigate to="findpeople" replace />} />
                 <Route path="findpeople" element={<FindPeople />} />
-                <Route path="getconnection" element={<GetConnections />} />
+                <Route path="getconnection/:panel?" element={<GetConnections />} />
               </Route>
               <Route path="/requests" element={<ConnectionsRequest />} />
 
