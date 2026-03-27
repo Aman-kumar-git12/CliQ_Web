@@ -1,262 +1,37 @@
-import { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, Plus, Flag, Bookmark } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import axiosClient from "../api/axiosClient";
-import { useFeedContext } from "../context/FeedContext";
+import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, Flag, Bookmark } from "lucide-react";
+import { Link } from "react-router-dom";
 import Toastbar from "./Chat/Toastbar";
 import ReportModal from "./ReportModal";
 import ProfileHoverCard from "./Post/ProfileHoverCard";
 import CommentsHoverCard from "./Post/CommentsHoverCard";
 import LikesHoverCard from "./Post/LikesHoverCard";
-import { useUserContext } from "../context/userContext";
+
+// Custom Hook
+import { usePostcard } from "./usePostcard";
 
 const PostCard = ({ post }) => {
-    const navigate = useNavigate();
-    const containerRef = useRef(null);
-    const { updateFeedPost } = useFeedContext();
-    const { user: currentUser } = useUserContext();
-    const [liked, setLiked] = useState(post?.isLiked || false);
-    const [likesCount, setLikesCount] = useState(post?.likes || 0);
-    const [isLiking, setIsLiking] = useState(false);
-
-    // Sync local state with props (Important for navigation back/forth)
-    useEffect(() => {
-        setLiked(post?.isLiked || false);
-        setLikesCount(post?.likes || 0);
-    }, [post]);
-
-    // Toast states
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState("");
-    const [showMenu, setShowMenu] = useState(false);
-    const [showReportModal, setShowReportModal] = useState(false);
-    const [isReporting, setIsReporting] = useState(false);
-    const [reported, setReported] = useState(post?.isReported || false);
-    const [activeTooltip, setActiveTooltip] = useState(null);
-    const tooltipTimeoutRef = useRef(null);
-
-    // Hover Card State
-    const [hoverUserId, setHoverUserId] = useState(null);
-    const [showHoverCard, setShowHoverCard] = useState(false);
-    const [hoverAnchorRect, setHoverAnchorRect] = useState(null);
-    const hoverTimeoutRef = useRef(null);
-
-    const handleProfileMouseEnter = (e, userId) => {
-        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-        const rect = e.currentTarget.getBoundingClientRect();
-        const parentRect = containerRef.current.getBoundingClientRect();
-
-        hoverTimeoutRef.current = setTimeout(() => {
-            setHoverUserId(userId);
-            setHoverAnchorRect({
-                top: rect.top - parentRect.top,
-                bottom: rect.bottom - parentRect.top,
-                left: rect.left - parentRect.left,
-                right: rect.right - parentRect.left,
-                viewportTop: rect.top,
-                width: rect.width,
-                height: rect.height
-            });
-            setShowHoverCard(true);
-        }, 500);
-    };
-
-    const handleProfileMouseLeave = () => {
-        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-        hoverTimeoutRef.current = setTimeout(() => {
-            setShowHoverCard(false);
-        }, 200); // Small delay to allow moving mouse to the card
-    };
-
-    const handleCardMouseEnter = () => {
-        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    };
-
-    const handleCardMouseLeave = () => {
-        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-        setShowHoverCard(false);
-    };
-
-    // Comments Hover Card State
-    const [showCommentsHover, setShowCommentsHover] = useState(false);
-    const [commentsAnchorRect, setCommentsAnchorRect] = useState(null);
-    const commentsHoverTimeoutRef = useRef(null);
-
-    const handleCommentsMouseEnter = (e) => {
-        if (commentsHoverTimeoutRef.current) clearTimeout(commentsHoverTimeoutRef.current);
-        const rect = e.currentTarget.getBoundingClientRect();
-        const parentRect = containerRef.current.getBoundingClientRect();
-
-        commentsHoverTimeoutRef.current = setTimeout(() => {
-            setCommentsAnchorRect({
-                top: rect.top - parentRect.top,
-                bottom: rect.bottom - parentRect.top,
-                left: rect.left - parentRect.left,
-                right: rect.right - parentRect.left,
-                viewportTop: rect.top,
-                width: rect.width,
-                height: rect.height
-            });
-            setShowCommentsHover(true);
-        }, 500);
-    };
-
-    const handleCommentsMouseLeave = () => {
-        if (commentsHoverTimeoutRef.current) clearTimeout(commentsHoverTimeoutRef.current);
-        commentsHoverTimeoutRef.current = setTimeout(() => {
-            setShowCommentsHover(false);
-        }, 200);
-    };
-
-    const handleCommentsCardMouseEnter = () => {
-        if (commentsHoverTimeoutRef.current) clearTimeout(commentsHoverTimeoutRef.current);
-    };
-
-    const handleCommentsCardMouseLeave = () => {
-        if (commentsHoverTimeoutRef.current) clearTimeout(commentsHoverTimeoutRef.current);
-        setShowCommentsHover(false);
-    };
-
-    // Likes Hover Card State
-    const [showLikesHover, setShowLikesHover] = useState(false);
-    const [likesAnchorRect, setLikesAnchorRect] = useState(null);
-    const likesHoverTimeoutRef = useRef(null);
-
-    const handleLikesMouseEnter = (e) => {
-        if (likesHoverTimeoutRef.current) clearTimeout(likesHoverTimeoutRef.current);
-        const rect = e.currentTarget.getBoundingClientRect();
-        const parentRect = containerRef.current.getBoundingClientRect();
-
-        likesHoverTimeoutRef.current = setTimeout(() => {
-            setLikesAnchorRect({
-                top: rect.top - parentRect.top,
-                bottom: rect.bottom - parentRect.top,
-                left: rect.left - parentRect.left,
-                right: rect.right - parentRect.left,
-                viewportTop: rect.top,
-                width: rect.width,
-                height: rect.height
-            });
-            setShowLikesHover(true);
-        }, 500);
-    };
-
-    const handleLikesMouseLeave = () => {
-        if (likesHoverTimeoutRef.current) clearTimeout(likesHoverTimeoutRef.current);
-        likesHoverTimeoutRef.current = setTimeout(() => {
-            setShowLikesHover(false);
-        }, 200);
-    };
-
-    const handleLikesCardMouseEnter = () => {
-        if (likesHoverTimeoutRef.current) clearTimeout(likesHoverTimeoutRef.current);
-    };
-
-    const handleLikesCardMouseLeave = () => {
-        if (likesHoverTimeoutRef.current) clearTimeout(likesHoverTimeoutRef.current);
-        setShowLikesHover(false);
-    };
-
-    const handleMouseEnter = (type) => {
-        if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
-        setActiveTooltip(type);
-        tooltipTimeoutRef.current = setTimeout(() => {
-            setActiveTooltip(null);
-        }, 1500);
-    };
-
-    const handleMouseLeave = () => {
-        if (tooltipTimeoutRef.current) clearTimeout(tooltipTimeoutRef.current);
-        setActiveTooltip(null);
-    };
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (showMenu && !event.target.closest('.post-menu-container')) {
-                setShowMenu(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showMenu]);
+    const {
+        liked, likesCount, showToast, setShowToast, toastMessage, showMenu, setShowMenu,
+        showReportModal, setShowReportModal, isReporting, reported,
+        hoverUserId, showHoverCard, hoverAnchorRect,
+        showCommentsHover, commentsAnchorRect,
+        showLikesHover, likesAnchorRect,
+        containerRef, currentUser, navigate, 
+        
+        handleProfileMouseEnter, handleProfileMouseLeave, handleCardMouseEnter,
+        handleCommentsMouseEnter, handleCommentsMouseLeave, handleCommentsCardMouseEnter,
+        handleLikesMouseEnter, handleLikesMouseLeave, handleLikesCardMouseEnter,
+        handleMouseEnterTooltip, handleMouseLeaveTooltip,
+        handleLike, handleActionClick, handleReportPost
+    } = usePostcard(post);
 
     if (!post) return null;
 
-    const handleLike = async (e) => {
-        e.preventDefault();
-        e.stopPropagation(); // Prevent navigating to post page
-
-        if (isLiking) return;
-
-        const previousLiked = liked;
-        const previousCount = likesCount;
-
-        // Optimistic UI update
-        setLiked(!liked);
-        setLikesCount(prev => liked ? prev - 1 : prev + 1);
-        setIsLiking(true);
-
-        try {
-            const res = await axiosClient.post(`/user/post/like/${post.id}`, {}, { withCredentials: true });
-            setLiked(res.data.isLiked);
-
-            // Re-fetch accurate count
-            const countRes = await axiosClient.get(`/user/post/likes/count/${post.id}`, { withCredentials: true });
-            setLikesCount(countRes.data.likesCount);
-
-            // Sync with global feed
-            updateFeedPost(post.id, (p) => ({
-                isLiked: res.data.isLiked,
-                likes: countRes.data.likesCount
-            }));
-        } catch (error) {
-            console.error("Error toggling like:", error);
-            // Rollback on error
-            setLiked(previousLiked);
-            setLikesCount(previousCount);
-        } finally {
-            setIsLiking(false);
-        }
-    };
-
-    const handleActionClick = (e, message) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setToastMessage(message);
-        setShowToast(true);
-    };
-
-    const openReportModal = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setShowReportModal(true);
-        setShowMenu(false);
-    };
-
-    const handleReportPost = async (reason) => {
-        setIsReporting(true);
-        try {
-            await axiosClient.post(`/user/post/report/${post.id}`, { reason }, { withCredentials: true });
-            setToastMessage("Post reported successfully 🫡");
-            setShowToast(true);
-            setShowReportModal(false);
-            setReported(true);
-        } catch (error) {
-            console.error("Error reporting post:", error);
-            setToastMessage("Failed to report post ❌");
-            setShowToast(true);
-        } finally {
-            setIsReporting(false);
-        }
-    };
-
-    // Ensure content fallback
     const text = post.text || post.content || "";
 
     return (
         <div ref={containerRef} className="flex flex-col mb-8 bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-lg relative group p-4">
             <div className="flex gap-4">
-
                 {/* LEFT: Avatar + Line */}
                 <div className="flex flex-col items-center">
                     <Link
@@ -268,6 +43,7 @@ const PostCard = ({ post }) => {
                         <img
                             src={post.avatar || "https://github.com/shadcn.png"}
                             className="w-11 h-11 rounded-full object-cover border border-neutral-200 dark:border-neutral-800 shadow-sm"
+                            alt="avatar"
                         />
                     </Link>
                     <div className="w-[2px] flex-1 bg-neutral-200 dark:bg-neutral-800 my-2 rounded-full" />
@@ -275,7 +51,6 @@ const PostCard = ({ post }) => {
 
                 {/* RIGHT: CONTENT */}
                 <div className="flex-1 min-w-0">
-
                     {/* Header: Username + Time */}
                     <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
@@ -306,7 +81,12 @@ const PostCard = ({ post }) => {
                             {showMenu && (
                                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-2xl z-50 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
                                     <button
-                                        onClick={reported ? null : openReportModal}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            if (!reported) setShowReportModal(true);
+                                            setShowMenu(false);
+                                        }}
                                         disabled={reported}
                                         className={`w-full px-4 py-3 text-left flex items-center gap-3 text-sm transition ${reported
                                             ? 'text-gray-400 cursor-default'
@@ -341,6 +121,7 @@ const PostCard = ({ post }) => {
                                             key={i}
                                             src={img}
                                             className="w-full h-full object-contain"
+                                            alt={`Post content ${i}`}
                                         />
                                     ))}
                                 </div>
@@ -353,11 +134,11 @@ const PostCard = ({ post }) => {
                         <button
                             onClick={handleLike}
                             onMouseEnter={(e) => {
-                                handleMouseEnter('like');
+                                handleMouseEnterTooltip('like');
                                 handleLikesMouseEnter(e);
                             }}
                             onMouseLeave={() => {
-                                handleMouseLeave();
+                                handleMouseLeaveTooltip();
                                 handleLikesMouseLeave();
                             }}
                             className={`transition hover:scale-110 active:scale-90 ${liked ? 'text-rose-500' : 'hover:text-rose-500'}`}
@@ -368,11 +149,11 @@ const PostCard = ({ post }) => {
                         <button
                             onClick={() => navigate(`/post/${post.id}`)}
                             onMouseEnter={(e) => {
-                                handleMouseEnter('comments');
+                                handleMouseEnterTooltip('comments');
                                 handleCommentsMouseEnter(e);
                             }}
                             onMouseLeave={() => {
-                                handleMouseLeave();
+                                handleMouseLeaveTooltip();
                                 handleCommentsMouseLeave();
                             }}
                             className="hover:scale-110 active:scale-90 transition hover:text-blue-500"
@@ -444,7 +225,7 @@ const PostCard = ({ post }) => {
                 isVisible={showHoverCard}
                 anchorRect={hoverAnchorRect}
                 onMouseEnter={handleCardMouseEnter}
-                onMouseLeave={handleCardMouseLeave}
+                onMouseLeave={handleProfileMouseLeave}
             />
 
             <CommentsHoverCard
@@ -452,7 +233,7 @@ const PostCard = ({ post }) => {
                 isVisible={showCommentsHover}
                 anchorRect={commentsAnchorRect}
                 onMouseEnter={handleCommentsCardMouseEnter}
-                onMouseLeave={handleCommentsCardMouseLeave}
+                onMouseLeave={handleCommentsMouseLeave}
             />
 
             <LikesHoverCard
@@ -460,7 +241,7 @@ const PostCard = ({ post }) => {
                 isVisible={showLikesHover}
                 anchorRect={likesAnchorRect}
                 onMouseEnter={handleLikesCardMouseEnter}
-                onMouseLeave={handleLikesCardMouseLeave}
+                onMouseLeave={handleLikesMouseLeave}
             />
         </div>
     );
