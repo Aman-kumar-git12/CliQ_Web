@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
 import { useUserContext } from "../../context/userContext";
@@ -13,10 +13,20 @@ export default function Login() {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const { setUser, setBlockedAccount, setBlockedMessage, setBlockedEmail } = useUserContext();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [error, setError] = useState(null);
     const [showErr, setShowErr] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const authError = searchParams.get("authError");
+        if (authError) {
+            setError(authError);
+            setShowErr(true);
+            setSearchParams({}, { replace: true });
+        }
+    }, [searchParams, setSearchParams]);
 
     const handleChange = (e) => {
         setShowErr(false); // hide error while typing
@@ -137,7 +147,7 @@ export default function Login() {
                     <div className="h-px flex-1 bg-white/10" />
                 </div>
 
-                <GoogleAuthButton />
+                <GoogleAuthButton label="signin_with" />
             </form>
         </div>
     );

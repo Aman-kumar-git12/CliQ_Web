@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { User, Mail, Lock, Calendar, Eye, EyeOff } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
 import { useUserContext } from "../../context/userContext";
@@ -15,11 +15,21 @@ export default function Signup() {
         terms: false,
     });
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [showPassword, setShowPassword] = useState(false);
     const { setUser } = useUserContext();
     const [error, setError] = useState(null);
     const [showErr, setShowErr] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const authError = searchParams.get("authError");
+        if (authError) {
+            setError(authError);
+            setShowErr(true);
+            setSearchParams({}, { replace: true });
+        }
+    }, [searchParams, setSearchParams]);
 
     const handleChange = (e) => {
         setShowErr(false);
@@ -190,7 +200,7 @@ export default function Signup() {
                     <div className="h-px flex-1 bg-white/10" />
                 </div>
 
-                <GoogleAuthButton />
+                <GoogleAuthButton label="signup_with" />
             </form>
         </div>
     );

@@ -1,14 +1,23 @@
 import { ShieldAlert, LogOut, SendHorizontal, Loader2, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import { useUserContext } from "../context/userContext";
 
 export default function BlockedAccount() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { blockedMessage, blockedEmail, setBlockedAccount, setBlockedMessage, setBlockedEmail, setUser } = useUserContext();
+    const fallbackBlockedMessage = useMemo(
+        () => searchParams.get("message") || blockedMessage || "This account has been blocked. If you think this was a mistake, you can request an unblock review.",
+        [blockedMessage, searchParams]
+    );
+    const fallbackBlockedEmail = useMemo(
+        () => searchParams.get("email") || blockedEmail || "",
+        [blockedEmail, searchParams]
+    );
     const [showRequestForm, setShowRequestForm] = useState(false);
-    const [requestEmail, setRequestEmail] = useState(blockedEmail || "");
+    const [requestEmail, setRequestEmail] = useState(fallbackBlockedEmail);
     const [requestMessage, setRequestMessage] = useState("");
     const [submitState, setSubmitState] = useState({ loading: false, error: "", success: "" });
 
@@ -76,7 +85,7 @@ export default function BlockedAccount() {
                     <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-red-300/70">Account Status</p>
                     <h1 className="mt-3 text-3xl font-black tracking-tight text-white">This Account Has Been Blocked</h1>
                     <p className="mt-4 text-[15px] leading-7 text-neutral-300">
-                        {blockedMessage || "This account has been blocked. If you think this was a mistake, you can request an unblock review."}
+                        {fallbackBlockedMessage}
                     </p>
                 </div>
 
