@@ -853,6 +853,19 @@ const ChatUI = () => {
         setTimeout(() => scrollToBottom(), 50);
     };
 
+    const buildAskAiContextWindow = () => {
+        const recentTurns = [...aiMessages]
+            .filter((message) => message?.role === 'user' || message?.role === 'ai')
+            .slice(-10)
+            .map((message) => ({
+                role: message.role === 'user' ? 'user' : 'ai',
+                text: String(message.text || '').trim(),
+            }))
+            .filter((message) => message.text);
+
+        return recentTurns;
+    };
+
     const handleAssistantGenerate = async () => {
         if (!targetuserId) return;
         const activeDraft = showAIOverlay ? aiInput : newMessage;
@@ -904,6 +917,7 @@ const ChatUI = () => {
                     mode: 'ask',
                     question: userQuery,
                     tone: assistantTone,
+                    assistant_history: buildAskAiContextWindow(),
                 })
             });
 

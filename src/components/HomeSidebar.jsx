@@ -172,7 +172,7 @@ const HomeSidebar = () => {
                         <Link to="/find/findpeople" className="text-[10px] font-black text-blue-500 hover:text-blue-600 dark:hover:text-white uppercase tracking-widest transition-colors flex items-center gap-1">
                             Explore <ChevronRight size={12} />
                         </Link>
-                        <button 
+                        <button
                             onClick={handleRefresh}
                             disabled={refreshing || loading}
                             title="Refresh Suggestions"
@@ -213,7 +213,7 @@ const HomeSidebar = () => {
                                 >
                                     {/* Hover glow background */}
                                     <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 opacity-0 group-hover/suggest:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                                    
+
                                     <div className="relative flex items-center gap-3 min-w-0">
                                         <Link
                                             to={`/public-profile/${user.id}`}
@@ -249,8 +249,8 @@ const HomeSidebar = () => {
                                         onClick={(e) => handleFollow(e, user.id)}
                                         disabled={followStatuses[user.id]}
                                         className={`relative shrink-0 flex items-center justify-center p-2 rounded-xl transition-all duration-300 ${followStatuses[user.id]
-                                                ? "bg-green-500/10 text-green-500 cursor-default"
-                                                : "bg-black dark:bg-white text-white dark:text-black hover:scale-110 active:scale-95 shadow-md hover:shadow-blue-500/20"
+                                            ? "bg-green-500/10 text-green-500 cursor-default"
+                                            : "bg-black dark:bg-white text-white dark:text-black hover:scale-110 active:scale-95 shadow-md hover:shadow-blue-500/20"
                                             }`}
                                     >
                                         {followStatuses[user.id] ? <CheckCircle2 size={14} /> : <UserPlus size={14} />}

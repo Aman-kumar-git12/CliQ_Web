@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
 import { useUserContext } from "../../context/userContext";
+import GoogleAuthButton from "./GoogleAuthButton";
 
 export default function Login() {
     const [formData, setFormData] = useState({
@@ -11,7 +12,7 @@ export default function Login() {
     });
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
-    const { setUser } = useUserContext();
+    const { setUser, setBlockedAccount, setBlockedMessage, setBlockedEmail } = useUserContext();
 
     const [error, setError] = useState(null);
     const [showErr, setShowErr] = useState(false);
@@ -35,10 +36,19 @@ export default function Login() {
             const response = await axiosClient.post("/login", formData);
             // console.log("Login response:", response.data);
             setUser(response.data.user);
+            setBlockedAccount(false);
             navigate("/home");
             setShowErr(false);
             setError(null);
         } catch (err) {
+            if (err.response?.status === 403) {
+                const blockedMsg = err.response?.data?.message || "This account has been blocked.";
+                setBlockedAccount(true);
+                setBlockedMessage(blockedMsg);
+                setBlockedEmail(formData.email);
+                navigate("/blocked-account", { replace: true });
+                return;
+            }
             // show backend error message
             const apiError = err.response?.data?.error;
             const errorMessage = typeof apiError === 'string'
@@ -120,6 +130,14 @@ export default function Login() {
                 >
                     {loading ? "Logging in..." : "Login"}
                 </button>
+
+                <div className="flex items-center gap-3 py-1">
+                    <div className="h-px flex-1 bg-white/10" />
+                    <span className="text-xs uppercase tracking-[0.25em] text-neutral-500">or</span>
+                    <div className="h-px flex-1 bg-white/10" />
+                </div>
+
+                <GoogleAuthButton />
             </form>
         </div>
     );

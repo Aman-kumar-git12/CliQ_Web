@@ -3,7 +3,7 @@ import { useUserContext } from "../context/userContext";
 import React from "react";
 
 const ProtectedRoute = () => {
-  const { user, loading } = useUserContext();
+  const { user, loading, blockedAccount } = useUserContext();
 
   if (loading) {
     return (
@@ -11,6 +11,10 @@ const ProtectedRoute = () => {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white"></div>
       </div>
     );
+  }
+
+  if (blockedAccount) {
+    return <Navigate to="/blocked-account" replace />;
   }
 
   return user ? <Outlet /> : <Navigate to="/login" replace />;

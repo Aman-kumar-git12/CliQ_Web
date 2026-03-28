@@ -16,8 +16,8 @@ const PostCard = ({ post }) => {
         hoverUserId, showHoverCard, hoverAnchorRect,
         showCommentsHover, commentsAnchorRect,
         showLikesHover, likesAnchorRect,
-        containerRef, currentUser, navigate, 
-        
+        containerRef, currentUser, navigate,
+
         handleProfileMouseEnter, handleProfileMouseLeave, handleCardMouseEnter,
         handleCommentsMouseEnter, handleCommentsMouseLeave, handleCommentsCardMouseEnter,
         handleLikesMouseEnter, handleLikesMouseLeave, handleLikesCardMouseEnter,

@@ -98,20 +98,42 @@ export default function AIAssistantOverlay({
     const replyModelLabel = replyData?.generation_source
         ? String(replyData.generation_source).replaceAll('_', ' ')
         : 'message assistant';
+    const aiUnderstandingParagraph = [
+        replyData?.conversation_summary,
+        replyData?.context_focus,
+        replyData?.detected_intent ? `The main intent looks like ${String(replyData.detected_intent).replaceAll('_', ' ')}.` : '',
+    ]
+        .filter(Boolean)
+        .join(' ');
 
-    const renderReplyCard = (text, key) => (
-        <div key={key} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-3">
-            <p className="text-[13px] leading-relaxed text-neutral-200">{text}</p>
+    const renderReplyCard = (text, key, { highlighted = false } = {}) => (
+        <div
+            key={key}
+            className={`rounded-2xl p-3 space-y-3 ${
+                highlighted
+                    ? 'border border-white/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03)_42%,rgba(255,255,255,0.02))] shadow-[0_14px_34px_rgba(0,0,0,0.22)]'
+                    : 'border border-white/10 bg-white/[0.03]'
+            }`}
+        >
+            <p className={`${highlighted ? 'text-[17px] leading-8 text-white font-medium tracking-[-0.01em]' : 'text-[13px] leading-relaxed text-neutral-200'}`}>
+                {text}
+            </p>
             <div className="flex gap-2">
                 <button
                     onClick={() => onUseReply?.(text)}
-                    className="rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-white/15"
+                    className={`rounded-full px-3 py-1.5 text-[11px] font-semibold text-white transition ${
+                        highlighted ? 'bg-white/12 hover:bg-white/18' : 'bg-white/10 hover:bg-white/15'
+                    }`}
                 >
                     Insert
                 </button>
                 <button
                     onClick={() => onSendReply?.(text)}
-                    className="rounded-full bg-emerald-500/20 px-3 py-1.5 text-[11px] font-semibold text-emerald-100 transition hover:bg-emerald-500/30"
+                    className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
+                        highlighted
+                            ? 'bg-emerald-500/20 text-emerald-100 hover:bg-emerald-500/30'
+                            : 'bg-emerald-500/20 text-emerald-100 hover:bg-emerald-500/30'
+                    }`}
                 >
                     Send Now
                 </button>
@@ -577,24 +599,36 @@ export default function AIAssistantOverlay({
                             </div>
                         )}
 
-                        {!replyLoading && !error && replyData?.context_preview && (
-                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                                <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Recent Context</p>
-                                <pre className="mt-2 whitespace-pre-wrap text-sm text-neutral-300 font-sans">{replyData.context_preview}</pre>
-                            </div>
-                        )}
+                        {!replyLoading && !error && (replyData?.context_preview || aiUnderstandingParagraph || replyData?.last_other_message) && (
+                            <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
+                                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 min-h-[260px]">
+                                    <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Actual Context</p>
+                                    {replyData?.context_preview ? (
+                                        <pre className="mt-2 whitespace-pre-wrap text-sm text-neutral-300 font-sans leading-relaxed">{replyData.context_preview}</pre>
+                                    ) : (
+                                        <p className="mt-2 text-sm text-neutral-400">No recent chat context available.</p>
+                                    )}
+                                    {replyData?.last_other_message && (
+                                        <div className="mt-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+                                            <p className="text-[10px] uppercase tracking-[0.18em] text-neutral-500 font-semibold">Last Message</p>
+                                            <p className="mt-2 text-sm text-neutral-200">{replyData.last_other_message}</p>
+                                        </div>
+                                    )}
+                                </div>
 
-                        {!replyLoading && !error && replyData?.last_other_message && (
-                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                                <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Last Message</p>
-                                <p className="mt-2 text-sm text-neutral-300">{replyData.last_other_message}</p>
+                                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 min-h-[260px]">
+                                    <p className="text-[11px] uppercase tracking-[0.2em] text-indigo-200/90 font-bold">What AI Understands</p>
+                                    <p className="mt-3 text-sm leading-7 text-neutral-200">
+                                        {aiUnderstandingParagraph || "The assistant is still forming an interpretation of the conversation context."}
+                                    </p>
+                                </div>
                             </div>
                         )}
 
                         {!replyLoading && !error && replyData?.top_reply && (
                             <div className="space-y-2">
                                 <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Top Reply</p>
-                                {renderReplyCard(replyData.top_reply, 'top-reply')}
+                                {renderReplyCard(replyData.top_reply, 'top-reply', { highlighted: true })}
                             </div>
                         )}
 

@@ -3,13 +3,15 @@ import { Mail, Lock, X, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axiosClient from "../../api/axiosClient";
 import { useUserContext } from "../../context/userContext";
+import { useNavigate } from "react-router-dom";
 
 const LoginModal = ({ isOpen, onClose }) => {
     const [formData, setFormData] = useState({
         email: "",
         password: "",
     });
-    const { setUser } = useUserContext();
+    const { setUser, setBlockedAccount, setBlockedMessage, setBlockedEmail } = useUserContext();
+    const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -44,6 +46,7 @@ const LoginModal = ({ isOpen, onClose }) => {
             
             // Set user in context
             setUser(response.data.user);
+            setBlockedAccount(false);
             
             // Close modal
             onClose();
@@ -51,6 +54,15 @@ const LoginModal = ({ isOpen, onClose }) => {
             // Refresh page to reset all states and re-fetch connection/feed data
             window.location.reload();
         } catch (err) {
+            if (err.response?.status === 403) {
+                const blockedMsg = err.response?.data?.message || "This account has been blocked.";
+                setBlockedAccount(true);
+                setBlockedMessage(blockedMsg);
+                setBlockedEmail(formData.email);
+                onClose();
+                navigate("/blocked-account", { replace: true });
+                return;
+            }
             const apiError = err.response?.data?.message || "Invalid credentials. Please try again.";
             setError(apiError);
         } finally {

@@ -105,3 +105,56 @@ html {
     animation: glow-pulse 4s ease-in-out infinite;
   }
 }
+@layer utilities {
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+  }
+
+  .metallic-card {
+    background: linear-gradient(135deg, #1a1a24 0%, #0d0d12 50%, #1a1a24 100%);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.1),
+      0 10px 20px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.8);
+  }
+
+  .metallic-pill {
+    background: linear-gradient(180deg, #2a2a35 0%, #1a1a22 100%);
+    box-shadow: 
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 4px 10px rgba(0, 0, 0, 0.4);
+    @apply border border-white/5;
+  }
+
+  .metallic-wrap {
+    @apply relative overflow-hidden rounded-[2.5rem];
+    background: linear-gradient(165deg, #16161d 0%, #0a0a0f 100%);
+    box-shadow: 
+      -20px 20px 60px #08080c,
+      20px -20px 60px #121218;
+  }
+
+  .bg-diagonal-metallic {
+    background: 
+      linear-gradient(45deg, transparent 49.5%, rgba(255,255,255,0.02) 50%, transparent 50.5%),
+      linear-gradient(-45deg, transparent 49.5%, rgba(255,255,255,0.01) 50%, transparent 50.5%),
+      #0a0a0f;
+    background-size: 60px 60px;
+  }
+
+  @keyframes metallic-shine {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .shine-effect {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.05),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: metallic-shine 3s infinite linear;
+  }
+}

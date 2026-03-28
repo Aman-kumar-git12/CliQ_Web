@@ -30,6 +30,7 @@ import ChatLayout from "./components/Chat/ChatLayout";
 import { MessageSquare } from "lucide-react";
 import SplashScreen from "./components/SplashScreen";
 import { useState, useEffect } from "react";
+import BlockedAccount from "./components/BlockedAccount";
 
 function App() {
   const { loading } = useUserContext();
@@ -55,6 +56,8 @@ function App() {
       )}
       <FeedProvider>
         <Routes>
+          <Route path="/blocked-account" element={<BlockedAccount />} />
+
           {/* Public Routes (Redirect to Home if logged in) */}
           <Route element={<PublicRoute />}>
             <Route path="/" element={<Signup />} />

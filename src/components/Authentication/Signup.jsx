@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { User, Mail, Lock, Calendar, Eye, EyeOff } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
 import { useUserContext } from "../../context/userContext";
+import GoogleAuthButton from "./GoogleAuthButton";
 
 export default function Signup() {
     const [formData, setFormData] = useState({
@@ -182,6 +183,14 @@ export default function Signup() {
                 >
                     {loading ? "Signing up..." : "Create an account"}
                 </button>
+
+                <div className="flex items-center gap-3 py-1">
+                    <div className="h-px flex-1 bg-white/10" />
+                    <span className="text-xs uppercase tracking-[0.25em] text-neutral-500">or</span>
+                    <div className="h-px flex-1 bg-white/10" />
+                </div>
+
+                <GoogleAuthButton />
             </form>
         </div>
     );
