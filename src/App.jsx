@@ -64,7 +64,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<ChatLayout />}>
               <Route path="/messages" element={<NoChatSelected />} />
-              <Route path="/messages/:targetuserId" element={<ChatUI />} />
+              <Route path="/messages/:targetuserId/:actionParam?" element={<ChatUI />} />
             </Route>
 
             <Route element={<Layout />}>

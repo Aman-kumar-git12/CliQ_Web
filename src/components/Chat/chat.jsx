@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronDown, Trash2, Pencil, Ban, Plus, Smile, Mic, SendHorizontal, FileText, Download, Image as ImageIcon, Loader2, X, Play, Pause, CornerUpLeft, CheckCircle2, Check, Copy } from "lucide-react";
+import { ArrowLeft, ChevronDown, Trash2, Pencil, Ban, Plus, Smile, Mic, SendHorizontal, FileText, Download, Image as ImageIcon, Loader2, X, Play, Pause, CornerUpLeft, CheckCircle2, Check, Copy, Sparkles, Bot } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import createSocketConnection from "./socket";
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -8,6 +8,8 @@ import Confirmation from "../../components/Confirmation";
 import Toastbar from "./Toastbar";
 import { useUserContext } from "../../context/userContext";
 import EmojiPicker from 'emoji-picker-react';
+import { motion, AnimatePresence } from "framer-motion";
+import AIAssistantOverlay from "./AIAssistantOverlay";
 
 const EMPTY_CHAT_STICKERS = [
     { url: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f44b/512.webp", type: "Hii" },
@@ -107,7 +109,7 @@ const VoicePlayer = ({ src, isMe, avatar }) => {
 
 const ChatUI = () => {
     const navigate = useNavigate();
-    const { targetuserId } = useParams();
+    const { targetuserId, actionParam } = useParams();
     const { user } = useUserContext();
 
     // State
@@ -139,12 +141,56 @@ const ChatUI = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [audioBlob, setAudioBlob] = useState(null);
+    const [assistantLoading, setAssistantLoading] = useState(false);
+    const [assistantError, setAssistantError] = useState("");
+    const [assistantData, setAssistantData] = useState(null);
+    const [assistantHistory, setAssistantHistory] = useState([]);
+    const [assistantAskHistory, setAssistantAskHistory] = useState([]);
+    const [pendingAssistantHistory, setPendingAssistantHistory] = useState(null);
+    const [assistantTone, setAssistantTone] = useState("polite");
 
     // Multi-Select State
     const [isSelectMode, setIsSelectMode] = useState(false);
     const [selectedMessages, setSelectedMessages] = useState(new Set());
     const [isBulkDeleting, setIsBulkDeleting] = useState(false);
     const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
+
+    // AI Assistant Overlay State
+    const [showAIOverlay, setShowAIOverlay] = useState(() => actionParam === 'ask_ai=true' || actionParam === 'generate_reply=true');
+    const [aiMessages, setAiMessages] = useState([]);
+    const [isAILoading, setIsAILoading] = useState(false);
+    const [aiThinkingStep, setAiThinkingStep] = useState('idle');
+    const [aiInput, setAiInput] = useState('');
+    const [aiOverlayMode, setAiOverlayMode] = useState(() => actionParam === 'generate_reply=true' ? 'replies' : 'ask');
+
+    // Sync UI state changes -> URL
+    useEffect(() => {
+        if (!targetuserId) return;
+        if (showAIOverlay) {
+            if (aiOverlayMode === 'ask' && actionParam !== 'ask_ai=true') {
+                navigate(`/messages/${targetuserId}/ask_ai=true`, { replace: true });
+            } else if (aiOverlayMode === 'replies' && actionParam !== 'generate_reply=true') {
+                navigate(`/messages/${targetuserId}/generate_reply=true`, { replace: true });
+            }
+        } else {
+            if (actionParam) {
+                navigate(`/messages/${targetuserId}`, { replace: true });
+            }
+        }
+    }, [showAIOverlay, aiOverlayMode, targetuserId, actionParam, navigate]);
+
+    // Sync URL param changes -> UI state (e.g. Browser Back/Forward)
+    useEffect(() => {
+        if (actionParam === 'ask_ai=true') {
+            setShowAIOverlay(true);
+            setAiOverlayMode('ask');
+        } else if (actionParam === 'generate_reply=true') {
+            setShowAIOverlay(true);
+            setAiOverlayMode('replies');
+        } else if (!actionParam) {
+            setShowAIOverlay(false);
+        }
+    }, [actionParam]);
 
     const canDeleteForEveryone = useMemo(() => {
         const selectedIds = Array.from(selectedMessages);
@@ -176,6 +222,26 @@ const ChatUI = () => {
     const audioChunksRef = useRef([]);
     const recordingTimerRef = useRef(null);
     const isRecordingCancelledRef = useRef(false);
+    const hasAutoLoadedLastChat = useRef(false);
+
+    // Reset auto-load flag when AI Overlay closes
+    useEffect(() => {
+        if (!showAIOverlay) {
+            hasAutoLoadedLastChat.current = false;
+        }
+    }, [showAIOverlay]);
+
+    // Auto-load last Ask AI chat when overlay opens
+    useEffect(() => {
+        if (showAIOverlay && aiOverlayMode === 'ask' && !hasAutoLoadedLastChat.current && assistantAskHistory.length > 0 && aiMessages.length === 0) {
+            hasAutoLoadedLastChat.current = true;
+            const lastChat = assistantAskHistory[0];
+            setAiMessages(lastChat.messages || [
+                { id: Date.now() + 1, type: 'user', text: lastChat.question },
+                { id: Date.now() + 2, type: 'ai', text: lastChat.answer, isComplete: true }
+            ]);
+        }
+    }, [showAIOverlay, aiOverlayMode, assistantAskHistory, aiMessages.length]);
 
     // Fetch Target User
     useEffect(() => {
@@ -196,6 +262,34 @@ const ChatUI = () => {
         };
         fetchTargetUser();
     }, [targetuserId]);
+
+    useEffect(() => {
+        const loadAssistantHistory = async () => {
+            if (!targetuserId || !user?.id) {
+                setAssistantHistory([]);
+                setAssistantAskHistory([]);
+                return;
+            }
+
+            try {
+                const { data } = await axiosClient.get(`/message-ai/history/${targetuserId}`);
+                setAssistantHistory(data.history || []);
+            } catch (error) {
+                console.error("Failed to load message assistant history:", error);
+                setAssistantHistory([]);
+            }
+
+            try {
+                const { data } = await axiosClient.get(`/message-ai/ask-history/${targetuserId}`);
+                setAssistantAskHistory(data.history || []);
+            } catch (error) {
+                console.error("Failed to load Ask AI history:", error);
+                setAssistantAskHistory([]);
+            }
+        };
+
+        loadAssistantHistory();
+    }, [targetuserId, user?.id]);
 
     // Fetch Chat History
     useEffect(() => {
@@ -443,12 +537,22 @@ const ChatUI = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+
     const onEmojiClick = (emojiData) => {
         setNewMessage(prev => prev + emojiData.emoji);
     };
 
     useEffect(() => {
         setHasInitialScrolled(false);
+    }, [targetuserId]);
+
+    useEffect(() => {
+        setAssistantData(null);
+        setAssistantError("");
+        setAssistantTone("polite");
+        setAiMessages([]);
+        setAiInput('');
+        setAiOverlayMode('ask');
     }, [targetuserId]);
 
     const scrollToBottom = (behavior = 'smooth') => {
@@ -558,7 +662,298 @@ const ChatUI = () => {
         }
     };
 
+    const applyAssistantText = (text) => {
+        if (!text) return;
+        setNewMessage(text);
+        setShowAIOverlay(false);
+        if (assistantData) {
+            setPendingAssistantHistory({
+                snapshot: assistantData,
+                replyText: text,
+            });
+        }
+        setTimeout(() => {
+            if (inputRef.current) {
+                inputRef.current.focus();
+                inputRef.current.style.height = 'auto';
+                inputRef.current.style.height = inputRef.current.scrollHeight + 'px';
+            }
+        }, 0);
+    };
+
+    const buildAssistantGeneratedReplies = (snapshot) => {
+        if (!snapshot) return [];
+
+        return [
+            snapshot.top_reply,
+            ...(snapshot.reply_suggestions || []),
+            ...(snapshot.emoji_replies || []),
+            ...(snapshot.same_message_variants || []),
+            snapshot.grouped_replies?.top_reply,
+            snapshot.grouped_replies?.safe_reply,
+            snapshot.grouped_replies?.warm_reply,
+            snapshot.grouped_replies?.playful_reply,
+            snapshot.grouped_replies?.curious_reply,
+            snapshot.grouped_replies?.direct_reply,
+            snapshot.rewrites?.clean,
+            snapshot.rewrites?.short,
+            snapshot.rewrites?.warm,
+            snapshot.rewrites?.confident,
+        ].filter((item, index, arr) => item && arr.indexOf(item) === index);
+    };
+
+    const saveAssistantHistory = async (replyText, snapshot) => {
+        if (!targetuserId || !replyText?.trim() || !snapshot) return;
+
+        try {
+            const { data } = await axiosClient.post(`/message-ai/history/${targetuserId}`, {
+                conversationId: snapshot.conversationId || snapshot.conversation_id || null,
+                contextSummary: snapshot.context_preview || snapshot.context_focus || snapshot.conversation_summary || "No recent context available.",
+                lastMessage: snapshot.last_other_message || "",
+                sentReply: replyText,
+                tone: snapshot.tone || assistantTone,
+                detectedIntent: snapshot.detected_intent || "",
+                topReply: snapshot.top_reply || "",
+                generatedReplies: buildAssistantGeneratedReplies(snapshot),
+            });
+
+            if (data?.history) {
+                setAssistantHistory((prev) => [data.history, ...prev].slice(0, 20));
+            }
+        } catch (error) {
+            console.error("Failed to save message assistant history:", error);
+        }
+    };
+
+    const saveAskAiHistory = async (questionText, answerText) => {
+        if (!targetuserId || !user?.id || !questionText?.trim() || !answerText?.trim()) return;
+        const historyPayload = {
+            question: questionText.trim(),
+            answer: answerText.trim(),
+            messages: [
+                { role: 'user', text: questionText.trim() },
+                { role: 'ai', text: answerText.trim() },
+            ],
+        };
+        try {
+            const { data } = await axiosClient.post(`/message-ai/ask-history/${targetuserId}`, historyPayload);
+            if (data?.history) {
+                setAssistantAskHistory((prev) => [data.history, ...prev].slice(0, 20));
+            }
+        } catch (error) {
+            console.error("Failed to save Ask AI history:", error);
+        }
+    };
+
+    const handleContinueAskHistory = (historyItem) => {
+        if (!historyItem) return;
+
+        const restoredMessages = Array.isArray(historyItem.messages) && historyItem.messages.length > 0
+            ? historyItem.messages
+            : [
+                { role: 'user', text: historyItem.question || '' },
+                { role: 'ai', text: historyItem.answer || '' },
+            ].filter((item) => item.text);
+
+        setAiOverlayMode('ask');
+        setAiMessages(restoredMessages);
+        setAiInput('');
+        setShowAIOverlay(true);
+    };
+
+    const handleClearAskHistory = async () => {
+        if (!targetuserId || !user?.id) return;
+
+        try {
+            await axiosClient.delete(`/message-ai/ask-history/${targetuserId}`);
+            setAssistantAskHistory([]);
+            setAiMessages([]);
+        } catch (error) {
+            console.error("Failed to clear Ask AI history:", error);
+        }
+    };
+
+    const handleClearReplyHistory = async () => {
+        if (!targetuserId) return;
+
+        try {
+            await axiosClient.delete(`/message-ai/history/${targetuserId}`);
+            setAssistantHistory([]);
+        } catch (error) {
+            console.error("Failed to clear reply history:", error);
+        }
+    };
+
+    const handleDeleteAskHistoryItem = async (historyId) => {
+        if (!historyId || !targetuserId || !user?.id) return;
+        try {
+            await axiosClient.delete(`/message-ai/ask-history/${targetuserId}/${historyId}`);
+            setAssistantAskHistory((prev) => prev.filter((item) => item.id !== historyId));
+        } catch (error) {
+            console.error("Failed to delete Ask AI history item:", error);
+        }
+    };
+
+    const handleDeleteReplyHistoryItem = async (historyId) => {
+        if (!historyId || !targetuserId) return;
+
+        try {
+            await axiosClient.delete(`/message-ai/history/${targetuserId}/${historyId}`);
+            setAssistantHistory((prev) => prev.filter((item) => item.id !== historyId));
+        } catch (error) {
+            console.error("Failed to delete reply history item:", error);
+        }
+    };
+
+    const sendAssistantReply = (text) => {
+        if (!socket || !user || !text?.trim()) return;
+
+        const replyText = text.trim();
+        const tempId = Date.now().toString();
+        const parentMsg = replyTo ? { ...replyTo } : null;
+        const assistantSnapshot = assistantData;
+        setPendingAssistantHistory(null);
+
+        setMessages(prev => [...prev, {
+            id: tempId,
+            text: replyText,
+            firstname: user.firstname,
+            isMe: true,
+            date: new Date(),
+            imageUrl: user.imageUrl,
+            parentMessage: parentMsg
+        }]);
+
+        socket.emit("sendMessage", {
+            firstname: user.firstname,
+            userId: user.id,
+            targetuserId,
+            text: replyText,
+            image: null,
+            file: null,
+            parentMessageId: replyTo?.id
+        }, (response) => {
+            if (response.success && response.id) {
+                setMessages(prev => prev.map(msg =>
+                    msg.id === tempId ? { ...msg, id: response.id } : msg
+                ));
+                localStorage.setItem(`lastSeen_${user.id}_${targetuserId}`, response.id);
+                window.dispatchEvent(new CustomEvent('chatUpdated', {
+                    detail: { targetId: targetuserId, lastMessage: replyText }
+                }));
+                saveAssistantHistory(replyText, assistantSnapshot);
+            }
+        });
+
+        setReplyTo(null);
+        setShowAIOverlay(false);
+        setAssistantData(null);
+        setNewMessage("");
+        if (inputRef.current) inputRef.current.style.height = 'auto';
+        setTimeout(() => scrollToBottom(), 50);
+    };
+
+    const handleAssistantGenerate = async () => {
+        if (!targetuserId) return;
+        const activeDraft = showAIOverlay ? aiInput : newMessage;
+
+        setShowAIOverlay(true);
+        setAiOverlayMode('replies');
+        setAssistantLoading(true);
+        setAssistantError("");
+        setAssistantData(null);
+        setAiThinkingStep('analysing');
+        setTimeout(() => setAiThinkingStep('thinking'), 800);
+
+        try {
+           const { data } = await axiosClient.post(`/message-ai/conversation/${targetuserId}`, {
+               mode: "replies",
+               draft: activeDraft,
+               tone: assistantTone,
+            });
+            setAiThinkingStep('generating');
+            setAssistantData(data);
+            setAiThinkingStep('idle');
+        } catch (error) {
+            console.error("Message assistant failed:", error);
+            setAssistantError("Could not load message suggestions right now.");
+            setAiThinkingStep('idle');
+        } finally {
+            setAssistantLoading(false);
+        }
+    };
+
+    const handleAISubmit = async (query) => {
+        if (!query.trim() || isAILoading) return;
+        
+        const userQuery = query.trim();
+        setAiInput('');
+
+        setAiMessages(prev => [...prev, { role: 'user', text: userQuery }, { role: 'ai', text: '' }]);
+        setIsAILoading(true);
+        setAiThinkingStep('analysing');
+        setTimeout(() => setAiThinkingStep('thinking'), 800);
+
+        try {
+
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/message-ai/conversation/stream/${targetuserId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    mode: 'ask',
+                    question: userQuery,
+                    tone: assistantTone,
+                })
+            });
+
+            if (!response.ok) throw new Error("API request failed");
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let fullAiAnswer = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                if (fullAiAnswer === "") {
+                    setAiThinkingStep('generating');
+                }
+                const chunk = decoder.decode(value, { stream: true });
+                fullAiAnswer += chunk;
+                
+                setAiMessages(prev => {
+                    const last = prev[prev.length - 1];
+                    const updated = [...prev];
+                    updated[updated.length - 1] = { ...last, text: fullAiAnswer };
+                    return updated;
+                });
+                if (fullAiAnswer.length > 50) setAiThinkingStep('refining');
+            }
+            if (fullAiAnswer.trim()) {
+                await saveAskAiHistory(userQuery, fullAiAnswer);
+            }
+            setAiThinkingStep('idle');
+        } catch (error) {
+            console.error("AI Assistant Error:", error);
+            setAiMessages(prev => {
+                const last = prev[prev.length - 1];
+                const updated = [...prev];
+                updated[updated.length - 1] = { ...last, text: "I encountered an error while processing your request. Please try again later." };
+                return updated;
+            });
+        } finally {
+            setIsAILoading(false);
+            setAiThinkingStep('idle');
+        }
+    };
+
     const sendMessage = () => {
+        if (showAIOverlay) {
+            handleAISubmit(aiInput);
+            return;
+        }
         if (updateMessage) {
             handleUpdateMessage();
             return;
@@ -597,11 +992,16 @@ const ChatUI = () => {
                     window.dispatchEvent(new CustomEvent('chatUpdated', {
                         detail: { targetId: targetuserId, lastMessage: text }
                     }));
+
+                    if (pendingAssistantHistory?.snapshot) {
+                        saveAssistantHistory(text, pendingAssistantHistory.snapshot);
+                    }
                 }
             });
 
             setNewMessage("");
             setReplyTo(null);
+            setPendingAssistantHistory(null);
             if (inputRef.current) inputRef.current.style.height = 'auto';
             setTimeout(() => scrollToBottom(), 50);
         }
@@ -753,6 +1153,50 @@ const ChatUI = () => {
                 style={{ backgroundImage: `url('https://w0.peakpx.com/wallpaper/580/671/HD-wallpaper-whatsapp-doodle-pattern-whatsapp-pattern-doodle.jpg')`, backgroundSize: '400px' }}>
             </div>
 
+            <AnimatePresence>
+                {showAIOverlay && (
+                    <AIAssistantOverlay 
+                        isOpen={showAIOverlay}
+                        onClose={() => {
+                            setShowAIOverlay(false);
+                            setAssistantData(null);
+                            setAiMessages([]);
+                            setAssistantError("");
+                            setAiInput('');
+                            setAiOverlayMode('ask');
+                        }}
+                        messages={aiMessages}
+                        onNewAskChat={() => setAiMessages([])}
+                        isLoading={isAILoading}
+                        thinkingStep={aiThinkingStep}
+                        title="Message AI"
+                        subtitle="Chat-aware assistant with messaging guidance"
+                        emptyTitle="Ask anything about this chat"
+                        emptyDescription="Use this for message-specific help like summaries, reply ideas, intent understanding, or what to say next."
+                        inputValue={aiInput}
+                        onInputChange={setAiInput}
+                        onSubmit={() => handleAISubmit(aiInput)}
+                        mode={aiOverlayMode}
+                        onModeChange={setAiOverlayMode}
+                        replyData={assistantData}
+                        replyLoading={assistantLoading}
+                        error={aiOverlayMode === 'replies' ? assistantError : ''}
+                        selectedTone={assistantTone}
+                        onToneChange={setAssistantTone}
+                        onGenerateReplies={handleAssistantGenerate}
+                        onUseReply={applyAssistantText}
+                        onSendReply={sendAssistantReply}
+                        history={assistantHistory}
+                        askHistory={assistantAskHistory}
+                        onContinueAskHistory={handleContinueAskHistory}
+                        onClearAskHistory={handleClearAskHistory}
+                        onClearReplyHistory={handleClearReplyHistory}
+                        onDeleteAskHistoryItem={handleDeleteAskHistoryItem}
+                        onDeleteReplyHistoryItem={handleDeleteReplyHistoryItem}
+                    />
+                )}
+            </AnimatePresence>
+
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2 bg-[#1c1c1e]/90 backdrop-blur-xl border-b border-neutral-800/50 sticky top-0 z-20 h-[65px]">
                 <div className="flex items-center gap-2">
@@ -789,7 +1233,6 @@ const ChatUI = () => {
                             onClick={() => sendDirectMessage(stickerMessage)}
                             className="relative group cursor-pointer active:scale-95 transition-all duration-300"
                         >
-                            {/* Animated Background Highlight */}
                             <div className="absolute -inset-8 bg-[#007aff]/30 blur-3xl rounded-full animate-pulse z-0"></div>
                             <div className="absolute -inset-4 bg-[#007aff]/20 blur-xl rounded-full z-0 group-hover:scale-110 transition-transform duration-500"></div>
 
@@ -850,7 +1293,7 @@ const ChatUI = () => {
             </div>
 
             {/* Input Bar */}
-            <div className="relative z-20 flex flex-col bg-[#1c1c1e] border-t border-neutral-800/50 p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] min-h-[85px] justify-center shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+            <div className="sticky bottom-0 relative z-20 flex flex-col bg-[#1c1c1e]/95 backdrop-blur-xl border-t border-neutral-800/50 p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] min-h-[85px] justify-center shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
                 {replyTo && (
                     <div className="mx-3 mb-2 px-3 py-2 bg-[#2c2c2e] border-l-4 border-[#007aff] rounded-lg flex items-center justify-between">
                         <div className="flex flex-col overflow-hidden">
@@ -864,39 +1307,55 @@ const ChatUI = () => {
                 )}
                 <div className="flex items-end gap-2">
                     {!isRecording ? (
-                        <>
+                        <div className="flex items-center gap-2 flex-1">
                             <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="p-3 text-[#007aff] hover:bg-white/5 rounded-full active:scale-90 transition-colors">
                                 {isUploading && !audioBlob ? <Loader2 size={28} className="animate-spin" /> : <Plus size={28} strokeWidth={2.5} />}
                             </button>
                             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt" />
+                            
+                            <div onClick={() => inputRef.current?.focus()} className="flex-1 relative flex items-center bg-[#2c2c2e] rounded-[24px] min-h-[48px] px-3 py-1 border border-white/5 shadow-inner cursor-text overflow-visible">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowAIOverlay(true); }}
+                                    className={`p-1.5 rounded-full transition-all ${showAIOverlay ? 'bg-indigo-600 text-white shadow-[0_0_10px_rgba(99,102,241,0.5)]' : 'text-neutral-400 hover:text-indigo-400 hover:bg-indigo-500/10'}`}
+                                    title="Message AI"
+                                >
+                                    <Sparkles size={18} strokeWidth={2.5} />
+                                </button>
 
-                            <div onClick={() => inputRef.current?.focus()} className="flex-1 relative flex items-center bg-[#2c2c2e] rounded-[24px] min-h-[48px] px-4 py-2 border border-white/5 shadow-inner cursor-text">
                                 <textarea
                                     ref={inputRef}
-                                    autoFocus
-                                    rows={1}
+                                    rows="1"
                                     value={newMessage}
                                     onChange={(e) => {
                                         setNewMessage(e.target.value);
                                         e.target.style.height = 'auto';
-                                        e.target.style.height = e.target.scrollHeight + 'px';
+                                        if (e.target.scrollHeight > 36) {
+                                            e.target.style.height = e.target.scrollHeight + 'px';
+                                        }
                                     }}
-                                    placeholder="Message..."
-                                    className="w-full bg-transparent text-white py-1 px-1 outline-none text-[15px] resize-none max-h-[120px] scrollbar-hide"
-                                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            sendMessage();
+                                        }
+                                    }}
+                                    placeholder={showAIOverlay ? "Ask Message AI about this chat..." : "Type a message..."}
+                                    className="flex-1 bg-transparent text-white text-[15px] px-3 py-2 focus:outline-none placeholder-neutral-500 resize-none max-h-32 transition-all scrollbar-hide"
                                 />
-                                <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`p-1 ${showEmojiPicker ? "text-[#007aff]" : "text-[#8e8e93] hover:text-[#f2f2f7]"}`}>
+
+                                <button onClick={(e) => { e.stopPropagation(); setShowEmojiPicker(!showEmojiPicker); }} className={`p-1 ${showEmojiPicker ? "text-[#007aff]" : "text-[#8e8e93] hover:text-[#f2f2f7]"}`}>
                                     <Smile size={24} />
                                 </button>
+
                                 {showEmojiPicker && (
                                     <div ref={emojiPickerRef} className="absolute bottom-full right-0 mb-4 z-[100] shadow-2xl rounded-2xl overflow-hidden ring-1 ring-white/10">
                                         <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" width={320} height={400} skinTonesDisabled />
                                     </div>
                                 )}
                             </div>
-                        </>
+                        </div>
                     ) : (
-                        <div className="flex-1 flex items-center justify-between bg-[#2c2c2e] rounded-[22px] min-h-[40px] px-4 py-1 border border-white/5 animate-in slide-in-from-right-4 duration-300">
+                        <div className="flex-1 flex items-center justify-between bg-[#2c2c2e] rounded-[22px] min-h-[48px] px-4 py-1 border border-white/5 animate-in slide-in-from-right-4 duration-300">
                             <div className="flex items-center gap-3">
                                 <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
                                 <span className="text-white font-medium tabular-nums">{formatTime(recordingTime)}</span>
@@ -909,11 +1368,11 @@ const ChatUI = () => {
                     )}
 
                     <button
-                        className={`rounded-full p-3 active:scale-90 transition-all ${isRecording || newMessage.trim() || updateMessage || (isUploading && audioBlob) ? "bg-[#007aff]" : "bg-pink-600"} text-white ${(isRecording || (isUploading && audioBlob)) ? "animate-pulse ring-4 ring-pink-500/20" : "shadow-lg"}`}
+                        className={`rounded-full p-3.5 active:scale-90 transition-all ${isRecording || newMessage.trim() || updateMessage || (isUploading && audioBlob) ? "bg-[#007aff] shadow-[0_0_15px_rgba(0,122,255,0.4)]" : "bg-neutral-800 text-neutral-500"} text-white`}
                         onClick={isUploading ? null : (isRecording ? stopRecording : (newMessage.trim() || updateMessage ? sendMessage : startRecording))}
                         disabled={isUploading && !audioBlob}
                     >
-                        {isUploading && audioBlob ? <Loader2 size={22} className="animate-spin" /> : (isRecording || newMessage.trim() || updateMessage ? <SendHorizontal size={22} /> : <Mic size={22} />)}
+                        {isUploading && audioBlob ? <Loader2 size={24} className="animate-spin" /> : (isRecording || newMessage.trim() || updateMessage ? <SendHorizontal size={24} /> : <Mic size={24} />)}
                     </button>
                 </div>
             </div>
@@ -931,7 +1390,7 @@ const ChatUI = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
-                                    onClick={handleBulkDelete}
+                                    onClick={() => setBulkDeleteConfirmOpen(true)}
                                     disabled={selectedMessages.size === 0 || isBulkDeleting}
                                     className={`p-2.5 rounded-full transition-all ${selectedMessages.size > 0 ? "text-red-500 hover:bg-red-500/10 active:scale-95" : "text-neutral-600"} ${isBulkDeleting ? "animate-pulse" : ""}`}
                                     title="Delete"
@@ -978,8 +1437,6 @@ const ChatUI = () => {
 
             {toast && <Toastbar message={toast} onClose={() => setToast(null)} />}
 
-
-
             {/* WhatsApp-style Image/File Preview Overlay */}
             {selectedFile && (
                 <div className="absolute inset-0 z-[200] bg-[#000000] flex flex-col animate-in fade-in duration-200">
@@ -991,7 +1448,7 @@ const ChatUI = () => {
                             <span className="text-[15px] font-semibold text-white">{selectedFile.name}</span>
                             <span className="text-[11px] text-neutral-400">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
                         </div>
-                        <div className="w-10" /> {/* Spacer */}
+                        <div className="w-10" />
                     </div>
 
                     <div className="flex-1 flex items-center justify-center p-4 overflow-hidden bg-[#0c0c0c]">

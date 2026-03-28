@@ -517,6 +517,13 @@ export const useConnectionLogic = () => {
         }
     }, [loading, isFetchingMore, sending, user, nextUser, userQueue.length]);
 
+    const refreshMatches = () => {
+        initializeUsers({ refresh: true });
+    };
+
+    const isPreferred = useMemo(() => user?.id && preferredIds.has(user.id), [user?.id, preferredIds]);
+    const isNotPreferred = useMemo(() => user?.id && notPreferredIds.has(user.id), [user?.id, notPreferredIds]);
+
     return {
         // State
         user, nextUser, userQueue, viewerProfile, loading, sending, isFetchingMore,
