@@ -105,7 +105,7 @@ const ProfileHeader = ({
                             @{user.username || `${user.firstname?.toLowerCase()}_${user.lastname?.toLowerCase()}`}
                         </p>
                         <p className="text-[#8e8e93] text-[15px] font-medium flex items-center justify-center sm:justify-start gap-2">
-                            {user.bio || "Builder • Creator • Professional"}
+                            {user.email}
                         </p>
                     </div>
                 </div>

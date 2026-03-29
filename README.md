@@ -7,13 +7,6 @@ CliQ is a thread-style social and professional networking platform where users c
 It blends social media engagement with professional networking, making it easy to discover people, build connections, and start meaningful conversations.
 
 
-# Follow this steps to run smoothly on the hosted link..
-1. When you open the website for the first time and it doesn’t load, refresh the page once.
-2. If it still doesn’t load, close the tab and reopen the link. Repeat this 2–3 times if needed.
-3. Make sure you have a stable and active internet connection.
-4. The first request may take some time because the server is waking up — please be patient while the page loads.
-5. Since images are loaded from the server, they may take a short time to appear, especially on slower connections.
-
 
 # 🧩 The Problem
 

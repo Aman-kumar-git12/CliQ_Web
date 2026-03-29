@@ -81,6 +81,11 @@ export default function FindPeople() {
     }, [search]);
 
     const avatar = (img) => img || "https://cdn-icons-png.flaticon.com/512/219/219969.png";
+    const getPublicHandle = (user) => {
+        const first = String(user?.firstname || "").trim().toLowerCase();
+        const last = String(user?.lastname || "").trim().toLowerCase();
+        return [first, last].filter(Boolean).join("_") || "user";
+    };
     const [connectionStatuses, setConnectionStatuses] = useState({});
 
     useEffect(() => {
@@ -258,7 +263,7 @@ export default function FindPeople() {
                                                     </Link>
                                                 </motion.div>
                                                 <motion.span layoutId={`handle-${user.id}`} className="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mt-1 truncate px-2">
-                                                    @{user.username || user.email.split("@")[0]}
+                                                    @{user.username || getPublicHandle(user)}
                                                 </motion.span>
                                             </div>
                                             {currentUser?.id !== user.id && (
@@ -284,7 +289,7 @@ export default function FindPeople() {
                                                     </Link>
                                                 </motion.div>
                                                 <div className="flex items-center gap-5 mt-1">
-                                                    <motion.span layoutId={`handle-${user.id}`} className="text-[13px] text-neutral-500 font-bold uppercase tracking-widest">@{user.username || user.email.split("@")[0]}</motion.span>
+                                                    <motion.span layoutId={`handle-${user.id}`} className="text-[13px] text-neutral-500 font-bold uppercase tracking-widest">@{user.username || getPublicHandle(user)}</motion.span>
                                                     <span className="w-1 h-1 rounded-full bg-neutral-800"></span>
                                                     <motion.p layoutId={`expertise-${user.id}`} className="text-[12px] text-neutral-400 font-medium italic line-clamp-1 truncate max-w-sm">
                                                         {user.expertise?.aboutYou || "Potential high-tier connector discovered."}
