@@ -1,185 +1,136 @@
 # 🚀 CliQ
 
-Connect. Share. Collaborate.
+**Connect. Share. Collaborate.**
 
-CliQ is a thread-style social and professional networking platform where users can post content, showcase their expertise, and connect with the right people to collaborate and grow together.
+CliQ is a modern social + professional networking platform where users can post content, showcase their expertise, build meaningful connections, and collaborate through real-time chat. It brings together content sharing, networking, messaging, and AI assistance into one connected experience.
 
-It blends social media engagement with professional networking, making it easy to discover people, build connections, and start meaningful conversations.
+---
 
+## 🧩 The Problem
+Today’s platforms make communication easy, but meaningful collaboration is still hard.
+- **Social Apps**: Focus more on entertainment than expertise.
+- **Professional Platforms**: Feel static and inactive.
+- **Disconnected Flow**: No smooth transition from discovery → understanding → reaching out.
+- **Fragmented Tools**: Messaging, networking, and profile building are scattered.
+- **Lack of Intelligence**: No assistant to help users communicate better or present themselves well.
 
+---
 
-# 🧩 The Problem
+## 💡 The Solution — CliQ
+CliQ solves this by creating one seamless workflow:
+**Post → Discover → Connect → Chat → Collaborate**
 
-Today’s platforms don’t help people find the right collaborators.
-People struggle with:
-1. Social apps that focus on entertainment, not expertise
-2. Professional networks that feel cold and inactive
-3. No easy way to move from content → profile → connection → conversation
-4. Communication scattered across multiple apps
+Users can build a professional identity around expertise, discover relevant talent through smart recommendations, and collaborate instantly with built-in AI tools.
 
-Finding someone is easy.
-Finding the right person is hard.
+---
 
+## 🛠️ Tech Stack
 
+### Frontend
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)
 
-# 💡 The Solution — CliQ
+### Backend
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-4ea94b?style=for-the-badge&logo=mongodb&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
 
-CliQ brings everything into one seamless flow:
-Post → Discover → Connect → Chat → Collaborate
-Users can:
-1. Share posts and images
-2. View profiles & expertise
-3. Connect with the right people
-4. Chat and work together — all in one place
+### AI Agent Service
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 
+---
 
+## 🚀 Features
 
-# 🚀 What CliQ Offers
+### 🏆 CliQ Premium Features & Security
+- **🔐 Secure Authentication**: OTP-based verification, password resets, and Google Sign-In via OAuth.
+- **⚖️ Production Hardened**: Integrated **Helmet** for security headers, **Morgan** for detailed HTTP logging, and **Rate Limiting** to prevent brute force.
+- **🛡️ Dynamic CSP**: Intelligent Content Security Policy that automatically whitelists your production domains.
+- **🚀 Fail-Fast Validation**: Backend ensures all critical env variables exist at startup to prevent runtime crashes.
 
-1. 🔐 Secure Authentication -> Easy and safe Login/Signup flow to get started quickly.
+### 👤 Profile & Expertise
+- **Email As Tagline**: Profiles use the user's verified email as a primary identifier in the header for transparent networking.
+- **🧠 Expertise Showcase**: A structured section for skills, projects, and achievements.
+- **🤖 AI Profile Builder**: Generate high-quality expertise content instantly based on your inputs.
 
-2. 👤 Profile Management -> Update your personal details anytime , Display your expertise and skills  , View public profiles of other users
+### 🤝 Connections & Recommendations
+- **🎯 Smart Matching**: Discovery system that suggests relevant users based on professional data.
+- **📊 Activity Insights**: Tracks connection interests and saves to continuously refine recommendations.
 
-3. 🤝 Build Connections -> Discover People – Explore users suggested to you , Connection Requests ->Send, accept, or decline requests , My Network – View all your current connections in one place
+### 💬 Real-Time Collaboration
+- **💬 Advanced Chat**: Instant messaging with file sharing, voice messages, and message editing/deletion.
+- **✨ AI Message Assistant**: Get smart reply hints and context-aware suggestions directly inside your chat window.
+- **🤖 Dedicated AI Agent**: A standalone chatbot for guidance and instant support.
 
-4. 📝 Share Experiences Through Posts  -> Create and publish posts , Upload images to make posts more engaging , Personalized feed based on your connections , View individual post pages and user-specific posts.
+---
 
-5. 💬 Chat & Collaboration ->  Once connected, users can chat and start meaningful collaborations directly inside the platform.
+## 🏁 Getting Started
 
-6. ⚙️ Settings -> Manage account preferences and customize your experience.
-7. 📱 Fully Responsive Design -> Works beautifully on desktops, tablets, and mobile devices.
+### ✅ Requirements
+- Node.js (v18+)
+- npm / yarn
+- MongoDB Instance
+- Redis Server (Required for status tracking & caching)
+- Cloudinary Account (For image & file storage)
 
+### 📥 Installation
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd Website
+   ```
 
+2. Install dependencies:
+   - **Frontend**: `cd website_Dev/vite-project && npm install`
+   - **Backend**: `cd WebsiteBackend && npm install`
+   - **AI Agent**: `cd WebsiteAgent && pip install -r requirements.txt`
 
-# 🛠️ Tech Stack
+### 🔑 Configuration
+Create `.env` files based on the project requirements.
 
-Frontend -> React + Vite  , Tailwind CSS , React Router DOM , Context API , Axios , Lucide React,   React Icons , Framer Motion , useState , useContext , useEffect , useParams
+**Backend (`WebsiteBackend/.env`)**:
+```env
+DATABASE_URL="your-mongodb-url"
+JWT_SECRET_KEY="your-secret"
+FRONTEND_URL="http://localhost:5173"
+REDIS_URL="redis://127.0.0.1:6379"
+CLOUDINARY_URL="your-cloudinary-url"
+... (plus SMTP and Google credentials)
+```
 
-Backend -> Node.js , Express , MongoDB , JWT Authentication
-
-
-
-
-# 🌍 Live Application
-
-Frontend:
-https://cliq-web-rho.vercel.app 
-
-Backend API:
-https://cliq-backend-1.onrender.com
-
-
-
-# 🏁 Getting Started
-
-Follow the steps below to run the project on your machine.
-
-✅ Requirements
-Node.js (v14+)
-npm or yarn
-
-📥 Installation
-
-Clone the repository -> git clone <repository-url> -> cd vite-project
-
-Install dependencies -> npm install
-
-
-🔑 Environment Variables
-
-Create a .env file in the project root:
-
+### ▶ Run
+Start all services for a full experience:
+```bash
 # Frontend
-
-- VITE_BACKEND_URL="http://localhost:2001"
-▶ Run Development Server -> npm run dev
-🏗 Create Production Build -> npm run build
+npm run dev
 
 # Backend
+npm run dev
 
-- DATABASE_URL
-- JWT_SECRET_KEY
-- FRONTEND_URL
-- CLOUD_NAME
-- CLOUD_KEY
-- CLOUD_SECRET
+# AI Agent
+python -m src.main
+```
 
+---
 
+## 🌍 Deployment
+- **Frontend**: Optimized for **Vercel** / Netlify.
+- **Backend**: Built for **Render** / Railway / DigitalOcean (supports PM2/Docker).
+- **AI Agent**: Containerized and ready for cloud deployment via **Docker**.
 
-# 📁 Project Structure
+### Production Tip 🚀
+When deploying the backend, set `NODE_ENV=production` to enable high-fidelity logging and specialized security optimizations.
 
-# Frontend important file
-vite-project/
-├── public/                 # Static public assets (icons, robots.txt)
-├── src/
-│   ├── api/                # Axios instance & specific API configurations
-│   ├── assets/             # Global images and styling assets
-│   ├── components/         # Main UI logic
-│   │   ├── Authentication/ # Signup and Login logic
-│   │   ├── Chat/           # Real-time messaging UI
-│   │   ├── Connections/    # Networking, Requests, Discovery
-│   │   ├── Mobileview/     # Mobile-specific navigation & top bar
-│   │   ├── Post/           # Post creation, editing, and details
-│   │   ├── shimmering/     # Loading skeletons for posts/profiles
-│   │   ├── Home.jsx        # Personalized feed with scroll restoration
-│   │   ├── Postcard.jsx    # Reusable post UI with interaction logic
-│   │   ├── Profile.jsx     # User's own profile management
-│   │   └── Sidebar.jsx     # Desktop navigation panel
-│   ├── context/            # Global state (UserContext, FeedContext)
-│   ├── App.jsx             # Route definitions and Providers
-│   ├── Layout.jsx          # Structural wrapper for all pages
-│   ├── index.css           # Tailwind CSS and global overrides
-│   └── main.jsx            # Entry point for React
-├── .env                    # Environment variables (Backend URL)
-├── package.json            # Frontend dependencies
-└── vite.config.js          # Vite configuration
+---
 
-# Backend important file
-
-WebsiteBackend/
-├── prisma/
-│   ├── schema.prisma       # Database models (User, Post, Message, Connection, etc.)
-│   └── ...
-├── src/
-│   ├── controllers/        # Logical handlers for API business logic
-│   │   ├── authController.js       # Signup, Login, Logout, Session management
-│   │   ├── chatController.js       # Real-time message storage, history, and deleting
-│   │   ├── postController.js       # Feed generation, Likes, Comments, Reports
-│   │   ├── profileController.js    # Fetching/Updating user profile and expertise
-│   │   ├── requestController.js    # Sending, accepting, and declining connections
-│   │   ├── searchController.js     # Finding people and filtering users
-│   │   ├── userController.js       # General user data management
-│   │   └── myConnectionController.js # Managing existing user connections
-│   ├── routes/             # API Route definitions (Entry points)
-│   │   ├── index.js                # Main router entry combining all routes
-│   │   ├── authRoutes.js
-│   │   ├── chatRoutes.js
-│   │   ├── postRoutes.js
-│   │   ├── profileRoutes.js
-│   │   ├── requestRoutes.js
-│   │   ├── userRoutes.js
-│   │   └── ...
-│   ├── middlewares/        # Security and Utility layers
-│   │   ├── authMiddleware.js       # JWT token verification & route protection
-│   │   └── uploadMiddleware.js     # Image/File processing logic
-│   ├── socket/             # Real-time WebSocket logic
-│   │   └── index.js                # Socket.io event listeners (messaging, online status)
-│   ├── upload/             # Local storage for user-uploaded images/media
-│   ├── utils/              # Helper functions (token generation, formatters)
-│   └── app.js              # Server entry point (Port: 2002)
-├── .env                    # Environment variables (DB_URL, JWT_SECRET, Port)
-├── package.json            # Backend dependencies and scripts
-├── prisma.config.ts        # Prisma configuration
-└── reproduce_random_feed.js # Internal utility for testing feed logic
-
-
-
-# 🎯 Vision
-
-CliQ is not just a social platform —
-it is a connection engine designed to help people discover talent, build relationships, and collaborate on real ideas.
-
-If you want, I can also create:
-A backend README
-A system architecture diagram
-Or a startup pitch version for investors 💼
+## 🎯 Vision
+CliQ is not just a social platform. It is a **connection engine** built to help people discover talent, communicate better, and collaborate on real ideas in one unified experience.
