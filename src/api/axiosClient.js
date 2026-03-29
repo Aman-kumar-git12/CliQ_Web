@@ -15,11 +15,18 @@ const axiosClient = axios.create({
 axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // If there's no response (likely a timeout or network error)
+    // If there's no response (likely a timeout, CORS, or network error)
     if (!error.response) {
-      console.log("Backend might be asleep, retrying in 3 seconds...");
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      return axiosClient(error.config);
+      // Initialize retry count
+      const config = error.config;
+      config._retryCount = config._retryCount || 0;
+
+      if (config._retryCount < 2) {
+        config._retryCount += 1;
+        console.warn(`Backend unreachable, retrying (${config._retryCount}/2) in 3 seconds...`);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        return axiosClient(config);
+      }
     }
     return Promise.reject(error);
   }
