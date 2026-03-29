@@ -14,8 +14,8 @@ export default function Signup() {
         age: "",
         terms: false,
     });
-    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const { setUser } = useUserContext();
     const [error, setError] = useState(null);
@@ -43,17 +43,25 @@ export default function Signup() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+
+        if (!formData.terms) {
+            setError("You must agree to the Terms and Privacy Policy to create an account.");
+            setShowErr(true);
+            setLoading(false);
+            return;
+        }
+
         try {
             const response = await axiosClient.post("/signup", formData);
-            console.log(response)
-            setUser(response.data.user);
-            navigate("/home");
-            setShowErr(false);
-            setError(null);
+            setUser(null);
+            // Redirect to OTP verification page, passing email via route state
+            navigate("/verify-otp", {
+                state: { email: response.data?.email || formData.email },
+                replace: true,
+            });
         } catch (error) {
             const errorData = error.response?.data;
             const errorMessage = errorData?.message || errorData?.error || "Signup failed";
-
             setShowErr(true);
             setError(errorMessage);
         } finally {
@@ -75,7 +83,7 @@ export default function Signup() {
                 <div className="flex justify-between items-center">
                     <h3 className="text-2xl font-semibold">Register Now!</h3>
 
-                    <div className="flex items-center gap-0.5 text-sm">
+                    <div className="flex items-center gap-1 text-sm">
                         <span className="text-gray-300">Already registered?</span>
                         <Link
                             to="/login"
@@ -89,8 +97,8 @@ export default function Signup() {
                 {/* FIRST NAME + LAST NAME */}
                 <div className="flex gap-2">
                     {/* First Name */}
-                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2">
-                        <User className="text-gray-400 mr-2" size={18} />
+                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2 group focus-within:border-white transition-colors">
+                        <User className="text-gray-400 mr-2 group-focus-within:text-white transition-colors" size={18} />
                         <input
                             type="text"
                             name="firstname"
@@ -102,8 +110,8 @@ export default function Signup() {
                     </div>
 
                     {/* Last Name */}
-                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2">
-                        <User className="text-gray-400 mr-2" size={18} />
+                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2 group focus-within:border-white transition-colors">
+                        <User className="text-gray-400 mr-2 group-focus-within:text-white transition-colors" size={18} />
                         <input
                             type="text"
                             name="lastname"
@@ -116,8 +124,8 @@ export default function Signup() {
                 </div>
 
                 {/* EMAIL */}
-                <div className="flex items-center border border-gray-600 rounded px-3 py-2">
-                    <Mail className="text-gray-400 mr-2" size={18} />
+                <div className="flex items-center border border-gray-600 rounded px-3 py-2 group focus-within:border-white transition-colors">
+                    <Mail className="text-gray-400 mr-2 group-focus-within:text-white transition-colors" size={18} />
                     <input
                         type="email"
                         name="email"
@@ -151,8 +159,8 @@ export default function Signup() {
                     </div>
 
                     {/* Age */}
-                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2">
-                        <Calendar className="text-gray-400 mr-2" size={18} />
+                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2 group focus-within:border-white transition-colors">
+                        <Calendar className="text-gray-400 mr-2 group-focus-within:text-white transition-colors" size={18} />
                         <input
                             type="number"
                             name="age"
@@ -166,13 +174,13 @@ export default function Signup() {
                 </div>
 
                 {/* TERMS */}
-                <div className="flex items-start text-sm text-gray-400 space-x-2">
+                <div className={`flex items-start text-sm space-x-2 transition-colors ${showErr && error?.includes("Terms") ? "text-red-400 font-medium" : "text-gray-400"}`}>
                     <input
                         type="checkbox"
                         name="terms"
                         checked={formData.terms}
                         onChange={handleChange}
-                        className="mt-1"
+                        className={`mt-1 ${showErr && error?.includes("Terms") ? "ring-2 ring-red-500 ring-offset-1 ring-offset-black rounded-sm" : ""}`}
                     />
                     <p>
                         By creating an account, you agree to the{" "}
@@ -181,7 +189,7 @@ export default function Signup() {
                     </p>
                 </div>
 
-                {showErr && (
+                {showErr && !error?.includes("Terms") && (
                     <div className=" text-red-600 px-4 py-2 rounded">{error}</div>
                 )}
 

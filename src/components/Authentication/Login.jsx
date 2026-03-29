@@ -9,8 +9,10 @@ export default function Login() {
     const [formData, setFormData] = useState({
         email: "",
         password: "",
+        newPassword: "",
     });
     const navigate = useNavigate();
+    const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const { setUser, setBlockedAccount, setBlockedMessage, setBlockedEmail } = useUserContext();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -18,6 +20,8 @@ export default function Login() {
     const [error, setError] = useState(null);
     const [showErr, setShowErr] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
+    const [resendMessage, setResendMessage] = useState("");
 
     useEffect(() => {
         const authError = searchParams.get("authError");
@@ -30,6 +34,7 @@ export default function Login() {
 
     const handleChange = (e) => {
         setShowErr(false); // hide error while typing
+        setResendMessage("");
         const { name, value } = e.target;
 
         setFormData((prev) => ({
@@ -38,9 +43,67 @@ export default function Login() {
         }));
     };
 
+    const handleResendVerification = async () => {
+        if (!formData.email) {
+            setError("Enter your email first to resend the verification link.");
+            setShowErr(true);
+            return;
+        }
+
+        setResendLoading(true);
+        try {
+            const response = await axiosClient.post("/auth/resend-verification", {
+                email: formData.email,
+            });
+            setResendMessage(response.data?.message || "Verification email sent.");
+            setShowErr(false);
+        } catch (err) {
+            const errorMessage = err.response?.data?.message || err.response?.data?.error || "Unable to resend verification email.";
+            setError(errorMessage);
+            setShowErr(true);
+            setResendMessage("");
+        } finally {
+            setResendLoading(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setResendMessage("");
+        setError(null);
+        setShowErr(false);
+
+        if (forgotPasswordMode) {
+            if (formData.newPassword.length < 8) {
+                setError("New password must be at least 8 characters long.");
+                setShowErr(true);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                // Trigger the forgot password email
+                await axiosClient.post("/auth/forgot-password", { email: formData.email });
+                
+                // Immediately navigate to OTP verification, passing the new password silently in state
+                navigate("/verify-otp", {
+                    replace: true,
+                    state: { 
+                        email: formData.email, 
+                        intent: "reset_password",
+                        newPassword: formData.newPassword
+                    }
+                });
+            } catch (err) {
+                const errorMessage = err.response?.data?.message || err.response?.data?.error || "Failed to send reset code. Try again.";
+                setError(errorMessage);
+                setShowErr(true);
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
 
         try {
             const response = await axiosClient.post("/login", formData);
@@ -51,7 +114,7 @@ export default function Login() {
             setShowErr(false);
             setError(null);
         } catch (err) {
-            if (err.response?.status === 403) {
+            if (err.response?.status === 403 && err.response?.data?.code !== "EMAIL_NOT_VERIFIED") {
                 const blockedMsg = err.response?.data?.message || "This account has been blocked.";
                 setBlockedAccount(true);
                 setBlockedMessage(blockedMsg);
@@ -60,10 +123,8 @@ export default function Login() {
                 return;
             }
             // show backend error message
-            const apiError = err.response?.data?.error;
-            const errorMessage = typeof apiError === 'string'
-                ? apiError
-                : apiError?.message || "Something went wrong";
+            const errorData = err.response?.data;
+            const errorMessage = errorData?.message || errorData?.error || "Something went wrong";
             setError(errorMessage);
             setShowErr(true);
             // console.log("Login error:", err.response?.data);
@@ -83,8 +144,10 @@ export default function Login() {
 
             <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-5">
                 {/* Top Heading */}
-                <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-semibold">Login now!</h3>
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-semibold">
+                        {forgotPasswordMode ? "Reset Password" : "Login Now!"}
+                    </h3>
 
                     <div className="flex items-center gap-1 text-sm">
                         <span className="text-gray-300">New here?</span>
@@ -95,8 +158,8 @@ export default function Login() {
                 </div>
 
                 {/* Email */}
-                <div className="flex items-center border border-gray-600 rounded px-3 py-2">
-                    <Mail className="text-gray-400 mr-2" size={18} />
+                <div className="flex items-center border border-gray-600 rounded px-3 py-2 group focus-within:border-white transition-colors">
+                    <Mail className="text-gray-400 mr-2 group-focus-within:text-white transition-colors" size={18} />
                     <input
                         type="email"
                         name="email"
@@ -107,29 +170,61 @@ export default function Login() {
                     />
                 </div>
 
-                {/* Password */}
-                <div className="flex items-center border border-gray-600 rounded px-3 py-2 group focus-within:border-white transition-colors">
-                    <Lock className="text-gray-400 mr-2 group-focus-within:text-white" size={18} />
-                    <input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        placeholder="Enter password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="bg-transparent outline-none text-gray-200 w-full"
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                    >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
+                {/* Password / New Password */}
+                <div>
+                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 group focus-within:border-white transition-colors">
+                        <Lock className="text-gray-400 mr-2 group-focus-within:text-white transition-colors" size={18} />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name={forgotPasswordMode ? "newPassword" : "password"}
+                            placeholder={forgotPasswordMode ? "Enter new password" : "Enter password"}
+                            value={forgotPasswordMode ? formData.newPassword : formData.password}
+                            onChange={handleChange}
+                            className="bg-transparent outline-none text-gray-200 w-full"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="text-gray-400 hover:text-white transition-colors"
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                    </div>
+
+                    {/* Toggle Forgot Password Mode */}
+                    <div className="flex justify-end mt-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setForgotPasswordMode(!forgotPasswordMode);
+                                setError(null);
+                                setShowErr(false);
+                            }}
+                            className="text-xs text-neutral-400 hover:text-white transition cursor-pointer"
+                        >
+                            {forgotPasswordMode ? "Back to Login" : "Forgot Password?"}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Error Message */}
                 {showErr && (
                     <div className="text-red-600 px-4 py-2 rounded">{error}</div>
+                )}
+
+                {resendMessage && (
+                    <div className="text-green-500 px-4 py-2 rounded">{resendMessage}</div>
+                )}
+
+                {showErr && error === "Please verify your email before logging in." && (
+                    <button
+                        type="button"
+                        onClick={handleResendVerification}
+                        disabled={resendLoading}
+                        className={`w-full border border-white/20 text-white font-medium py-3 rounded-full hover:bg-white/5 transition-all ${resendLoading ? "opacity-70 cursor-not-allowed" : ""}`}
+                    >
+                        {resendLoading ? "Sending..." : "Resend verification email"}
+                    </button>
                 )}
 
                 {/* Submit Button */}
@@ -138,7 +233,7 @@ export default function Login() {
                     type="submit"
                     className={`w-full bg-white text-black font-semibold py-3 rounded-full hover:opacity-90 transition-all ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
                 >
-                    {loading ? "Logging in..." : "Login"}
+                    {loading ? (forgotPasswordMode ? "Sending..." : "Logging in...") : (forgotPasswordMode ? "Send OTP" : "Login")}
                 </button>
 
                 <div className="flex items-center gap-3 py-1">

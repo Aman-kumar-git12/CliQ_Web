@@ -1,9 +1,10 @@
-
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Home from "./components/Home";
 import Layout from "./Layout";
 import Signup from "./components/Authentication/Signup";
 import Login from "./components/Authentication/Login";
+import VerifyEmail from "./components/Authentication/VerifyEmail";
+import VerifyOTP from "./components/Authentication/VerifyOTP";
 import { useUserContext } from "./context/userContext";
 import Profile from "./components/profile";
 import EditProfile from "./components/EditProfile";
@@ -57,6 +58,8 @@ function App() {
       <FeedProvider>
         <Routes>
           <Route path="/blocked-account" element={<BlockedAccount />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
 
           {/* Public Routes (Redirect to Home if logged in) */}
           <Route element={<PublicRoute />}>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 
 
@@ -12,8 +12,14 @@ export const UserContextProvider = ({ children }) => {
     const [blockedEmail, setBlockedEmail] = useState("");
     const [loading, setLoading] = useState(true); // True until auto-login completes
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
+        if (location.pathname === "/verify-email" || location.pathname === "/verify-otp") {
+            setLoading(false);
+            return;
+        }
+
         const checkAuth = async () => {
             try {
                 // Backend will read token from cookies and return the user
@@ -44,7 +50,7 @@ export const UserContextProvider = ({ children }) => {
         };
 
         checkAuth();
-    }, [navigate]); // Run once on mount
+    }, [location.pathname, navigate]); // Run once on mount, except verification page
 
     return (
         <UserContext.Provider value={{ user, setUser, loading, blockedAccount, setBlockedAccount, blockedMessage, setBlockedMessage, blockedEmail, setBlockedEmail }}>
