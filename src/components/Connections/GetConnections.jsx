@@ -91,9 +91,9 @@ export default function GetConnections() {
     return (
         <motion.div
             style={{ backgroundColor: bgGlow }}
-            className="w-full relative min-h-[700px] grid place-items-center pt-8 pb-12 px-4 overflow-hidden rounded-[40px] transition-colors duration-500 bg-[#16161f]"
+            className="w-full relative min-h-[700px] grid place-items-center pt-20 pb-12 px-4 overflow-hidden rounded-[40px] transition-colors duration-500 bg-[#16161f]"
         >
-            <ConnectionNudge nudge={viewerProfileNudge} />
+            {!activePanel && <ConnectionNudge nudge={viewerProfileNudge} />}
 
             <div className="absolute top-5 right-5 z-30 flex items-center gap-2">
                 <button

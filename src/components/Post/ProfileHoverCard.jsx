@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserPlus, Check, MessageSquare, Users as GroupsIcon } from "lucide-react";
+import { UserPlus, Check, MessageSquare, Users as GroupsIcon, Play } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
 
@@ -157,7 +157,21 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                                             <div key={i} className="aspect-square bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
                                                 {post ? (
                                                     <Link to={`/post/${post.id}`} className="block w-full h-full">
-                                                        {post.image ? (
+                                                        {post.video ? (
+                                                            <div className="relative w-full h-full">
+                                                                <video
+                                                                    src={post.video}
+                                                                    className="w-full h-full object-cover hover:scale-110 transition duration-300"
+                                                                    muted
+                                                                    playsInline
+                                                                    preload="metadata"
+                                                                />
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none" />
+                                                                <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center text-white pointer-events-none">
+                                                                    <Play size={10} fill="currentColor" />
+                                                                </div>
+                                                            </div>
+                                                        ) : post.image ? (
                                                             <img src={post.image} className="w-full h-full object-cover hover:scale-110 transition duration-300" alt="Post" />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors">

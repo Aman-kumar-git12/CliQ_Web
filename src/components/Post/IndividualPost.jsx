@@ -626,13 +626,21 @@ export default function IndividualPost() {
                             </p>
                         )}
 
-                        {post.image && (
+                        {(post.image || post.video) && (
                             <div className="rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-[#121212] border border-white/10 mb-6">
-                                <img
-                                    src={post.image}
-                                    alt="Post"
-                                    className="w-full h-full object-contain"
-                                />
+                                {post.video ? (
+                                    <video
+                                        src={post.video}
+                                        controls
+                                        className="w-full h-full object-contain"
+                                    />
+                                ) : (
+                                    <img
+                                        src={post.image}
+                                        alt="Post"
+                                        className="w-full h-full object-contain"
+                                    />
+                                )}
                             </div>
                         )}
                     </div>
@@ -746,10 +754,10 @@ export default function IndividualPost() {
                             <form onSubmit={handleAddComment} className="flex items-center space-x-3">
                                 <Link
                                     to="/profile"
-                                    onMouseEnter={(e) => handleProfileMouseEnter(e, user?.id)}
+                                    onMouseEnter={(e) => handleProfileMouseEnter(e, currentUser?.id)}
                                     onMouseLeave={handleProfileMouseLeave}
                                 >
-                                    <img src={user?.imageUrl || "https://github.com/shadcn.png"} className="w-9 h-9 rounded-full object-cover hover:opacity-80 transition-opacity" alt="Me" />
+                                    <img src={currentUser?.imageUrl || "https://github.com/shadcn.png"} className="w-9 h-9 rounded-full object-cover hover:opacity-80 transition-opacity" alt="Me" />
                                 </Link>
                                 <div className="flex-1 relative">
                                     <input
@@ -775,7 +783,7 @@ export default function IndividualPost() {
                                 comments.map((comment) => (
                                     <div key={comment.id} className="p-4 flex space-x-3 hover:bg-white/[0.02] transition-colors">
                                         <Link
-                                            to={user?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
+                                            to={currentUser?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
                                             onMouseEnter={(e) => handleProfileMouseEnter(e, comment.userId)}
                                             onMouseLeave={handleProfileMouseLeave}
                                         >
@@ -785,7 +793,7 @@ export default function IndividualPost() {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-2">
                                                     <Link
-                                                        to={user?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
+                                                        to={currentUser?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
                                                         className="font-bold text-sm text-white hover:text-emerald-400 transition-colors"
                                                         onMouseEnter={(e) => handleProfileMouseEnter(e, comment.userId)}
                                                         onMouseLeave={handleProfileMouseLeave}
@@ -805,7 +813,7 @@ export default function IndividualPost() {
 
                                                     {activeMenuId === comment.id && (
                                                         <div className="absolute right-0 mt-1 w-32 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-20 overflow-hidden animate-fadeIn">
-                                                            {comment.userId === user?.id ? (
+                                                            {comment.userId === currentUser?.id ? (
                                                                 <button
                                                                     onClick={() => {
                                                                         setDeletingCommentId(comment.id);

@@ -109,21 +109,32 @@ const PostCard = ({ post }) => {
                             </p>
                         </div>
 
-                        {/* IMAGE AREA */}
+                        {/* MEDIA AREA */}
                         {(() => {
                             const imgSrc = post.image || post.images;
+                            const videoSrc = post.video;
                             const images = Array.isArray(imgSrc) ? imgSrc : imgSrc ? [imgSrc] : [];
-                            if (images.length === 0) return null;
+                            
+                            if (images.length === 0 && !videoSrc) return null;
+
                             return (
                                 <div className="w-full h-[500px] bg-neutral-100 dark:bg-neutral-950 rounded-xl flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-neutral-800 mb-3">
-                                    {images.map((img, i) => (
-                                        <img
-                                            key={i}
-                                            src={img}
+                                    {videoSrc ? (
+                                        <video
+                                            src={videoSrc}
+                                            controls
                                             className="w-full h-full object-contain"
-                                            alt={`Post content ${i}`}
                                         />
-                                    ))}
+                                    ) : (
+                                        images.map((img, i) => (
+                                            <img
+                                                key={i}
+                                                src={img}
+                                                className="w-full h-full object-contain"
+                                                alt={`Post content ${i}`}
+                                            />
+                                        ))
+                                    )}
                                 </div>
                             );
                         })()}

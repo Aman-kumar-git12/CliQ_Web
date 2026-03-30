@@ -13,8 +13,7 @@ const formatBucketLabel = (value = "") =>
 const ConnectionDashboard = ({ analyticsData, adminAnalytics }) => {
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <InsightCard label="Shown" value={analyticsData.counts?.shown || 0} icon={<BarChart3 size={16} />} />
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <InsightCard label="Saved" value={analyticsData.counts?.saved || 0} icon={<Bookmark size={16} />} />
                 <InsightCard label="Interest Rate" value={formatPercent(analyticsData.conversion?.interestRate)} icon={<Send size={16} />} />
                 <InsightCard label="Save Rate" value={formatPercent(analyticsData.conversion?.saveRate)} icon={<Check size={16} />} />

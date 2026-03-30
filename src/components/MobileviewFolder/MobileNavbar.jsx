@@ -10,7 +10,7 @@ export default function MobileNavbar() {
             <Link to="/home" className={`p-2 rounded-xl transition-colors ${isActive('/home') ? "text-white" : "text-neutral-400"}`}>
                 <Home size={24} strokeWidth={isActive('/home') ? 2.5 : 2} />
             </Link>
-            <Link to="/find/findpeople" className={`p-2 rounded-xl transition-colors ${isActive('/find') ? "text-white" : "text-neutral-400"}`}>
+            <Link to="/find/getconnection" className={`p-2 rounded-xl transition-colors ${isActive('/find') ? "text-white" : "text-neutral-400"}`}>
                 <Search size={24} strokeWidth={isActive('/find') ? 2.5 : 2} />
             </Link>
             <Link to="/create/post" className="p-2 rounded-xl text-neutral-400 hover:text-white transition-colors">

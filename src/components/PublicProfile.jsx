@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import MyExperties from "./MyExperties/MyExperties";
-import { X, Plus, Eye } from "lucide-react";
+import { X, Plus, Eye, Play } from "lucide-react";
 import ProfileHoverCard from "./Post/ProfileHoverCard";
 import { useUserContext } from "../context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -259,7 +259,21 @@ const PublicProfile = () => {
                                                     key={post.id}
                                                     className="group relative aspect-square bg-[#111] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
                                                 >
-                                                    {post.image ? (
+                                                    {post.video ? (
+                                                        <>
+                                                            <video
+                                                                src={post.video}
+                                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                                muted
+                                                                playsInline
+                                                                preload="metadata"
+                                                            />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none" />
+                                                            <div className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-black/65 border border-white/10 flex items-center justify-center text-white shadow-lg pointer-events-none">
+                                                                <Play size={16} fill="currentColor" />
+                                                            </div>
+                                                        </>
+                                                    ) : post.image ? (
                                                         <img src={post.image} alt="Post" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-gray-400 p-4 text-center text-sm">

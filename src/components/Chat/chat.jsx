@@ -2,7 +2,7 @@ import { ArrowLeft, ChevronDown, Trash2, Pencil, Ban, Plus, Smile, Mic, SendHori
 import { useNavigate, useParams } from "react-router-dom";
 import createSocketConnection from "./socket";
 import { useEffect, useState, useRef, useMemo } from "react";
-import axiosClient from "../../api/axiosClient";
+import axiosClient, { apiBaseUrl } from "../../api/axiosClient";
 import LoadingChat from "./LoadingChat";
 import Confirmation from "../../components/Confirmation";
 import Toastbar from "./Toastbar";
@@ -909,7 +909,7 @@ const ChatUI = () => {
 
         try {
 
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/message-ai/conversation/stream/${targetuserId}`, {
+            const response = await fetch(`${apiBaseUrl}/message-ai/conversation/stream/${targetuserId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -922,6 +922,7 @@ const ChatUI = () => {
             });
 
             if (!response.ok) throw new Error("API request failed");
+            if (!response.body) throw new Error("AI stream did not return a readable response body");
             
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, Send, Bot, Menu, PlusCircle, Trash2, MessageSquare, Maximize2, Minimize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useUserContext } from '../../context/userContext';
-import axiosClient from "../../api/axiosClient";
+import axiosClient, { apiBaseUrl } from "../../api/axiosClient";
 
 const DEFAULT_GREETING = "Hi, I am CliQ AI. How can I help you today? 🙂";
 
@@ -176,13 +176,15 @@ export default function Chatbot() {
             // 2. Stream generation
             // We use the backend URL to leverage the proxy and handle CORS/authentication if needed.
             // The proxy in app.js maps /api/agent to the LLM service /api.
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/agent/chat/stream`, {
+            const response = await fetch(`${apiBaseUrl}/api/agent/chat/stream`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ message: userQuery, sessionId: targetSessionId })
             });
 
             if (!response.ok) throw new Error("API request failed");
+            if (!response.body) throw new Error("AI stream did not return a readable response body");
             setIsLoading(false); 
 
             const reader = response.body.getReader();

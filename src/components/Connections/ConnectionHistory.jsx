@@ -15,7 +15,6 @@ const formatPercent = (value) => `${Math.round((value || 0) * 100)}%`;
 
 const formatEventLabel = (action) => {
     switch (action) {
-        case "shown": return "Shown";
         case "saved": return "Saved";
         case "ignored": return "Ignored";
         case "interested": return "Interested";
@@ -25,7 +24,6 @@ const formatEventLabel = (action) => {
 
 const formatSectionTitle = (action) => {
     switch (action) {
-        case "shown": return "Shown Profiles";
         case "saved": return "Saved Profiles";
         case "ignored": return "Ignored Profiles";
         case "interested": return "Interested Profiles";
@@ -37,7 +35,6 @@ const formatSectionTitle = (action) => {
 
 const getSectionActionLabel = (action) => {
     switch (action) {
-        case "shown": return "Remove";
         case "saved": return "Unsave";
         case "ignored": return "Remove Ignore";
         case "interested": return "Remove Interest";
@@ -112,7 +109,7 @@ const ConnectionHistory = ({
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {(selectedSection === "shown" || selectedSection === "saved") && (
+                                    {(selectedSection === "saved") && (
                                         <>
                                             <button
                                                 disabled={actionInProgress.has(candidate.id)}
@@ -152,7 +149,6 @@ const ConnectionHistory = ({
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <InsightCard label="Shown" value={historyData.counts?.shown || 0} icon={<BarChart3 size={16} />} onView={() => setSelectedSection("shown")} />
                 <InsightCard label="Saved" value={historyData.counts?.saved || 0} icon={<Bookmark size={16} />} onView={() => setSelectedSection("saved")} />
                 <InsightCard label="Ignored" value={historyData.counts?.ignored || 0} icon={<X size={16} />} onView={() => setSelectedSection("ignored")} />
                 <InsightCard label="Interested" value={historyData.counts?.interested || 0} icon={<Send size={16} />} onView={() => setSelectedSection("interested")} />

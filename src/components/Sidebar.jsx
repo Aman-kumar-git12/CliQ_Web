@@ -99,7 +99,7 @@ export default function Sidebar() {
 
                     <div className="flex flex-col gap-4">
                         <NavItem to="/home" icon={Home} label="Home" />
-                        <NavItem to="/find/findpeople" icon={Search} label="Find" />
+                        <NavItem to="/find/getconnection" icon={Search} label="Find" />
                         <NavItem to="/requests" icon={Heart} label="Requests" />
                         <NavItem to="/create/post" icon={PlusSquare} label="Create" />
                         <NavItem to="/messages" icon={MessageSquare} label="Messages" />

@@ -2,9 +2,10 @@
 import axios from "axios";
 
 const pro = import.meta.env.VITE_BACKEND_URL;
+export const apiBaseUrl = (pro || (typeof window !== "undefined" ? window.location.origin : "")).replace(/\/$/, "");
 
 const axiosClient = axios.create({
-  baseURL: pro,   // your backend  URL
+  baseURL: apiBaseUrl,   // your backend URL
   headers: {
     "Content-Type": "application/json",
   },

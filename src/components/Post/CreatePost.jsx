@@ -30,15 +30,24 @@ const CreatePost = () => {
         setTimeout(() => setSnack(""), 3000);
     };
 
-    // Handle image selection
-    const handleImageUpload = (e) => {
+    // Handle file selection
+    const handleFileSelection = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Check file size (10MB = 10 * 1024 * 1024 bytes)
-        const maxSize = 10 * 1024 * 1024;
+        // Check file type
+        const isVideo = file.type.startsWith("video/");
+        const isImage = file.type.startsWith("image/");
+
+        if (!isVideo && !isImage) {
+            showSnack("Only image and video files are supported");
+            return;
+        }
+
+        // Check file size (Image: 10MB, Video: 50MB)
+        const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
         if (file.size > maxSize) {
-            showSnack("Image should be less than 10 MB");
+            showSnack(`${isVideo ? "Video" : "Image"} should be less than ${isVideo ? "50" : "10"} MB`);
             return;
         }
 
@@ -53,7 +62,10 @@ const CreatePost = () => {
     };
 
     const handleCreatePostClick = () => {
-        if (!content.trim()) return alert("Please add some description");
+        if (!content.trim() && !selectedFile) {
+            showSnack("Add some text or select media before posting");
+            return;
+        }
         setShowConfirm(true);
     };
 
@@ -66,7 +78,8 @@ const CreatePost = () => {
             const formData = new FormData();
             formData.append("content", content);
             if (selectedFile) {
-                formData.append("image", selectedFile);
+                const isVideo = selectedFile.type.startsWith("video/");
+                formData.append(isVideo ? "video" : "image", selectedFile);
             }
 
             await axiosClient.post("/create/post", formData, {
@@ -118,7 +131,7 @@ const CreatePost = () => {
             <div className="w-full max-w-2xl">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl border border-purple-500/20">
-                        <ImagePlus size={24} className="text-purple-400" />
+                        <Loader2 size={24} className="text-purple-400" />
                     </div>
                     <div>
                         <h2 className="text-3xl font-extrabold tracking-tight text-white leading-none">Create Post</h2>
@@ -161,26 +174,35 @@ const CreatePost = () => {
                                     <ImagePlus size={28} className="text-neutral-400 group-hover:text-white transition-colors" />
                                 </div>
                                 <p className="text-neutral-400 font-bold group-hover:text-white transition-colors text-lg">
-                                    Upload Image
+                                    Upload Media
                                 </p>
                                 <p className="text-xs text-neutral-600 mt-2 font-medium">
-                                    PNG, JPG up to 10MB
+                                    Image or Video up to 50MB
                                 </p>
                             </div>
                         ) : (
-                            <div className="relative rounded-2xl overflow-hidden border border-white/10 group shadow-2xl">
-                                <img
-                                    src={preview}
-                                    alt="preview"
-                                    className="w-full h-[300px] object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                                />
+                            <div className="relative rounded-2xl overflow-hidden border border-white/10 group shadow-2xl bg-black">
+                                {selectedFile?.type.startsWith("video/") ? (
+                                    <video
+                                        src={preview}
+                                        controls
+                                        className="w-full h-[300px] object-contain"
+                                    />
+                                ) : (
+                                    <img
+                                        src={preview}
+                                        alt="preview"
+                                        className="w-full h-[300px] object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                                    />
+                                )}
                                 <button
+                                    type="button"
                                     onClick={() => {
                                         setSelectedFile(null);
                                         setPreview("");
                                         if (fileInputRef.current) fileInputRef.current.value = "";
                                     }}
-                                    className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white p-1.5 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                                    className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white p-1.5 rounded-full transition-colors z-10"
                                 >
                                     <X size={16} />
                                 </button>
@@ -189,9 +211,9 @@ const CreatePost = () => {
 
                         <input
                             type="file"
-                            accept="image/*"
+                            accept="image/*,video/*"
                             ref={fileInputRef}
-                            onChange={handleImageUpload}
+                            onChange={handleFileSelection}
                             className="hidden"
                         />
                     </div>
@@ -207,7 +229,7 @@ const CreatePost = () => {
 
                         <button
                             onClick={handleCreatePostClick}
-                            disabled={loading || !content.trim()}
+                            disabled={loading || (!content.trim() && !selectedFile)}
                             className="flex-1 px-4 py-3.5 bg-white text-black hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
                         >
                             {loading ? (
