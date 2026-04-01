@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import axiosClient from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
-import LogoutConfirmation from "./Confirmation";
+import Confirmation from "./Confirmation";
+import { Zap } from "lucide-react";
+import { motion } from "framer-motion";
 
 import EditProfileShimmering from "./shimmering/EditProfileShimmering";
 
@@ -57,16 +59,12 @@ export default function EditProfile() {
     };
 
     const handleConfirmSave = async () => {
-        // e.preventDefault(); (Not needed here as it's not an event handler for form submit anymore)
-        console.log(form);
-
         try {
             const res = await axiosClient.put("/profile/edit", form, {
                 withCredentials: true,
             });
 
             console.log("Updated:", res.data);
-
             navigate("/profile");
         } catch (error) {
             console.error("Update failed:", error);
@@ -82,29 +80,30 @@ export default function EditProfile() {
         return <EditProfileShimmering />;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-black text-black dark:text-white relative overflow-hidden flex items-center justify-center p-4 transition-colors duration-300">
-            {/* Background Gradients (Subtle Dark Glow) */}
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-800/20 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
-
-            <div className="w-full max-w-2xl relative z-10">
-
-                <div className="bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl rounded-3xl overflow-hidden p-8 sm:p-10">
-
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-white dark:to-gray-400">
-                                Edit Profile
-                            </h2>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Update your personal details</p>
-                        </div>
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="p-2 rounded-full bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        </button>
+        <div className="min-h-screen bg-transparent relative overflow-x-hidden pt-24 md:pt-12 pb-24 md:pb-20 transition-all duration-500 no-scrollbar">
+            <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; }` }} />
+ 
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="px-3 md:px-0 max-w-full md:max-w-3xl mx-auto w-full relative z-10"
+            >
+                {/* CLIQ PREMIUM HEADER - Ultra Compact Sync */}
+                <div className="flex flex-col items-start justify-start mb-8 md:mb-6">
+                    <div className="flex items-center gap-2 mb-1">
+                        <Zap size={14} className="fill-[#8b5cf6]/20 text-[#8b5cf6]" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-transparent bg-clip-text bg-gradient-to-r from-[#8b5cf6] to-[#ec4899]">Profile Module</span>
                     </div>
+                    <h1 className="text-[22px] md:text-[32px] font-black tracking-tighter text-white uppercase italic leading-none drop-shadow-md">
+                        Edit
+                    </h1>
+                    <span className="text-[14px] md:text-[26px] text-[#8b85b1] font-light uppercase italic leading-none -mt-1 block">
+                        Information
+                    </span>
+                </div>
+
+                <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 shadow-2xl rounded-[32px] overflow-hidden p-5 md:p-10 relative">
 
                     {errorMsg && (
                         <div className="text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-xl mb-6 text-sm flex items-center gap-2">
@@ -113,103 +112,108 @@ export default function EditProfile() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-
+                    <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
-                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
+                                <label className="block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">First Name</label>
                                 <input
                                     type="text"
                                     name="firstname"
                                     value={form.firstname}
                                     onChange={handleChange}
-                                    className="w-full bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-black dark:text-white placeholder-gray-400"
+                                    placeholder="First Name"
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-4 md:px-5 md:py-[17px] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold text-[13px] md:text-base"
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
+                                <label className="block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Last Name</label>
                                 <input
                                     type="text"
                                     name="lastname"
                                     value={form.lastname}
                                     onChange={handleChange}
-                                    className="w-full bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-black dark:text-white placeholder-gray-400"
+                                    placeholder="Last Name"
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-4 md:px-5 md:py-[17px] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold text-[13px] md:text-base"
                                     required
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
+                            <label className="block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Email Address</label>
                             <input
                                 type="email"
                                 name="email"
                                 value={form.email}
                                 onChange={handleChange}
-                                className="w-full bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-black dark:text-white placeholder-gray-400"
+                                placeholder="Email"
+                                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold"
                                 required
                             />
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
-                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Age</label>
+                                <label className="block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Age</label>
                                 <input
                                     type="number"
                                     name="age"
                                     value={form.age}
                                     onChange={handleChange}
-                                    className="w-full bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-black dark:text-white placeholder-gray-400"
+                                    placeholder="Age"
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-4 md:px-5 md:py-[17px] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold text-[13px] md:text-base"
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Password (Optional)</label>
+                                <label className="block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Password (Optional)</label>
                                 <input
                                     type="password"
                                     name="password"
                                     value={form.password}
                                     onChange={handleChange}
-                                    className="w-full bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-black dark:text-white placeholder-gray-400"
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-4 md:px-5 md:py-[17px] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold text-[13px] md:text-base"
                                     placeholder="••••••••"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Profile Image URL</label>
+                            <label className="block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Profile Image URL</label>
                             <input
                                 type="text"
                                 name="imageUrl"
                                 value={form.imageUrl}
                                 onChange={handleChange}
-                                className="w-full bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all text-black dark:text-white placeholder-gray-400"
+                                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold"
                                 placeholder="https://example.com/avatar.jpg"
                             />
                         </div>
 
-                        <div className="pt-4">
-                            <button
+                        <div className="pt-6">
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                                 type="submit"
-                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-blue-500/25 transition-all transform hover:-translate-y-0.5"
+                                className="w-full bg-indigo-500 text-black font-black py-[19px] md:py-[25px] rounded-2xl shadow-xl shadow-indigo-500/20 transition-all uppercase italic tracking-widest text-[11px] md:text-sm"
                             >
                                 Save Changes
-                            </button>
+                            </motion.button>
                         </div>
                     </form>
                 </div>
-            </div>
 
-            <LogoutConfirmation
-                isOpen={showSaveConfirm}
-                onClose={() => setShowSaveConfirm(false)}
-                onConfirm={handleConfirmSave}
-                title="Save Changes?"
-                message="Are you sure you want to update your profile details?"
-                confirmText="Yes, Update"
-                confirmColor="bg-blue-600 hover:bg-blue-700"
-            />
+                <Confirmation
+                    isOpen={showSaveConfirm}
+                    onClose={() => setShowSaveConfirm(false)}
+                    onConfirm={handleConfirmSave}
+                    title="Save Changes?"
+                    message="Are you sure you want to update your profile details?"
+                    confirmText="Yes, Update"
+                    confirmColor="bg-blue-600 hover:bg-blue-700"
+                />
+            </motion.div>
         </div>
     );
 }

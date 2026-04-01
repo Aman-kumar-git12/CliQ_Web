@@ -89,7 +89,7 @@ export const useConnectionLogic = () => {
     const bgGlow = useTransform(
         dragX,
         [-150, 0, 150],
-        ["rgba(239, 68, 68, 0.08)", "rgba(255, 255, 255, 0)", "rgba(34, 197, 94, 0.08)"]
+        ["rgba(236, 72, 153, 0.04)", "rgba(255, 255, 255, 0)", "rgba(139, 92, 246, 0.04)"]
     );
     
     const controls = useAnimation();
@@ -320,34 +320,47 @@ export const useConnectionLogic = () => {
     const handleIgnore = async () => {
         if (!user || sending) return;
         setSending(true);
-        await controls.start({ x: -600, opacity: 0, transition: { duration: 0.4, ease: "anticipate" } });
+        const currentUserId = user.id;
+
+        await animate(dragX, -800, { duration: 0.35, ease: "easeOut" });
+        
+        // Let next card mount instantly
+        advanceToNextUser();
+        setSending(false);
+
+        // Fire API independently
         try {
-            await axiosClient.post(`/request/send/ignored/${user.id}`, { source: "smart_connections" });
-            showSnack("Ignored");
+            await axiosClient.post(`/request/send/ignored/${currentUserId}`, { source: "smart_connections" });
             refreshInsights();
-            await advanceToNextUser();
         } catch (err) {
             console.error("Failed to ignore:", err);
-            controls.set({ x: 0, opacity: 1, scale: 1, y: 0 });
-        } finally {
-            setSending(false);
+            // Even if it fails (like 409 conflict), still refresh insights so the UI stays in sync
+            refreshInsights();
         }
     };
 
     const handleInterested = async () => {
         if (!user || sending) return;
         setSending(true);
+        const currentUserId = user.id;
+
+        await animate(dragX, 800, { duration: 0.35, ease: "easeOut" });
+        
+        // Let next card mount instantly
+        showSnack("Request sent");
+        advanceToNextUser();
+        setSending(false);
+
+        // Fire API independently
         try {
-            await controls.start({ x: 600, opacity: 0, transition: { duration: 0.4, ease: "anticipate" } });
-            await axiosClient.post(`/request/send/interested/${user.id}`, { source: "smart_connections" });
-            showSnack("Request sent");
+            await axiosClient.post(`/request/send/interested/${currentUserId}`, { source: "smart_connections" });
             refreshInsights();
-            await advanceToNextUser();
         } catch (err) {
             console.error("Failed to send interest:", err);
-            controls.set({ x: 0, opacity: 1, scale: 1, y: 0 });
-        } finally {
-            setSending(false);
+            if (err.response && err.response.status === 409) {
+                // Ignore 409 silently, they already sent a request
+                refreshInsights();
+            }
         }
     };
 

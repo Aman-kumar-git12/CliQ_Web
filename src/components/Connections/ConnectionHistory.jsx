@@ -91,49 +91,49 @@ const ConnectionHistory = ({
                         const candidate = candidateOrItem.candidate || candidateOrItem;
                         const recordedAt = candidateOrItem.recordedAt || candidateOrItem.updatedAt || new Date();
                         return (
-                            <div key={candidate.id} className="rounded-3xl border border-white/5 bg-white/[0.03] p-4 flex flex-col md:flex-row md:items-center gap-4 md:justify-between">
-                                <div className="flex items-center gap-4 min-w-0">
-                                    <div className="w-16 h-16 rounded-full overflow-hidden bg-neutral-800 shrink-0">
+                            <div key={candidate.id} className="rounded-3xl border border-white/5 bg-white/[0.03] p-3.5 md:p-4 flex flex-col md:flex-row md:items-center gap-4 md:justify-between transition-all hover:bg-white/5 group/historyCard">
+                                <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden bg-neutral-800 shrink-0 border border-white/5">
                                         <img src={avatar(candidate?.imageUrl)} alt={`${candidate?.firstname} ${candidate?.lastname}`} className="w-full h-full object-cover" />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-base font-semibold text-white truncate">
+                                        <p className="text-[15px] md:text-base font-semibold text-white truncate">
                                             {candidate.firstname} {candidate.lastname}
                                         </p>
-                                        <p className="text-[12px] text-neutral-400 truncate">
+                                        <p className="text-[11px] md:text-[12px] text-neutral-400 truncate mt-0.5">
                                             {candidate.expertise?.aboutYou || candidate.expertise?.description || formatSectionTitle(selectedSection)}
                                         </p>
-                                        <p className="text-[11px] text-neutral-500 mt-1">
+                                        <p className="text-[10px] md:text-[11px] text-neutral-500 mt-1 uppercase tracking-wider">
                                             {formatEventLabel(selectedSection)} • {formatEventTime(recordedAt)}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="grid grid-cols-2 lg:flex lg:items-center gap-2 mt-4 md:mt-0">
                                     {(selectedSection === "saved") && (
                                         <>
                                             <button
                                                 disabled={actionInProgress.has(candidate.id)}
                                                 onClick={() => handleActionFromList("preferred", candidate.id)}
-                                                className={`px-3 py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-[10px] font-black uppercase tracking-[0.15em] text-emerald-300/70 hover:bg-emerald-500/10 hover:text-emerald-300 transition-colors ${actionInProgress.has(candidate.id) ? "opacity-50 cursor-not-allowed" : ""}`}
+                                                className={`px-3 py-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] text-emerald-300/70 hover:bg-emerald-500/10 hover:text-emerald-300 transition-colors ${actionInProgress.has(candidate.id) ? "opacity-50 cursor-not-allowed" : ""}`}
                                             >
                                                 Preferred
                                             </button>
                                             <button
                                                 disabled={actionInProgress.has(candidate.id)}
                                                 onClick={() => handleActionFromList("not_preferred", candidate.id)}
-                                                className={`px-3 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-[10px] font-black uppercase tracking-[0.15em] text-red-300/70 hover:bg-red-500/10 hover:text-red-300 transition-colors ${actionInProgress.has(candidate.id) ? "opacity-50 cursor-not-allowed" : ""}`}
+                                                className={`px-3 py-2 rounded-xl border border-red-500/20 bg-red-500/5 text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] text-red-300/70 hover:bg-red-500/10 hover:text-red-300 transition-colors ${actionInProgress.has(candidate.id) ? "opacity-50 cursor-not-allowed" : ""}`}
                                             >
                                                 Not Preferred
                                             </button>
                                         </>
                                     )}
-                                    <Link to={`/public-profile/${candidate.id}`} className="px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-[0.15em] text-white/70 hover:bg-white/10 hover:text-white transition-colors">
+                                    <Link to={`/public-profile/${candidate.id}`} className="px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] text-white/70 hover:bg-white/10 hover:text-white transition-colors text-center flex items-center justify-center">
                                         View
                                     </Link>
                                     <button
                                         disabled={actionInProgress.has(candidate.id)}
                                         onClick={() => handleRemoveSectionItem(selectedSection, candidate.id)}
-                                        className={`px-3 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-[10px] font-black uppercase tracking-[0.15em] text-red-300/70 hover:bg-red-500/10 hover:text-red-300 transition-colors ${actionInProgress.has(candidate.id) ? "opacity-50 cursor-not-allowed" : ""}`}
+                                        className={`px-3 py-2 rounded-xl border border-red-500/20 bg-red-500/5 text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] text-red-300/70 hover:bg-red-500/10 hover:text-red-300 transition-colors ${actionInProgress.has(candidate.id) ? "opacity-50 cursor-not-allowed" : ""}`}
                                     >
                                         {getSectionActionLabel(selectedSection)}
                                     </button>

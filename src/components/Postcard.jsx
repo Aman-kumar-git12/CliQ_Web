@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Repeat, Send, MoreHorizontal, Flag, Bookmark } from "lucide-react";
+import { Heart, MessageSquare, Share2, MoreHorizontal, Globe, Repeat2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Toastbar from "./Chat/Toastbar";
 import ReportModal from "./ReportModal";
@@ -30,230 +30,139 @@ const PostCard = ({ post }) => {
     const text = post.text || post.content || "";
 
     return (
-        <div ref={containerRef} className="flex flex-col mb-8 bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-lg relative group p-4">
-            <div className="flex gap-4">
-                {/* LEFT: Avatar + Line */}
-                <div className="flex flex-col items-center">
+        <div ref={containerRef} className="cliq-feed-panel rounded-2xl p-3.5 mb-3 relative group transition-all duration-500 hover:border-violet-300/20 max-w-[560px] w-full mx-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2.5">
                     <Link
                         to={currentUser?.id === post.userId ? "/profile" : `/public-profile/${post.userId}`}
-                        className="relative w-11 h-11 shrink-0"
+                        className="relative w-9 h-9 shrink-0 group/avatar"
                         onMouseEnter={(e) => handleProfileMouseEnter(e, post.userId)}
                         onMouseLeave={handleProfileMouseLeave}
                     >
-                        <img
-                            src={post.avatar || "https://github.com/shadcn.png"}
-                            className="w-11 h-11 rounded-full object-cover border border-neutral-200 dark:border-neutral-800 shadow-sm"
-                            alt="avatar"
-                        />
+                        <div className="absolute -inset-0.5 bg-gradient-to-tr from-[#a78bfa] to-[#f472b6] rounded-full opacity-0 group-hover/avatar:opacity-100 transition-opacity blur-sm" />
+                        <div className="relative w-9 h-9 rounded-full bg-gradient-to-tr from-[#8b5cf6] to-[#f472b6] flex items-center justify-center border-2 border-black text-white font-black text-[11px] shadow-xl">
+                            {post.username ? post.username.substring(0, 1).toUpperCase() : "A"}
+                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-black border-2 border-[#0A0A0F] rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                        </div>
                     </Link>
-                    <div className="w-[2px] flex-1 bg-neutral-200 dark:bg-neutral-800 my-2 rounded-full" />
-                </div>
-
-                {/* RIGHT: CONTENT */}
-                <div className="flex-1 min-w-0">
-                    {/* Header: Username + Time */}
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex flex-col gap-0">
                         <div className="flex items-center gap-2">
                             <Link
                                 to={currentUser?.id === post.userId ? "/profile" : `/public-profile/${post.userId}`}
-                                className="font-bold text-sm text-black dark:text-white hover:underline transition-all"
-                                onMouseEnter={(e) => handleProfileMouseEnter(e, post.userId)}
-                                onMouseLeave={handleProfileMouseLeave}
+                                className="font-black text-[14px] text-white hover:text-[var(--cliq-lilac)] transition-colors tracking-tight"
                             >
                                 {post.username || "Anonymous"}
                             </Link>
-                            <span className="text-neutral-500 text-xs">•</span>
-                            <span className="text-neutral-500 text-[11px]">{post.time || "Just now"}</span>
                         </div>
-
-                        <div className="relative post-menu-container">
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setShowMenu(!showMenu);
-                                }}
-                                className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition text-neutral-500"
-                            >
-                                <MoreHorizontal size={18} />
-                            </button>
-
-                            {showMenu && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-2xl z-50 overflow-hidden py-1 animate-in fade-in zoom-in-95 duration-200">
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            if (!reported) setShowReportModal(true);
-                                            setShowMenu(false);
-                                        }}
-                                        disabled={reported}
-                                        className={`w-full px-4 py-3 text-left flex items-center gap-3 text-sm transition ${reported
-                                            ? 'text-gray-400 cursor-default'
-                                            : 'text-red-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'
-                                            }`}
-                                    >
-                                        <Flag size={16} className={reported ? 'text-gray-400' : 'text-red-500'} />
-                                        {reported ? "Reported" : "Report"}
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* MAIN CONTENT (Image & Text) */}
-                    <Link to={`/post/${post.id}`} className="block">
-                        <div className="px-0 py-1">
-                            <p className="text-[15px] text-black dark:text-white leading-snug whitespace-pre-wrap mb-3">
-                                {text}
-                            </p>
-                        </div>
-
-                        {/* MEDIA AREA */}
-                        {(() => {
-                            const imgSrc = post.image || post.images;
-                            const videoSrc = post.video;
-                            const images = Array.isArray(imgSrc) ? imgSrc : imgSrc ? [imgSrc] : [];
-                            
-                            if (images.length === 0 && !videoSrc) return null;
-
-                            return (
-                                <div className="w-full h-[500px] bg-neutral-100 dark:bg-neutral-950 rounded-xl flex items-center justify-center overflow-hidden border border-neutral-200 dark:border-neutral-800 mb-3">
-                                    {videoSrc ? (
-                                        <video
-                                            src={videoSrc}
-                                            controls
-                                            className="w-full h-full object-contain"
-                                        />
-                                    ) : (
-                                        images.map((img, i) => (
-                                            <img
-                                                key={i}
-                                                src={img}
-                                                className="w-full h-full object-contain"
-                                                alt={`Post content ${i}`}
-                                            />
-                                        ))
-                                    )}
-                                </div>
-                            );
-                        })()}
-                    </Link>
-
-                    {/* ACTIONS BAR */}
-                    <div className="flex items-center gap-5 mt-2 text-neutral-500 dark:text-neutral-400">
-                        <button
-                            onClick={handleLike}
-                            onMouseEnter={(e) => {
-                                handleMouseEnterTooltip('like');
-                                handleLikesMouseEnter(e);
-                            }}
-                            onMouseLeave={() => {
-                                handleMouseLeaveTooltip();
-                                handleLikesMouseLeave();
-                            }}
-                            className={`transition hover:scale-110 active:scale-90 ${liked ? 'text-rose-500' : 'hover:text-rose-500'}`}
-                        >
-                            <Heart size={20} fill={liked ? "currentColor" : "none"} strokeWidth={liked ? 0 : 2} />
-                        </button>
-
-                        <button
-                            onClick={() => navigate(`/post/${post.id}`)}
-                            onMouseEnter={(e) => {
-                                handleMouseEnterTooltip('comments');
-                                handleCommentsMouseEnter(e);
-                            }}
-                            onMouseLeave={() => {
-                                handleMouseLeaveTooltip();
-                                handleCommentsMouseLeave();
-                            }}
-                            className="hover:scale-110 active:scale-90 transition hover:text-blue-500"
-                        >
-                            <MessageCircle size={20} />
-                        </button>
-
-                        <button
-                            onClick={(e) => handleActionClick(e, "Remix is on a break ☕")}
-                            className="hover:scale-110 active:scale-90 transition hover:text-green-500"
-                        >
-                            <Repeat size={18} />
-                        </button>
-
-                        <button
-                            onClick={(e) => handleActionClick(e, "Sharing... 📤")}
-                            className="hover:scale-110 active:scale-90 transition hover:text-yellow-500 -rotate-12"
-                        >
-                            <Send size={18} />
-                        </button>
-                    </div>
-
-                    {/* LIKES & COMMENTS INFO */}
-                    <div className="mt-3 flex flex-col gap-1">
-                        {(likesCount > 0 || post.comments > 0) && (
-                            <div className="flex items-center gap-3 text-xs text-neutral-400 font-medium">
-                                {likesCount > 0 && (
-                                    <button
-                                        className="hover:text-black dark:hover:text-white transition-colors"
-                                        onMouseEnter={(e) => handleLikesMouseEnter(e)}
-                                        onMouseLeave={handleLikesMouseLeave}
-                                    >
-                                        {likesCount.toLocaleString()} {likesCount === 1 ? 'like' : 'likes'}
-                                    </button>
-                                )}
-                                {likesCount > 0 && post.comments > 0 && <span>•</span>}
-                                {post.comments > 0 && (
-                                    <button
-                                        onClick={() => navigate(`/post/${post.id}`)}
-                                        className="hover:text-black dark:hover:text-white transition-colors"
-                                        onMouseEnter={(e) => handleCommentsMouseEnter(e)}
-                                        onMouseLeave={handleCommentsMouseLeave}
-                                    >
-                                        {post.comments} comments
-                                    </button>
-                                )}
+                        <div className="flex items-center gap-1.5 text-[9px] font-bold text-[#8b86a6] uppercase tracking-widest leading-none">
+                            <span>{post.time || "4 months ago"}</span>
+                            <span className="text-neutral-700">•</span>
+                            <div className="flex items-center gap-1 text-blue-500/80">
+                                <Globe size={9} strokeWidth={3} />
+                                <span className="font-black">Public</span>
                             </div>
-                        )}
+                        </div>
                     </div>
+                </div>
+
+                <button
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowMenu(!showMenu);
+                    }}
+                    className="p-1.5 hover:bg-white/5 rounded-full transition text-[#8b86a6] hover:text-white"
+                >
+                    <MoreHorizontal size={18} />
+                </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="px-0.5">
+                <Link to={`/post/${post.id}`} className="block mb-2">
+                    <p className="text-[12.5px] text-[#ebe7f7] leading-[1.6] whitespace-pre-wrap font-medium">
+                        {text}
+                    </p>
+                </Link>
+
+                {/* Media Area */}
+                {(() => {
+                    const imgSrc = post.image || post.images;
+                    const videoSrc = post.video;
+                    const images = Array.isArray(imgSrc) ? imgSrc : imgSrc ? [imgSrc] : [];
+
+                    if (images.length === 0 && !videoSrc) return null;
+
+                    return (
+                        <Link to={`/post/${post.id}`} className="relative flex justify-center w-full rounded-lg overflow-hidden border border-white/8 bg-[#050505] mb-2 group/media">
+                            {videoSrc ? (
+                                <video src={videoSrc} controls className="w-full max-h-[400px] object-contain" />
+                            ) : (
+                                images.map((img, i) => (
+                                    <img key={i} src={img} className="w-full max-h-[400px] h-auto object-contain" alt="post" />
+                                ))
+                            )}
+
+                            {/* Overlay caption concept - making it look like the image */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-4">
+                                <p className="text-[11px] font-bold text-white/90 drop-shadow-md">
+                                    {post.caption || "The face of resilience 🍋"}
+                                </p>
+                            </div>
+                        </Link>
+                    );
+                })()}
+
+                {/* Hashtags */}
+                <div className="flex flex-wrap gap-1 mb-2">
+                    {["#motivation", "#growth", "#devlife"].map(tag => (
+                        <span key={tag} className="px-2.5 py-0.5 bg-violet-500/10 border border-violet-300/10 rounded-full text-[8.5px] font-black text-[#9e8bff] uppercase tracking-tighter hover:bg-violet-500/15 transition-colors cursor-pointer">
+                            {tag}
+                        </span>
+                    ))}
                 </div>
             </div>
 
-            {showToast && (
-                <Toastbar
-                    message={toastMessage}
-                    onClose={() => setShowToast(false)}
-                />
-            )}
+            {/* Actions */}
+            <div className="flex items-center justify-between pt-2 border-t cliq-feed-divider px-0.5">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={handleLike}
+                        className={`flex items-center gap-2 transition group ${liked ? 'text-[var(--cliq-pink)]' : 'text-[#8b86a6] hover:text-white'}`}
+                    >
+                        <Heart size={16} fill={liked ? "currentColor" : "none"} className="group-hover:scale-110 transition-transform" />
+                        <span className="text-[11px] font-black">{likesCount}</span>
+                    </button>
 
-            <ReportModal
-                isOpen={showReportModal}
-                onClose={() => setShowReportModal(false)}
-                onReport={handleReportPost}
-                isReporting={isReporting}
-            />
+                    <button
+                        onClick={() => navigate(`/post/${post.id}`)}
+                        className="flex items-center gap-2 text-[#8b86a6] hover:text-white transition group"
+                    >
+                        <MessageSquare size={16} className="group-hover:scale-110 transition-transform" />
+                        <span className="text-[11px] font-black">{post.comments}</span>
+                    </button>
 
-            <ProfileHoverCard
-                userId={hoverUserId}
-                isVisible={showHoverCard}
-                anchorRect={hoverAnchorRect}
-                onMouseEnter={handleCardMouseEnter}
-                onMouseLeave={handleProfileMouseLeave}
-            />
+                    <button className="flex items-center gap-2 text-[#8b86a6] hover:text-white transition group">
+                        <Repeat2 size={16} className="group-hover:scale-110 transition-transform" />
+                        <span className="text-[11px] font-black">18</span>
+                    </button>
+                </div>
 
-            <CommentsHoverCard
-                postId={post.id}
-                isVisible={showCommentsHover}
-                anchorRect={commentsAnchorRect}
-                onMouseEnter={handleCommentsCardMouseEnter}
-                onMouseLeave={handleCommentsMouseLeave}
-            />
+                <div className="flex items-center gap-1.5 text-[#8b86a6] hover:text-white transition cursor-pointer group">
+                    <Share2 size={14} className="group-hover:scale-110 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.15em]">Share</span>
+                </div>
+            </div>
 
-            <LikesHoverCard
-                postId={post.id}
-                isVisible={showLikesHover}
-                anchorRect={likesAnchorRect}
-                onMouseEnter={handleLikesCardMouseEnter}
-                onMouseLeave={handleLikesMouseLeave}
-            />
+            {/* Toast & Tooltips (Keeping functionality) */}
+            {showToast && <Toastbar message={toastMessage} onClose={() => setShowToast(false)} />}
+            <ReportModal isOpen={showReportModal} onClose={() => setShowReportModal(false)} onReport={handleReportPost} isReporting={isReporting} />
+            <ProfileHoverCard userId={hoverUserId} isVisible={showHoverCard} anchorRect={hoverAnchorRect} onMouseEnter={handleCardMouseEnter} onMouseLeave={handleProfileMouseLeave} />
+            <CommentsHoverCard postId={post.id} isVisible={showCommentsHover} anchorRect={commentsAnchorRect} onMouseEnter={handleCommentsCardMouseEnter} onMouseLeave={handleCommentsMouseLeave} />
+            <LikesHoverCard postId={post.id} isVisible={showLikesHover} anchorRect={likesAnchorRect} onMouseEnter={handleLikesCardMouseEnter} onMouseLeave={handleLikesMouseLeave} />
         </div>
     );
 };

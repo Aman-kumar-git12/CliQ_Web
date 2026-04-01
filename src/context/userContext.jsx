@@ -50,7 +50,7 @@ export const UserContextProvider = ({ children }) => {
         };
 
         checkAuth();
-    }, [location.pathname, navigate]); // Run once on mount, except verification page
+    }, []); // Run ONLY once on mount
 
     return (
         <UserContext.Provider value={{ user, setUser, loading, blockedAccount, setBlockedAccount, blockedMessage, setBlockedMessage, blockedEmail, setBlockedEmail }}>

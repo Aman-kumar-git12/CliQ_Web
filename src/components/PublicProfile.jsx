@@ -194,10 +194,13 @@ const PublicProfile = () => {
     if (!user) return <div className="text-center text-white mt-10 font-bold">User not found</div>;
 
     return (
-        <div ref={containerRef} className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-300 relative">
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-900/10 dark:bg-neutral-900/20 rounded-full blur-[120px] pointer-events-none" />
+        <div ref={containerRef} className="min-h-screen bg-transparent text-white relative overflow-x-hidden no-scrollbar transition-all duration-500">
+            <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; }` }} />
+            {/* Cinematic Background Glows */}
+            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#8b5cf6]/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse transition-opacity duration-[3000ms]" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#ec4899]/5 rounded-full blur-[140px] pointer-events-none -z-10" />
 
-            <div className="w-full max-w-2xl mx-auto pt-6 px-4 pb-20 relative z-10 transition-all duration-500">
+            <div className="w-full max-w-2xl mx-auto pt-[80px] md:pt-6 pb-[90px] relative z-10 transition-all duration-500">
                 
                 <ProfileHeader 
                     user={user}
@@ -210,7 +213,7 @@ const PublicProfile = () => {
                     onAvatarMouseLeave={handleProfileMouseLeave}
                 />
 
-                <div className="px-6 sm:px-10 mt-6">
+                <div className="mt-4 md:mt-6">
                     <ProfileStats 
                         stats={{
                             posts: user.postsCount || posts.length,
@@ -226,7 +229,7 @@ const PublicProfile = () => {
                 </div>
 
                 {/* TAB CONTENT SECTION */}
-                <div className="mt-8 min-h-[400px] px-4">
+                <div className="mt-4 md:mt-8 min-h-[400px] px-1 md:px-4">
                     <AnimatePresence mode="popLayout" custom={direction} initial={false}>
                         <motion.div
                             key={activeTab}
@@ -240,24 +243,24 @@ const PublicProfile = () => {
                         >
                             {activeTab === "posts" && (
                                 <div className="space-y-6">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                    <div className="flex items-center justify-between mb-3 md:mb-4 px-2">
+                                        <h2 className="text-lg md:text-xl font-black text-white flex items-center gap-2 uppercase italic tracking-wider">
                                             Recent Posts
-                                            <span className="text-sm font-normal text-gray-500 bg-white/10 px-2 py-0.5 rounded-full">{posts.length}</span>
+                                            <span className="text-[9px] md:text-[10px] font-black text-white/30 bg-white/5 px-2 py-0.5 rounded-full border border-white/10 not-italic tracking-widest">{posts.length}</span>
                                         </h2>
                                     </div>
 
                                     {!loadingPosts && posts.length === 0 ? (
-                                        <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-gray-700">
-                                            <p className="text-gray-400">This user hasn't posted anything yet.</p>
+                                        <div className="text-center py-20 mx-3 md:mx-0 bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-white/10">
+                                            <p className="text-white/30 font-black uppercase tracking-widest italic">No posts yet</p>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                                        <div className="grid grid-cols-3 gap-1 md:gap-4 transition-all duration-500">
                                             {posts.map((post) => (
                                                 <Link
                                                     to={`/post/${post.id}`}
                                                     key={post.id}
-                                                    className="group relative aspect-square bg-[#111] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+                                                    className="group relative aspect-square bg-white/[0.03] backdrop-blur-xl rounded-sm md:rounded-[28px] overflow-hidden border border-white/10 shadow-lg hover:border-white/20 transition-all duration-500 active:scale-95"
                                                 >
                                                     {post.video ? (
                                                         <>
@@ -288,35 +291,35 @@ const PublicProfile = () => {
                             )}
 
                             {activeTab === "connections" && (
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                                            Network
-                                            <span className="text-sm font-normal text-gray-500 bg-white/10 px-2 py-0.5 rounded-full">{connections.length}</span>
+                                <div className="space-y-4 md:space-y-6 px-3 md:px-0">
+                                    <div className="flex items-center justify-between mb-3 md:mb-5 px-1 md:px-0">
+                                        <h2 className="text-lg md:text-2xl font-bold text-white flex items-center gap-2">
+                                            Connections
+                                            <span className="text-[10px] md:text-sm font-normal text-gray-500 bg-white/10 px-2 py-0.5 rounded-full">{connections.length}</span>
                                         </h2>
                                     </div>
                                     {loadingConnections ? (
                                         <div className="space-y-3">
                                             {[1, 2, 3].map(i => (
-                                                <div key={i} className="h-20 bg-white/5 rounded-2xl animate-pulse" />
+                                                <div key={i} className="h-20 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl animate-pulse" />
                                             ))}
                                         </div>
                                     ) : connections.length === 0 ? (
-                                        <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-gray-700">
-                                            <p className="text-gray-400 text-sm">No public connections found.</p>
+                                        <div className="text-center py-20 mx-3 md:mx-0 bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-white/10">
+                                            <p className="text-white/30 font-black uppercase tracking-widest italic">No connections yet</p>
                                         </div>
                                     ) : (
-                                        <div className="space-y-3">
+                                        <div className="space-y-2 md:space-y-3">
                                             {connections.map((conn) => (
                                                 <Link
                                                     to={conn.id === currentUser?.id ? "/profile" : `/user/${conn.id}`}
                                                     key={conn.id}
-                                                    className="group relative flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl transition-all hover:bg-white/10"
+                                                    className="group relative flex items-center justify-between p-3.5 md:p-4 bg-white/[0.03] border border-white/5 rounded-2xl transition-all hover:bg-white/10"
                                                 >
-                                                    <div className="flex items-center gap-4">
-                                                        <img src={conn.imageUrl || "https://github.com/shadcn.png"} alt={conn.firstname} className="w-12 h-12 rounded-full object-cover border-2 border-white/10 shadow-lg" />
+                                                    <div className="flex items-center gap-3 md:gap-4">
+                                                        <img src={conn.imageUrl || "https://github.com/shadcn.png"} alt={conn.firstname} className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-white/10 shadow-lg" />
                                                         <div className="flex flex-col">
-                                                            <h3 className="text-sm font-bold text-white">
+                                                            <h3 className="text-[13px] md:text-sm font-bold text-white leading-tight">
                                                                 {conn.firstname} {conn.lastname}
                                                             </h3>
                                                             <p className="text-xs text-gray-400">
@@ -332,35 +335,32 @@ const PublicProfile = () => {
                             )}
 
                             {activeTab === "groups" && (
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                <div className="space-y-4 md:space-y-6 px-3 md:px-0">
+                                    <div className="flex items-center justify-between mb-3 md:mb-5 px-1 md:px-0">
+                                        <h2 className="text-lg md:text-2xl font-bold text-white flex items-center gap-2">
                                             Groups
-                                            <span className="text-sm font-normal text-gray-500 bg-white/10 px-2 py-0.5 rounded-full">{groups.length}</span>
+                                            <span className="text-[10px] md:text-sm font-normal text-gray-500 bg-white/10 px-2 py-0.5 rounded-full">{groups.length}</span>
                                         </h2>
                                     </div>
                                     {loadingGroups ? (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {[1, 2].map(i => (
-                                                <div key={i} className="h-24 bg-white/5 rounded-2xl animate-pulse" />
+                                                <div key={i} className="h-24 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl animate-pulse" />
                                             ))}
                                         </div>
                                     ) : groups.length === 0 ? (
-                                        <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-gray-700 flex flex-col items-center gap-4">
-                                            <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-gray-500">
-                                                <Plus size={24} />
-                                            </div>
-                                            <p className="text-gray-400 text-sm">No public groups found.</p>
+                                        <div className="text-center py-20 mx-3 md:mx-0 bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-white/10 flex flex-col items-center gap-4">
+                                            <p className="text-white/30 font-black uppercase tracking-widest italic">No groups found</p>
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {groups.map((group) => (
-                                                <div key={group.id} className="group relative flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl transition-all hover:bg-white/10">
-                                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0 overflow-hidden">
+                                                <div key={group.id} className="group relative flex items-center gap-3 md:gap-4 p-3.5 md:p-4 bg-white/[0.03] border border-white/5 rounded-2xl transition-all hover:bg-white/10">
+                                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-[10px] md:rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center text-white font-bold text-[15px] md:text-lg shadow-lg shrink-0 overflow-hidden">
                                                         {group.image ? <img src={group.image} alt={group.name} className="w-full h-full object-cover" /> : group.name?.charAt(0) || "G"}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <h3 className="font-bold text-sm text-white truncate">{group.name || "Unnamed Group"}</h3>
+                                                        <h3 className="font-bold text-[13px] md:text-sm text-white truncate leading-tight">{group.name || "Unnamed Group"}</h3>
                                                         <p className="text-xs text-gray-400 mt-0.5">{group.participantIds?.length || 0} Members</p>
                                                     </div>
                                                 </div>
@@ -371,16 +371,16 @@ const PublicProfile = () => {
                             )}
 
                             {activeTab === "expertise" && (
-                                <div className="space-y-6">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold text-white">Professional Stack</h2>
+                                <div className="space-y-4 md:space-y-6 px-3 md:px-0">
+                                    <div className="flex items-center justify-between mb-3 md:mb-6 px-1 md:px-0">
+                                        <h2 className="text-lg md:text-2xl font-bold text-white">Professional Stack</h2>
                                     </div>
-                                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 transition-all duration-500">
+                                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-[32px] p-6 md:p-8 border border-white/10 shadow-2xl overflow-hidden relative group transition-all duration-500 mx-3 md:mx-0">
                                         {user.expertise ? (
                                             <MyExperties expertise={user.expertise} />
                                         ) : (
                                             <div className="text-center py-12">
-                                                <p className="text-gray-500 text-sm font-bold">This user hasn't added any expertise yet.</p>
+                                                <p className="text-white/30 font-black uppercase tracking-widest italic">No expertise added</p>
                                             </div>
                                         )}
                                     </div>

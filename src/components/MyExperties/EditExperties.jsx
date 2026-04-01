@@ -560,7 +560,7 @@ const ExpertisePage = () => {
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+                <div className="mt-5 rounded-[24px] border border-slate-200 bg-slate-50/80 p-4 backdrop-blur-md">
                   <div className="mb-4 flex items-start gap-3">
                     <div className="rounded-2xl bg-slate-900 p-2.5 text-white shadow-md">
                       <LayoutTemplate size={16} />
@@ -740,7 +740,7 @@ const PillButton = ({ label, active, onClick, color = "indigo" }) => {
 };
 
 const GeneratedDetailCard = ({ title, content, skills, icon, compact = false }) => (
-  <div className={`rounded-[22px] border border-slate-200 bg-slate-50/80 p-5 ${compact ? "" : "min-h-[160px]"}`}>
+  <div className={`rounded-[22px] border border-slate-200 bg-slate-50/80 p-5 backdrop-blur-sm ${compact ? "" : "min-h-[160px]"}`}>
     <div className="rounded-xl bg-white p-2 text-slate-500 shadow-sm">
       {icon}
     </div>

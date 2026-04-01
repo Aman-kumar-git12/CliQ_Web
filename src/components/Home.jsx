@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigationType } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import PostCard from "./Postcard";
 import HomeSidebar from "./HomeSidebar";
+import StoriesBar from "./StoriesBar";
+import PostInput from "./PostInput";
 import { useFeedContext } from "../context/FeedContext";
 import HomeShimmering from "./shimmering/HomeShimmering";
 import Chatbot from "./Chatbot/Chatbot";
@@ -15,7 +16,6 @@ export default function Home() {
     feedScrollY, setFeedScrollY
   } = useFeedContext();
 
-  const navType = useNavigationType();
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
@@ -173,7 +173,7 @@ export default function Home() {
   // Restore scroll position instantly on mount if we have data
   useEffect(() => {
     if (feedPosts.length > 0 && feedScrollY > 0) {
-      // Small delay to ensure items are rendered
+      // Restore saved scroll position
       requestAnimationFrame(() => {
         window.scrollTo({
           top: feedScrollY,
@@ -191,6 +191,8 @@ export default function Home() {
   }, [feedPage]);
 
 
+  const [activeTab, setActiveTab] = useState("For You");
+
   if (loading && feedPage === 1 && feedPosts.length === 0) {
     return <HomeShimmering />;
   }
@@ -200,38 +202,65 @@ export default function Home() {
   }
 
   return (
-    <div className="flex justify-center gap-12 w-full pt-8 px-4">
+    <div className="relative flex justify-center gap-10 w-full pt-[85px] md:pt-4 pb-24 md:pb-8 min-h-screen px-4 xl:px-0 bg-transparent">
       {/* FEED COLUMN */}
-      <div className="flex-grow max-w-[600px] w-full">
-        {feedPosts.map((post, index) => {
-          if (feedPosts.length === index + 1) {
-            return (
-              <div ref={lastPostElementRef} key={post.id}>
-                <PostCard post={post} />
-              </div>
-            );
-          } else {
-            return <PostCard key={post.id} post={post} />;
-          }
-        })}
+      <div className="relative flex-grow max-w-[640px] w-full flex flex-col items-center md:items-stretch">
+        {/* STORIES */}
+        <StoriesBar />
 
-        {loadingMore && (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white"></div>
-          </div>
-        )}
+        {/* POST INPUT */}
+        <PostInput onPostSuccess={() => fetchFeed(1)} />
 
-        {!feedHasMore && feedPosts.length > 0 && (
-          <div className="p-8 text-center bg-white/5 rounded-3xl border border-dashed border-neutral-800 mt-4 mb-20">
-            <p className="text-neutral-500 text-sm font-medium italic">
-              ✨ You've reached the end of the universe! ✨
-            </p>
-          </div>
-        )}
+        {/* TABS */}
+        {/* TABS */}
+        <div className="flex items-center gap-10 mb-6 border-b cliq-feed-divider px-4 max-w-[560px] w-full self-center">
+          {["For You", "Following", "Trending"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-3 text-[11px] font-black uppercase tracking-[0.12em] transition-all relative
+                ${activeTab === tab ? "text-white" : "text-[#6f6a86] hover:text-[#b2aed0]"}`}
+            >
+              {tab}
+              {activeTab === tab && (
+                <div className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--cliq-lilac)] rounded-full shadow-[0_0_8px_rgba(167,139,250,0.4)]" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* FEED LIST */}
+        <div className="space-y-4 pb-20">
+          {feedPosts.map((post, index) => {
+            if (feedPosts.length === index + 1) {
+              return (
+                <div ref={lastPostElementRef} key={post.id}>
+                  <PostCard post={post} />
+                </div>
+              );
+            } else {
+              return <PostCard key={post.id} post={post} />;
+            }
+          })}
+
+          {loadingMore && (
+            <div className="flex justify-center py-6">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--cliq-pink)]"></div>
+            </div>
+          )}
+
+          {!feedHasMore && feedPosts.length > 0 && (
+            <div className="p-8 text-center cliq-feed-panel rounded-[1.5rem] border-dashed mt-4 max-w-[560px] w-full self-center">
+              <p className="text-neutral-600 text-[10px] font-bold uppercase tracking-[0.25em]">
+                ✨ End of the universe ✨
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* RIGHT SIDEBAR COLUMN */}
-      <div className="hidden lg:block w-[320px] shrink-0 sticky top-8 h-fit">
+      {/* RIGHT SIDEBAR COLUMN - Scrolls with feed */}
+      <div className="relative hidden xl:block w-[320px] shrink-0 pt-2 px-1">
         <HomeSidebar />
       </div>
 

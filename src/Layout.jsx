@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
-import { Outlet, useLocation, useNavigationType } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
-import MobileNavbar from "./components/MobileviewFolder/MobileNavbar";
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import MobileTopBar from "./components/MobileviewFolder/MobileTopBar";
 
 export default function Layout() {
@@ -18,21 +16,21 @@ export default function Layout() {
         }
     }, [pathname]);
 
-    return (
-        <div className="min-h-screen bg-neutral-950 text-white transition-colors duration-300">
-            {!pathname.startsWith("/chat") && !pathname.startsWith("/post/") && <MobileTopBar />}
-            <Sidebar />
+    const isChatView = pathname.startsWith("/messages") || pathname.startsWith("/chat");
+    const isConnectionsView = pathname.startsWith("/find") || pathname.startsWith("/requests");
 
-            <main className={`w-full md:pl-28 md:pt-0 min-h-screen ${pathname.startsWith("/chat") ? "" : "pt-16"}`}>
-                <div className={`${pathname === "/home" ? "max-w-5xl" :
-                        pathname === "/my-experties" ? "max-w-none" :
-                            "max-w-2xl"
-                    } mx-auto ${pathname === "/my-experties" ? "" : "border-x border-neutral-200 dark:border-neutral-800"} min-h-screen transition-all duration-500`}>
+    return (
+        <div className="w-full relative min-h-screen bg-transparent text-white flex overflow-hidden">
+            <div className="w-full min-h-screen relative z-10 bg-transparent">
+                {!pathname.startsWith("/chat") && !pathname.startsWith("/post/") && <MobileTopBar />}
+
+                <div className={`${pathname === "/home" ? "max-w-[1200px]" :
+                    isChatView || pathname === "/my-experties" || isConnectionsView ? "max-w-none" :
+                        "max-w-2xl"
+                    } mx-auto min-h-screen transition-all duration-500 flex justify-center overflow-visible bg-transparent`}>
                     <Outlet />
                 </div>
-            </main>
-
-            {!pathname.startsWith("/chat") && <MobileNavbar />}
+            </div>
         </div>
     );
 }

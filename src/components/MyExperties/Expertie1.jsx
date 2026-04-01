@@ -28,7 +28,7 @@ export default function Expertise1({ expertise = {} }) {
                 {/* HERO SECTION */}
                 <div className="relative p-6 md:p-8 pb-10 border-b border-neutral-50 bg-gradient-to-b from-neutral-50/50 to-transparent">
                     <div className="max-w-full mx-auto space-y-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-neutral-100 text-neutral-500 text-[9px] font-black uppercase tracking-[0.2em] rounded-full border border-neutral-200">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-neutral-100 text-neutral-800 text-[9px] font-black uppercase tracking-[0.2em] rounded-full border border-neutral-200">
                            <Zap size={8} className="text-indigo-500" /> Digital Architecture
                         </div>
                         <div className="space-y-2">
@@ -49,21 +49,21 @@ export default function Expertise1({ expertise = {} }) {
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
                                <div className="w-6 h-[2px] bg-indigo-500/20"></div>
-                               <h2 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-400">The Narrative</h2>
+                               <h2 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-800">The Narrative</h2>
                             </div>
-                            <p className="text-lg md:text-xl leading-[1.5] text-neutral-700 font-medium max-w-full tracking-tight">
+                            <p className="text-lg md:text-xl leading-[1.5] text-neutral-900 font-medium max-w-full tracking-tight">
                                 "{aboutYou}"
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                             <Section title="Strategic Projects" icon={<Briefcase size={16} />}>
-                                <div className="text-sm leading-relaxed text-neutral-500 font-medium whitespace-pre-line">
+                                <div className="text-sm leading-relaxed text-neutral-900 font-medium whitespace-pre-line">
                                     {projects}
                                 </div>
                             </Section>
                             <Section title="Key Accomplishments" icon={<Zap size={16} />}>
-                                <div className="text-sm leading-relaxed text-neutral-500 font-medium whitespace-pre-line">
+                                <div className="text-sm leading-relaxed text-neutral-900 font-medium whitespace-pre-line">
                                     {achievements}
                                 </div>
                             </Section>
@@ -78,7 +78,7 @@ export default function Expertise1({ expertise = {} }) {
                             <Section title="Engine" icon={<Code size={14} />} compact>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {skills.map((s, i) => (
-                                        <span key={i} className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest bg-neutral-50 text-neutral-600 rounded-lg border border-neutral-200 hover:border-indigo-300 transition-all cursor-default">
+                                        <span key={i} className="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest bg-neutral-50 text-neutral-900 rounded-lg border border-neutral-200 hover:border-indigo-300 transition-all cursor-default">
                                             {s.trim()}
                                         </span>
                                     ))}
@@ -87,13 +87,13 @@ export default function Expertise1({ expertise = {} }) {
 
                             <Section title="Intelligence" icon={<Globe size={14} />} compact>
                                 <div className="space-y-3">
-                                    <p className="text-neutral-500 text-[12px] font-medium leading-relaxed">{interests}</p>
+                                    <p className="text-neutral-900 text-[12px] font-medium leading-relaxed">{interests}</p>
                                     <div className="pt-2 space-y-2">
-                                        <div className="flex items-center gap-2 text-neutral-600 text-[10px] font-bold tracking-widest uppercase">
+                                        <div className="flex items-center gap-2 text-neutral-900 text-[10px] font-bold tracking-widest uppercase">
                                             <Mail size={12} className="text-indigo-500" />
                                             <span>{details.email}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-neutral-600 text-[10px] font-bold tracking-widest uppercase">
+                                        <div className="flex items-center gap-2 text-neutral-900 text-[10px] font-bold tracking-widest uppercase">
                                             <MapPin size={12} className="text-purple-500" />
                                             <span>{details.address}</span>
                                         </div>
@@ -114,7 +114,7 @@ const Section = ({ title, icon, children, compact = false }) => (
             <div className={`flex items-center justify-center p-2.5 rounded-xl bg-neutral-50 border border-neutral-100 text-indigo-500 transition-all duration-500 shadow-sm ${compact ? "w-8 h-8 p-1.5" : "w-11 h-11"}`}>
                 {React.cloneElement(icon, { size: compact ? 14 : 20 })}
             </div>
-            <h3 className={`font-black uppercase tracking-[0.2em] text-neutral-300 group-hover:text-neutral-500 transition-colors ${compact ? "text-[8px]" : "text-[10px]"}`}>
+            <h3 className={`font-black uppercase tracking-[0.2em] text-neutral-600 group-hover:text-neutral-900 transition-colors ${compact ? "text-[8px]" : "text-[10px]"}`}>
                 {title}
             </h3>
         </div>

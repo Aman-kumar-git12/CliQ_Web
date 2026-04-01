@@ -2,44 +2,37 @@ import React from "react";
 
 const CreatePostShimmering = () => {
     return (
-        <div className="min-h-screen bg-black text-white p-4 flex flex-col items-center pt-8">
-            <div className="w-full max-w-2xl animate-pulse">
-
-                {/* Header Skeleton */}
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="w-[50px] h-[50px] bg-white/5 rounded-2xl border border-white/5"></div>
-                    <div className="flex flex-col gap-2">
-                        <div className="h-8 w-48 bg-white/10 rounded-lg"></div>
-                        <div className="h-4 w-32 bg-white/5 rounded-md"></div>
-                    </div>
+        <div className="w-full min-h-screen relative overflow-x-hidden pt-[80px] md:pt-4 bg-transparent text-white transition-all duration-500">
+            <div className="px-4 md:px-0 max-w-full md:max-w-2xl mx-auto w-full pb-20 animate-pulse">
+                {/* Header Section Skeleton */}
+                <div className="flex flex-col items-start justify-start relative z-10 mb-4 px-2">
+                    <div className="h-4 w-32 bg-white/10 rounded-full mb-3"></div>
+                    <div className="h-10 w-48 bg-white/20 rounded-lg mb-2"></div>
+                    <div className="h-8 w-32 bg-white/10 rounded-lg"></div>
                 </div>
 
-                {/* Form Card Skeleton */}
-                <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 sm:p-8 relative overflow-hidden">
-
-                    {/* Top Glow Skeleton */}
-                    <div className="absolute top-0 inset-x-0 h-px bg-white/5"></div>
-
+                {/* Content Card Skeleton */}
+                <div className="relative p-6 md:p-8 rounded-[40px] border border-white/20 bg-white/[0.03] backdrop-blur-3xl shadow-2xl overflow-hidden">
                     {/* Description Area Skeleton */}
-                    <div className="mb-8">
-                        <div className="h-3 w-24 bg-white/5 rounded-sm mb-4"></div>
-                        <div className="w-full h-[148px] bg-black/40 border border-white/5 rounded-2xl p-5 flex flex-col gap-3">
-                            <div className="h-4 w-3/4 bg-white/10 rounded-md"></div>
-                            <div className="h-4 w-1/2 bg-white/5 rounded-md"></div>
-                            <div className="h-4 w-5/6 bg-white/5 rounded-md"></div>
+                    <div className="mb-6 relative z-10">
+                        <div className="h-3 w-24 bg-white/10 rounded-full mb-3 ml-2"></div>
+                        <div className="h-20 w-full bg-white/5 rounded-[24px]"></div>
+                    </div>
+
+                    {/* Media Area Skeleton */}
+                    <div className="mb-8 relative z-10">
+                        <div className="h-3 w-16 bg-white/10 rounded-full mb-3 ml-2"></div>
+                        <div className="w-full h-[220px] md:h-[260px] border-2 border-dashed border-white/10 rounded-[32px] flex flex-col items-center justify-center p-6 md:p-10 bg-white/[0.02]">
+                           <div className="w-14 h-14 bg-white/10 rounded-[24px] mb-4 border border-white/10"></div>
+                           <div className="h-6 w-40 bg-white/20 rounded-lg"></div>
+                           <div className="h-3 w-48 bg-white/10 rounded-full mt-3"></div>
                         </div>
                     </div>
 
-                    {/* Image Area Skeleton */}
-                    <div className="mb-10">
-                        <div className="h-3 w-16 bg-white/5 rounded-sm mb-4"></div>
-                        <div className="w-full h-[220px] bg-white/5 border border-white/5 rounded-2xl"></div>
-                    </div>
-
-                    {/* Buttons Skeleton */}
-                    <div className="flex gap-4 pt-2">
-                        <div className="flex-1 h-[52px] bg-white/5 rounded-xl border border-white/5"></div>
-                        <div className="flex-1 h-[52px] bg-white/10 rounded-xl border border-white/10"></div>
+                    {/* Action Buttons Skeleton */}
+                    <div className="flex flex-col sm:flex-row gap-4 pt-2 relative z-10">
+                        <div className="h-14 w-full bg-white/5 rounded-[20px] border border-white/5"></div>
+                        <div className="h-14 w-full bg-white/20 rounded-[20px] border border-white/10"></div>
                     </div>
 
                 </div>

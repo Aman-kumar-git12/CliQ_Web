@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronDown, Trash2, Pencil, Ban, Plus, Smile, Mic, SendHorizontal, FileText, Download, Image as ImageIcon, Loader2, X, Play, Pause, CornerUpLeft, CheckCircle2, Check, Copy, Sparkles, Bot } from "lucide-react";
+import { ArrowLeft, ChevronDown, Trash2, Pencil, Ban, Plus, Smile, Mic, SendHorizontal, FileText, Download, Image as ImageIcon, Loader2, X, Play, Pause, CornerUpLeft, CheckCircle2, Check, Copy, Sparkles, Bot, Phone, Video, MoreHorizontal, Star, Search } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import createSocketConnection from "./socket";
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -333,10 +333,8 @@ const ChatUI = () => {
             if (messages.length > 0) {
                 scrollToBottom('auto');
             }
-            const timer = setTimeout(() => {
-                setHasInitialScrolled(true);
-            }, 50);
-            return () => clearTimeout(timer);
+            setHasInitialScrolled(true);
+            return () => {};
         }
     }, [loading, hasInitialScrolled, messages.length]);
 
@@ -879,10 +877,10 @@ const ChatUI = () => {
         setTimeout(() => setAiThinkingStep('thinking'), 800);
 
         try {
-           const { data } = await axiosClient.post(`/message-ai/conversation/${targetuserId}`, {
-               mode: "replies",
-               draft: activeDraft,
-               tone: assistantTone,
+            const { data } = await axiosClient.post(`/message-ai/conversation/${targetuserId}`, {
+                mode: "replies",
+                draft: activeDraft,
+                tone: assistantTone,
             });
             setAiThinkingStep('generating');
             setAssistantData(data);
@@ -898,7 +896,7 @@ const ChatUI = () => {
 
     const handleAISubmit = async (query) => {
         if (!query.trim() || isAILoading) return;
-        
+
         const userQuery = query.trim();
         setAiInput('');
 
@@ -923,7 +921,7 @@ const ChatUI = () => {
 
             if (!response.ok) throw new Error("API request failed");
             if (!response.body) throw new Error("AI stream did not return a readable response body");
-            
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder('utf-8');
             let fullAiAnswer = "";
@@ -931,13 +929,13 @@ const ChatUI = () => {
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                
+
                 if (fullAiAnswer === "") {
                     setAiThinkingStep('generating');
                 }
                 const chunk = decoder.decode(value, { stream: true });
                 fullAiAnswer += chunk;
-                
+
                 setAiMessages(prev => {
                     const last = prev[prev.length - 1];
                     const updated = [...prev];
@@ -1033,23 +1031,23 @@ const ChatUI = () => {
                     // Notify Inbox of new last message
                     const lastVisible = updated.filter(m => !m.isDelete).at(-1);
                     window.dispatchEvent(new CustomEvent('chatUpdated', {
-                        detail: { 
-                            targetId: targetuserId, 
-                            lastMessage: lastVisible ? lastVisible.text : "No messages yet" 
+                        detail: {
+                            targetId: targetuserId,
+                            lastMessage: lastVisible ? lastVisible.text : "No messages yet"
                         }
                     }));
                     return updated;
                 });
                 await axiosClient.put(`/chat/message/${id}`, { isDelete: true });
-             } else {
+            } else {
                 setMessages(prev => {
                     const filtered = prev.filter(msg => msg.id !== id);
                     // Notify Inbox of new last message
                     const lastVisible = filtered.filter(m => !m.isDelete).at(-1);
                     window.dispatchEvent(new CustomEvent('chatUpdated', {
-                        detail: { 
-                            targetId: targetuserId, 
-                            lastMessage: lastVisible ? lastVisible.text : "No messages yet" 
+                        detail: {
+                            targetId: targetuserId,
+                            lastMessage: lastVisible ? lastVisible.text : "No messages yet"
                         }
                     }));
                     return filtered;
@@ -1129,9 +1127,9 @@ const ChatUI = () => {
                 // Notify Inbox of new last message
                 const lastVisible = messages.filter(m => !selectedMessages.has(m.id) && !m.isDelete).at(-1);
                 window.dispatchEvent(new CustomEvent('chatUpdated', {
-                    detail: { 
-                        targetId: targetuserId, 
-                        lastMessage: lastVisible ? lastVisible.text : "No messages yet" 
+                    detail: {
+                        targetId: targetuserId,
+                        lastMessage: lastVisible ? lastVisible.text : "No messages yet"
                     }
                 }));
             }
@@ -1163,14 +1161,15 @@ const ChatUI = () => {
     if (loading) return <LoadingChat />;
 
     return (
-        <div className="h-full bg-black text-white flex flex-col relative overflow-hidden" onClick={() => setOpenMenuId(null)}>
-            <div className="absolute inset-0 opacity-[0.08] pointer-events-none z-0"
-                style={{ backgroundImage: `url('https://w0.peakpx.com/wallpaper/580/671/HD-wallpaper-whatsapp-doodle-pattern-whatsapp-pattern-doodle.jpg')`, backgroundSize: '400px' }}>
-            </div>
+        <div className="h-full bg-[#040406] text-white flex flex-col relative overflow-hidden" onClick={() => setOpenMenuId(null)}>
+            {/* Extremely Subtle Ambient Purple Light */}
+            <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.04),transparent_50%)]" />
+
+
 
             <AnimatePresence>
                 {showAIOverlay && (
-                    <AIAssistantOverlay 
+                    <AIAssistantOverlay
                         isOpen={showAIOverlay}
                         onClose={() => {
                             setShowAIOverlay(false);
@@ -1184,10 +1183,10 @@ const ChatUI = () => {
                         onNewAskChat={() => setAiMessages([])}
                         isLoading={isAILoading}
                         thinkingStep={aiThinkingStep}
-                        title="Message AI"
-                        subtitle="Chat-aware assistant with messaging guidance"
+                        title="AI Assistant"
+                        subtitle="Messaging Co-pilot"
                         emptyTitle="Ask anything about this chat"
-                        emptyDescription="Use this for message-specific help like summaries, reply ideas, intent understanding, or what to say next."
+                        emptyDescription="Summaries, reply ideas, or context analysis."
                         inputValue={aiInput}
                         onInputChange={setAiInput}
                         onSubmit={() => handleAISubmit(aiInput)}
@@ -1212,49 +1211,55 @@ const ChatUI = () => {
                 )}
             </AnimatePresence>
 
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2 bg-[#1c1c1e]/90 backdrop-blur-xl border-b border-neutral-800/50 sticky top-0 z-20 h-[65px]">
+            {/* Premium Glass Header */}
+            <header className="flex items-center justify-between pl-2 pr-6 py-4 bg-white/[0.03] backdrop-blur-3xl border-b border-white/10 sticky top-0 z-20 h-[88px] shadow-[0_10px_50px_rgba(0,0,0,0.3)]">
                 <div className="flex items-center gap-2">
-                    <button onClick={() => navigate('/messages')} className="p-2 -ml-2 mr-1 text-white hover:bg-white/10 rounded-full transition-colors">
-                        <ArrowLeft size={22} className="text-white" />
+                    <button onClick={() => navigate('/messages')} className="p-2 -ml-1 mr-2 text-white/50 hover:bg-white/10 hover:text-white rounded-full transition-all active:scale-95 group">
+                        <ArrowLeft size={24} strokeWidth={3} className="group-hover:-translate-x-0.5 transition-transform" />
                     </button>
-                    <div className="flex items-center gap-3">
-                        <div className="relative">
-                            <img src={targetUser?.imageUrl || "https://cdn-icons-png.flaticon.com/512/219/219969.png"} alt="User" className="w-10 h-10 rounded-full object-cover border border-white/10" />
-                            {isTargetOnline && <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-[#1c1c1e] rounded-full"></div>}
+                    <div className="flex items-center gap-4">
+                        <div className="relative group cursor-pointer">
+                            <div className="w-[56px] h-[56px] rounded-[24px] overflow-hidden border border-white/20 p-[2px] bg-gradient-to-br from-[#3b82f6] to-[#8b5cf6] shadow-2xl transition-all duration-500 group-hover:scale-105">
+                                <img src={targetUser?.imageUrl || "https://cdn-icons-png.flaticon.com/512/219/219969.png"} alt="User" className="w-full h-full rounded-[21px] object-cover bg-[#0a0a0f]" />
+                            </div>
+                            {isTargetOnline && (
+                                <div className="absolute -bottom-1 -right-1 w-4.5 h-4.5 bg-[#10b981] border-[3px] border-[#0a0a0f] rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)] z-20">
+                                    <div className="absolute inset-0 bg-white/40 rounded-full animate-ping" />
+                                </div>
+                            )}
                         </div>
                         <div className="flex flex-col">
-                            <h2 className="text-[15px] font-bold text-white tracking-tight leading-snug">{targetUser?.firstname} {targetUser?.lastname}</h2>
-                            {isTargetOnline ? (
-                                <p className="text-[10px] text-emerald-500 font-medium flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                                    online
+                            <h2 className="text-[19px] font-black text-white tracking-tighter leading-none mb-1.5 uppercase italic">
+                                {targetUser?.firstname} {targetUser?.lastname}
+                            </h2>
+                            <div className="flex items-center gap-2">
+                                <div className={`w-1.5 h-1.5 rounded-full ${isTargetOnline ? "bg-[#10b981] shadow-[0_0_10px_rgba(16,185,129,0.5)]" : "bg-white/10"}`} />
+                                <p className={`text-[9px] font-black tracking-[0.25em] uppercase transition-colors ${isTargetOnline ? "text-[#10b981]" : "text-white/20"}`}>
+                                    {isTargetOnline ? "Active Now" : "Offline"}
                                 </p>
-                            ) : (
-                                <p className="text-[10px] text-neutral-400 font-medium">
-                                    Offline
-                                </p>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+
+
+            </header>
 
             {/* Chat Area */}
-            <div ref={scrollContainerRef} className={`flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide relative z-10 transition-opacity duration-300 ${hasInitialScrolled ? 'opacity-100' : 'opacity-0'}`}>
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden pl-2 pr-2 py-4 space-y-1 scrollbar-hide relative z-10 opacity-100">
                 {messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center gap-6 animate-in fade-in zoom-in duration-500">
                         <div
                             onClick={() => sendDirectMessage(stickerMessage)}
                             className="relative group cursor-pointer active:scale-95 transition-all duration-300"
                         >
-                            <div className="absolute -inset-8 bg-[#007aff]/30 blur-3xl rounded-full animate-pulse z-0"></div>
-                            <div className="absolute -inset-4 bg-[#007aff]/20 blur-xl rounded-full z-0 group-hover:scale-110 transition-transform duration-500"></div>
+                            <div className="absolute -inset-8 bg-violet-500/20 blur-3xl rounded-full animate-pulse z-0"></div>
+                            <div className="absolute -inset-4 bg-fuchsia-500/10 blur-xl rounded-full z-0 group-hover:scale-110 transition-transform duration-500"></div>
 
                             <img
                                 src={randomSticker.url}
                                 alt="Say Hi"
-                                className="w-32 h-32 relative z-10 drop-shadow-[0_0_15px_rgba(0,122,255,0.4)] group-hover:rotate-6 transition-transform duration-300"
+                                className="w-32 h-32 relative z-10 drop-shadow-[0_0_15px_rgba(168,85,247,0.35)] group-hover:rotate-6 transition-transform duration-300"
                             />
                             <div className="absolute -top-2 -right-2 bg-pink-500 p-2 rounded-full text-white shadow-[0_0_15px_rgba(236,72,153,0.5)] animate-bounce duration-1000 z-20 border-2 border-black">
                                 <Plus size={18} strokeWidth={4} />
@@ -1271,13 +1276,24 @@ const ChatUI = () => {
                         const prevMsgDate = index > 0 ? new Date(messages[index - 1].date).toLocaleDateString() : null;
                         const showDate = msgDate !== prevMsgDate;
 
+                        const prevMsg = index > 0 ? messages[index - 1] : null;
+                        const nextMsg = index < messages.length - 1 ? messages[index + 1] : null;
+                        const sameAsPrev = prevMsg && !showDate && prevMsg.isMe === msg.isMe;
+                        const sameAsNext = nextMsg && new Date(nextMsg.date).toLocaleDateString() === msgDate && nextMsg.isMe === msg.isMe;
+                        const isFirstInGroup = !sameAsPrev;
+                        const isLastInGroup = !sameAsNext;
+
                         return (
-                            <div key={msg.id} data-id={msg.id} className="message-bubble-wrapper animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <div key={msg.id} data-id={msg.id} className={`message-bubble-wrapper ${isFirstInGroup ? 'mt-3' : 'mt-0.5'}`}>
                                 {showDate && (
-                                    <div className="flex justify-center my-6">
-                                        <div className="bg-[#1c1c1e]/80 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-semibold text-neutral-400 border border-white/5 uppercase tracking-wider shadow-sm">
+                                    <div className="flex items-center gap-6 my-6 px-4">
+                                        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                                        <div className="bg-white/[0.02] backdrop-blur-3xl px-6 py-2 rounded-full text-[10px] font-black text-white/50 border border-white/10 uppercase tracking-[0.2em] shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center gap-3">
+                                            <div className="w-1 h-1 rounded-full bg-violet-500/50 shadow-[0_0_8px_rgba(139,92,246,0.6)]" />
                                             {new Date(msg.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                                            <div className="w-1 h-1 rounded-full bg-pink-500/50 shadow-[0_0_8px_rgba(236,72,153,0.6)]" />
                                         </div>
+                                        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
                                     </div>
                                 )}
                                 <MessageBubble
@@ -1292,13 +1308,15 @@ const ChatUI = () => {
                                     isSelectMode={isSelectMode}
                                     isSelected={selectedMessages.has(msg.id)}
                                     onToggleSelect={toggleMessageSelection}
-                                    onEnterSelectMode={(id) => { 
-                                        setIsSelectMode(true); 
-                                        toggleMessageSelection(id); 
+                                    onEnterSelectMode={(id) => {
+                                        setIsSelectMode(true);
+                                        toggleMessageSelection(id);
                                     }}
                                     setToast={setToast}
                                     setOpenMenuId={setOpenMenuId}
                                     setSelectedMessages={setSelectedMessages}
+                                    isFirstInGroup={isFirstInGroup}
+                                    isLastInGroup={isLastInGroup}
                                 />
                             </div>
                         );
@@ -1308,109 +1326,121 @@ const ChatUI = () => {
             </div>
 
             {/* Input Bar */}
-            <div className="sticky bottom-0 relative z-20 flex flex-col bg-[#1c1c1e]/95 backdrop-blur-xl border-t border-neutral-800/50 p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] min-h-[85px] justify-center shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-                {replyTo && (
-                    <div className="mx-3 mb-2 px-3 py-2 bg-[#2c2c2e] border-l-4 border-[#007aff] rounded-lg flex items-center justify-between">
-                        <div className="flex flex-col overflow-hidden">
-                            <span className="text-[#007aff] text-[12px] font-bold">{replyTo.firstname}</span>
-                            <span className="text-[#8e8e93] text-[13px] truncate">{replyTo.text}</span>
-                        </div>
-                        <button onClick={() => setReplyTo(null)} className="p-1 text-[#8e8e93] hover:text-white">
-                            <Plus size={20} className="rotate-45" />
+            <footer className="sticky bottom-0 z-30 pt-4 pb-[calc(env(safe-area-inset-bottom)+24px)] pl-2 pr-2 bg-white/[0.03] backdrop-blur-3xl border-t border-white/10">
+                <div className="w-full flex items-center gap-1 md:gap-1">
+                    {/* Plus Action */}
+                    {!isRecording && (
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                            className="w-[44px] h-[44px] shrink-0 flex items-center justify-center text-[#3b82f6] hover:bg-white/5 rounded-full transition-all active:scale-95 group/plus"
+                        >
+                            <Plus size={28} strokeWidth={3} className="group-hover/plus:rotate-90 transition-transform duration-300" />
                         </button>
-                    </div>
-                )}
-                <div className="flex items-end gap-2">
-                    {!isRecording ? (
-                        <div className="flex items-center gap-2 flex-1">
-                            <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="p-3 text-[#007aff] hover:bg-white/5 rounded-full active:scale-90 transition-colors">
-                                {isUploading && !audioBlob ? <Loader2 size={28} className="animate-spin" /> : <Plus size={28} strokeWidth={2.5} />}
-                            </button>
-                            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt" />
-                            
-                            <div onClick={() => inputRef.current?.focus()} className="flex-1 relative flex items-center bg-[#2c2c2e] rounded-[24px] min-h-[48px] px-3 py-1 border border-white/5 shadow-inner cursor-text overflow-visible">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setShowAIOverlay(true); }}
-                                    className={`p-1.5 rounded-full transition-all ${showAIOverlay ? 'bg-indigo-600 text-white shadow-[0_0_10px_rgba(99,102,241,0.5)]' : 'text-neutral-400 hover:text-indigo-400 hover:bg-indigo-500/10'}`}
-                                    title="Message AI"
-                                >
-                                    <Sparkles size={18} strokeWidth={2.5} />
-                                </button>
-
-                                <textarea
-                                    ref={inputRef}
-                                    rows="1"
-                                    value={newMessage}
-                                    onChange={(e) => {
-                                        setNewMessage(e.target.value);
-                                        e.target.style.height = 'auto';
-                                        if (e.target.scrollHeight > 36) {
-                                            e.target.style.height = e.target.scrollHeight + 'px';
-                                        }
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            sendMessage();
-                                        }
-                                    }}
-                                    placeholder={showAIOverlay ? "Ask Message AI about this chat..." : "Type a message..."}
-                                    className="flex-1 bg-transparent text-white text-[15px] px-3 py-2 focus:outline-none placeholder-neutral-500 resize-none max-h-32 transition-all scrollbar-hide"
-                                />
-
-                                <button onClick={(e) => { e.stopPropagation(); setShowEmojiPicker(!showEmojiPicker); }} className={`p-1 ${showEmojiPicker ? "text-[#007aff]" : "text-[#8e8e93] hover:text-[#f2f2f7]"}`}>
-                                    <Smile size={24} />
-                                </button>
-
-                                {showEmojiPicker && (
-                                    <div ref={emojiPickerRef} className="absolute bottom-full right-0 mb-4 z-[100] shadow-2xl rounded-2xl overflow-hidden ring-1 ring-white/10">
-                                        <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" width={320} height={400} skinTonesDisabled />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex-1 flex items-center justify-between bg-[#2c2c2e] rounded-[22px] min-h-[48px] px-4 py-1 border border-white/5 animate-in slide-in-from-right-4 duration-300">
-                            <div className="flex items-center gap-3">
-                                <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                                <span className="text-white font-medium tabular-nums">{formatTime(recordingTime)}</span>
-                            </div>
-                            <span className="text-neutral-500 text-sm font-medium animate-pulse ml-4">Recording...</span>
-                            <button onClick={cancelRecording} className="p-1 px-2 text-[#ff3b30] hover:bg-red-500/10 rounded-full transition-colors text-xs font-bold uppercase tracking-wider">
-                                Cancel
-                            </button>
-                        </div>
                     )}
 
+                    <div className="flex-1 bg-[#1c1c1e]/90 backdrop-blur-3xl border border-white/5 rounded-[32px] px-2 py-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.4)] flex flex-col relative group/input focus-within:border-[#3b82f6]/50 focus-within:shadow-[0_0_30px_rgba(59,130,246,0.2)] focus-within:bg-[#252528] transition-all duration-300">
+                        {replyTo && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="mx-1 mb-2 px-4 py-3 bg-white/[0.03] backdrop-blur-xl border-l-[4px] border-[#3b82f6] rounded-[20px] flex items-center justify-between shadow-lg"
+                            >
+                                <div className="flex flex-col overflow-hidden">
+                                    <span className="text-[#3b82f6] text-[9px] font-black uppercase tracking-[0.2em] mb-0.5">Replying to {replyTo.firstname}</span>
+                                    <span className="text-white/60 text-[13px] truncate font-medium">{replyTo.text}</span>
+                                </div>
+                                <button onClick={() => setReplyTo(null)} className="p-1.5 text-white/20 hover:text-white transition-colors">
+                                    <X size={18} strokeWidth={3} />
+                                </button>
+                            </motion.div>
+                        )}
+
+                        <div className="flex items-center gap-2">
+                            {!isRecording ? (
+                                <>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setShowAIOverlay(true); }}
+                                        className={`ml-3 p-1.5 rounded-xl transition-all duration-300 ${showAIOverlay ? 'text-[#3b82f6] scale-110' : 'text-white/20 hover:text-white/60'}`}
+                                    >
+                                        <Sparkles size={20} strokeWidth={2.5} />
+                                    </button>
+
+                                    <textarea
+                                        ref={inputRef}
+                                        rows="1"
+                                        value={newMessage}
+                                        onChange={(e) => {
+                                            setNewMessage(e.target.value);
+                                            e.target.style.height = 'auto';
+                                            if (e.target.scrollHeight > 32) {
+                                                e.target.style.height = e.target.scrollHeight + 'px';
+                                            }
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                sendMessage();
+                                            }
+                                        }}
+                                        placeholder="Type a message..."
+                                        className="flex-1 bg-transparent text-white text-[15px] font-medium py-3 px-1 focus:outline-none placeholder-white/20 resize-none max-h-48 transition-all scrollbar-hide"
+                                    />
+
+                                    <button onClick={(e) => { e.stopPropagation(); setShowEmojiPicker(!showEmojiPicker); }} className={`p-1.5 mr-2 transition-all duration-300 ${showEmojiPicker ? "text-[#3b82f6] scale-110" : "text-white/20 hover:text-white/60"}`}>
+                                        <Smile size={24} strokeWidth={2.5} />
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="flex-1 flex items-center justify-between px-4 py-2 text-[#3b82f6] font-bold">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-2 h-2 bg-[#3b82f6] rounded-full animate-pulse shadow-[0_0_10px_#3b82f6]" />
+                                        <span className="tabular-nums text-lg">{formatTime(recordingTime)}</span>
+                                    </div>
+                                    <button onClick={cancelRecording} className="text-[10px] uppercase tracking-widest text-white/30 hover:text-white transition-colors">Cancel</button>
+                                </div>
+                            )}
+                        </div>
+
+                        {showEmojiPicker && (
+                            <div ref={emojiPickerRef} className="absolute bottom-full right-0 mb-6 z-[100] shadow-[0_30px_60px_rgba(0,0,0,0.8)] rounded-3xl overflow-hidden border border-white/10 ring-1 ring-white/5 animate-in slide-in-from-bottom-4 duration-300">
+                                <EmojiPicker onEmojiClick={onEmojiClick} theme="dark" width={320} height={400} skinTonesDisabled />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Mic / Send Button */}
                     <button
-                        className={`rounded-full p-3.5 active:scale-90 transition-all ${isRecording || newMessage.trim() || updateMessage || (isUploading && audioBlob) ? "bg-[#007aff] shadow-[0_0_15px_rgba(0,122,255,0.4)]" : "bg-neutral-800 text-neutral-500"} text-white`}
+                        className={`rounded-full w-[48px] h-[48px] shrink-0 flex items-center justify-center active:scale-90 transition-all duration-500 shadow-xl relative overflow-hidden ${isRecording || newMessage.trim() || updateMessage || (isUploading && audioBlob) ? "bg-[#3b82f6] text-white shadow-[0_5px_15px_rgba(59,130,246,0.3)]" : "bg-[#1c1c1e] text-white border border-white/5"}`}
                         onClick={isUploading ? null : (isRecording ? stopRecording : (newMessage.trim() || updateMessage ? sendMessage : startRecording))}
                         disabled={isUploading && !audioBlob}
                     >
-                        {isUploading && audioBlob ? <Loader2 size={24} className="animate-spin" /> : (isRecording || newMessage.trim() || updateMessage ? <SendHorizontal size={24} /> : <Mic size={24} />)}
+                        {isUploading && audioBlob ? <Loader2 size={24} className="animate-spin text-white" /> : (isRecording || newMessage.trim() || updateMessage ? <SendHorizontal size={22} strokeWidth={3} className="ml-1" /> : <Mic size={22} strokeWidth={3} />)}
                     </button>
                 </div>
-            </div>
+
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt" />
+            </footer>
 
             {/* Bottom Selection Bar */}
             {isSelectMode && (
                 <div className="absolute bottom-0 left-0 right-0 z-[100] animate-in slide-in-from-bottom duration-300">
-                    <div className="bg-[#1c1c1e] border-t border-neutral-800/50 p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] min-h-[85px] flex flex-col justify-center shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
-                        <div className="w-full flex items-center justify-between px-4">
+                    <div className="bg-[#0a0a0f]/80 backdrop-blur-3xl border-t border-white/10 p-3 pb-[calc(env(safe-area-inset-bottom)+20px)] min-h-[90px] flex flex-col justify-center shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+                        <div className="w-full flex items-center justify-between px-6">
                             <div className="flex items-center gap-4">
-                                <button onClick={exitSelectMode} className="p-2 text-white hover:bg-white/10 rounded-full transition-colors">
-                                    <X size={24} />
+                                <button onClick={exitSelectMode} className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-all">
+                                    <X size={26} />
                                 </button>
-                                <span className="text-lg font-semibold text-white">{selectedMessages.size} selected</span>
+                                <span className="text-lg font-black text-white italic uppercase tracking-tight">{selectedMessages.size} selected</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setBulkDeleteConfirmOpen(true)}
                                     disabled={selectedMessages.size === 0 || isBulkDeleting}
-                                    className={`p-2.5 rounded-full transition-all ${selectedMessages.size > 0 ? "text-red-500 hover:bg-red-500/10 active:scale-95" : "text-neutral-600"} ${isBulkDeleting ? "animate-pulse" : ""}`}
+                                    className={`p-3 rounded-2xl transition-all ${selectedMessages.size > 0 ? "text-red-500 hover:bg-red-500/10 active:scale-95" : "text-white/10"} ${isBulkDeleting ? "animate-pulse" : ""}`}
                                     title="Delete"
                                 >
-                                    {isBulkDeleting ? <Loader2 size={26} className="animate-spin" /> : <Trash2 size={26} />}
+                                    {isBulkDeleting ? <Loader2 size={24} className="animate-spin" /> : <Trash2 size={24} />}
                                 </button>
                             </div>
                         </div>
@@ -1419,32 +1449,32 @@ const ChatUI = () => {
             )}
 
             {bulkDeleteConfirmOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-[#1c1c1e] w-full max-w-[280px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 p-5">
-                        <h3 className="text-[17px] font-semibold text-center mb-1">Delete messages?</h3>
-                        <p className="text-[13px] text-[#8e8e93] text-center mb-4">Are you sure you want to delete {selectedMessages.size} messages?</p>
-                        <div className="flex flex-col gap-2">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+                    <div className="bg-[#0a0a0f]/95 w-full max-w-[320px] rounded-[32px] overflow-hidden shadow-2xl border border-white/10 p-7 animate-in zoom-in-95 duration-300">
+                        <h3 className="text-xl font-black text-center mb-2 italic uppercase">Delete Message?</h3>
+                        <p className="text-[13px] text-white/40 text-center mb-6 leading-relaxed">Are you sure you want to delete <span className="text-white font-bold">{selectedMessages.size}</span> messages from your history?</p>
+                        <div className="flex flex-col gap-3">
                             {canDeleteForEveryone && (
-                                <button onClick={() => handleBulkDelete('everyone')} className="w-full py-2 text-[#ff3b30] font-medium hover:bg-white/5 rounded-lg active:scale-95 transition-all">Delete for everyone</button>
+                                <button onClick={() => handleBulkDelete('everyone')} className="w-full py-3.5 bg-red-500/10 text-red-500 font-black uppercase text-[11px] tracking-widest hover:bg-red-500/20 rounded-2xl transition-all active:scale-95">Delete for everyone</button>
                             )}
-                            <button onClick={() => handleBulkDelete('me')} className="w-full py-2 text-[#007aff] font-medium hover:bg-white/5 rounded-lg active:scale-95 transition-all">Delete for me</button>
-                            <button onClick={() => setBulkDeleteConfirmOpen(false)} className="w-full py-2 text-white/50 font-medium hover:bg-white/5 rounded-lg active:scale-95 transition-all">Cancel</button>
+                            <button onClick={() => handleBulkDelete('me')} className="w-full py-3.5 bg-white/[0.03] text-[#3b82f6] font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.08] rounded-2xl transition-all active:scale-95">Delete for me</button>
+                            <button onClick={() => setBulkDeleteConfirmOpen(false)} className="w-full py-3.5 text-white/30 font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.05] rounded-2xl transition-all">Cancel</button>
                         </div>
                     </div>
                 </div>
             )}
 
             {deleteConfirmation.isOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-[#1c1c1e] w-full max-w-[280px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 p-5">
-                        <h3 className="text-[17px] font-semibold text-center mb-1">Delete message?</h3>
-                        <p className="text-[13px] text-[#8e8e93] text-center mb-4">This action cannot be undone.</p>
-                        <div className="flex flex-col gap-2">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+                    <div className="bg-[#0a0a0f]/95 w-full max-w-[320px] rounded-[32px] overflow-hidden shadow-2xl border border-white/10 p-7 animate-in zoom-in-95 duration-300">
+                        <h3 className="text-xl font-black text-center mb-2 italic uppercase">Delete for Me?</h3>
+                        <p className="text-[13px] text-white/40 text-center mb-6 leading-relaxed">This message will be permanently removed from your chat history.</p>
+                        <div className="flex flex-col gap-3">
                             {deleteConfirmation.isMe && (
-                                <button onClick={() => confirmDelete('everyone')} className="w-full py-2 text-[#ff3b30] font-medium hover:bg-white/5 rounded-lg">Delete for everyone</button>
+                                <button onClick={() => confirmDelete('everyone')} className="w-full py-3.5 bg-red-500/10 text-red-500 font-black uppercase text-[11px] tracking-widest hover:bg-red-500/20 rounded-2xl transition-all active:scale-95">Delete for everyone</button>
                             )}
-                            <button onClick={() => confirmDelete('me')} className="w-full py-2 text-[#007aff] font-medium hover:bg-white/5 rounded-lg">Delete for me</button>
-                            <button onClick={() => setDeleteConfirmation({ isOpen: false, messageId: null, isMe: false })} className="w-full py-2 text-white/50 hover:bg-white/5 rounded-lg">Cancel</button>
+                            <button onClick={() => confirmDelete('me')} className="w-full py-3.5 bg-white/[0.03] text-[#3b82f6] font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.08] rounded-2xl transition-all active:scale-95">Delete for me</button>
+                            <button onClick={() => setDeleteConfirmation({ isOpen: false, messageId: null, isMe: false })} className="w-full py-3.5 text-white/30 font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.05] rounded-2xl transition-all">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -1528,29 +1558,59 @@ const downloadFile = async (url, filename) => {
     }
 };
 
-const MessageBubble = ({ msg, targetUser, openMenuId, toggleMenu, handleEdit, handleDelete, handleReply, menuDirection, isSelectMode, isSelected, onToggleSelect, onEnterSelectMode, setToast, setOpenMenuId, setSelectedMessages }) => {
+const MessageBubble = ({ msg, targetUser, openMenuId, toggleMenu, handleEdit, handleDelete, handleReply, menuDirection, isSelectMode, isSelected, onToggleSelect, onEnterSelectMode, setToast, setOpenMenuId, setSelectedMessages, isFirstInGroup, isLastInGroup }) => {
     const { user } = useUserContext();
     const displayImage = !msg.isMe ? (targetUser?.imageUrl || msg.imageUrl) : msg.imageUrl;
     const displayName = !msg.isMe ? (targetUser?.firstname || msg.firstname) : msg.firstname;
 
+    // Dynamic rounding based on group position
+    const getBubbleRadius = () => {
+        const R = '20px'; // full radius
+        const r = '6px';  // soft corner
+        if (msg.isMe) {
+            if (!isFirstInGroup && !isLastInGroup) return { borderRadius: `${R} ${r} ${r} ${R}` };
+            if (!isFirstInGroup && isLastInGroup) return { borderRadius: `${R} ${R} ${r} ${R}` };
+            return { borderRadius: `${R} ${R} ${r} ${R}` };
+        } else {
+            if (!isFirstInGroup && !isLastInGroup) return { borderRadius: `${r} ${R} ${R} ${r}` };
+            if (!isFirstInGroup && isLastInGroup) return { borderRadius: `${R} ${R} ${R} ${r}` };
+            return { borderRadius: `${R} ${R} ${R} ${r}` };
+        }
+    };
+
     return (
-        <div className={`flex w-full items-center gap-2 mb-0.5 group px-1 sm:px-4 py-1.5 transition-all duration-200 ${isSelected ? "bg-[#007aff]/10" : ""}`}>
+        <div className={`flex w-full items-end gap-2 group px-3 sm:px-5 transition-all duration-300 ${openMenuId === msg.id ? "z-[50] relative" : "z-0 relative"} ${isSelected ? "bg-white/[0.04]" : ""} ${isLastInGroup ? 'pb-1' : 'pb-0'}`}>
             {isSelectMode && (
                 <div
                     onClick={() => onToggleSelect(msg.id)}
-                    className={`w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${isSelected ? "bg-[#007aff] border-[#007aff]" : "border-neutral-600 hover:border-neutral-400"}`}
+                    className={`w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${isSelected ? "bg-[#8b5cf6] border-[#8b5cf6] shadow-[0_0_10px_rgba(139,92,246,0.5)]" : "border-[#413c58] hover:border-white/40"}`}
                 >
-                    {isSelected && <Check size={14} className="text-white" strokeWidth={3} />}
+                    {isSelected && <Check size={12} className="text-white" strokeWidth={4} />}
                 </div>
             )}
-            <div className={`flex flex-1 ${msg.isMe ? "justify-end" : "justify-start"} items-center gap-2`}>
+            <div className={`flex flex-1 ${msg.isMe ? "justify-end" : "justify-start"} items-end gap-2`}>
                 {!msg.isMe && (
-                    <div className="w-7 h-7 rounded-full bg-neutral-700 flex-shrink-0 overflow-hidden border border-neutral-800">
-                        {displayImage ? <img src={displayImage} alt="" className="w-full h-full object-cover" /> : <span className="text-[10px] flex items-center justify-center h-full font-bold">{displayName?.[0]?.toUpperCase()}</span>}
-                    </div>
+                    isLastInGroup ? (
+                        <div className="w-8 h-8 rounded-full bg-[#2a2a35] flex-shrink-0 overflow-hidden flex items-center justify-center border border-white/5">
+                            {displayImage ? (
+                                <img src={displayImage} alt="" className="w-full h-full rounded-full object-cover" />
+                            ) : (
+                                <span className="text-[12px] font-bold text-white/40">{displayName?.[0]?.toUpperCase()}</span>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="w-8 flex-shrink-0" />
+                    )
                 )}
                 <div
-                    className={`max-w-[85%] md:max-w-[70%] px-3 py-1.5 rounded-2xl relative min-w-[80px] cursor-pointer transition-all ${isSelected ? (msg.isMe ? "ring-2 ring-black/70 shadow-lg scale-[1.01]" : "ring-2 ring-[#007aff] shadow-[0_0_15px_rgba(0,122,255,0.4)] scale-[1.01]") : ""} ${msg.isDelete ? "bg-[#1f2c33]/50 italic text-[#8696a0]" : msg.isMe ? "bg-[#007aff] text-white rounded-tr-sm" : "bg-[#262626] text-[#e9edef] rounded-tl-sm"}`}
+                    className={`max-w-[75%] md:max-w-[65%] px-4 py-2.5 relative min-w-[70px] cursor-pointer transition-all duration-300 shadow-sm ${isSelected ? "opacity-70 scale-[0.98]" : ""
+                        } ${msg.isDelete
+                            ? "bg-white/5 backdrop-blur-xl italic text-white/20 rounded-[24px] border border-white/5"
+                            : msg.isMe
+                                ? "bg-gradient-to-br from-blue-600 to-blue-500 rounded-[22px] rounded-br-[4px] text-white shadow-[0_4px_15px_rgba(37,99,235,0.3)]"
+                                : "bg-white/[0.08] backdrop-blur-md border border-white/10 rounded-[22px] rounded-bl-[4px] text-white/95"
+                        }`}
+                    style={getBubbleRadius()}
                     onClick={(e) => {
                         e.stopPropagation();
                         if (isSelectMode) {
@@ -1562,7 +1622,7 @@ const MessageBubble = ({ msg, targetUser, openMenuId, toggleMenu, handleEdit, ha
                 >
                     <div className="flex flex-col gap-1">
                         {msg.parentMessage && !msg.isDelete && (
-                            <div className={`p-2 rounded-lg border-l-4 text-[11px] mb-1 ${msg.isMe ? "bg-white/10 border-white/50" : "bg-white/5 border-[#007aff]"}`}>
+                            <div className={`p-2 rounded-xl border-l-4 text-[11px] mb-1 ${msg.isMe ? "bg-white/10 border-white/50" : "bg-white/5 border-violet-400"}`}>
                                 <p className="font-bold">{msg.parentMessage.firstname}</p>
                                 <p className="opacity-70 truncate">{msg.parentMessage.text}</p>
                             </div>
@@ -1605,25 +1665,28 @@ const MessageBubble = ({ msg, targetUser, openMenuId, toggleMenu, handleEdit, ha
                                         </div>
                                     )
                                 )}
-                                {msg.text && <p className="text-[14.5px] leading-relaxed break-words whitespace-pre-wrap">{msg.text}</p>}
+                                {msg.text && <p className="text-[14px] leading-snug break-words whitespace-pre-wrap">{msg.text}</p>}
                             </div>
                         )}
                         <div className="flex items-center justify-end gap-1 mt-0.5">
-                            <span className={`text-[9px] ${msg.isMe ? "text-blue-100" : "text-neutral-500"}`}>{new Date(msg.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span className={`text-[10px] ${msg.isMe ? "text-violet-100/70" : "text-white/30"}`}>{new Date(msg.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                     </div>
                     {!isSelectMode && (
-                        <button onClick={(e) => { e.stopPropagation(); toggleMenu(msg.id, e); }} className={`absolute top-1 right-1 p-0.5 rounded-full hover:bg-black/10 transition-all ${openMenuId === msg.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                        <button onClick={(e) => { e.stopPropagation(); toggleMenu(msg.id, e); }} className={`absolute top-2 right-2 p-0.5 rounded-full hover:bg-black/10 transition-all ${openMenuId === msg.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                             <ChevronDown size={14} />
                         </button>
                     )}
                     {openMenuId === msg.id && (
-                        <div className={`absolute ${menuDirection === 'up' ? "bottom-full mb-1" : "top-full mt-1"} z-[100] bg-[#2c2c2e] shadow-2xl rounded-xl min-w-[150px] py-1 border border-neutral-700 ${msg.isMe ? "right-0" : "left-0"}`}>
-                            {!msg.isDelete && <button onClick={() => handleReply(msg)} className="w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm flex items-center gap-2 transition-all active:scale-95"><CornerUpLeft size={16} /> Reply</button>}
+                        <div className={`absolute ${menuDirection === 'up' ? "bottom-full mb-2" : "top-full mt-2"} z-[999] bg-[#1c1a24]/95 backdrop-blur-3xl shadow-[0_10px_50px_rgba(0,0,0,0.6)] rounded-xl min-w-[160px] py-1.5 border border-white/10 ${msg.isMe ? "right-0" : "left-0"} animate-in fade-in zoom-in-95 duration-200`}>
+                            {!msg.isDelete && <button onClick={() => { handleReply(msg); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm flex items-center gap-2 transition-all active:scale-95 text-white/90 font-medium"><CornerUpLeft size={16} /> Reply</button>}
 
-                            {msg.text && !msg.isDelete && <button onClick={() => { navigator.clipboard.writeText(msg.text); setToast("Message copied"); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm flex items-center gap-2 transition-all active:scale-95"><Copy size={16} /> Copy</button>}
-                            {msg.isMe && !msg.isDelete && <button onClick={() => handleEdit(msg.id, msg.text)} className="w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm flex items-center gap-2 transition-all active:scale-95"><Pencil size={16} /> Edit</button>}
-                             <button onClick={() => { onEnterSelectMode(msg.id); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm text-red-500 flex items-center gap-2 transition-all active:scale-95"><Trash2 size={16} /> Delete</button>
+                            {msg.text && !msg.isDelete && <button onClick={() => { navigator.clipboard.writeText(msg.text); setToast("Message copied"); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm flex items-center gap-2 transition-all active:scale-95 text-white/90 font-medium"><Copy size={16} /> Copy Text</button>}
+                            {msg.isMe && !msg.isDelete && <button onClick={() => { handleEdit(msg.id, msg.text); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 hover:bg-white/5 text-sm flex items-center gap-2 transition-all active:scale-95 text-white/90 font-medium"><Pencil size={16} /> Edit Message</button>}
+
+                            <div className="h-[1px] bg-white/5 mx-2 my-1" />
+
+                            <button onClick={() => { onEnterSelectMode(msg.id); setOpenMenuId(null); }} className="w-full text-left px-4 py-2 hover:bg-red-500/10 text-sm text-red-400 flex items-center gap-2 transition-all active:scale-95 font-medium"><Trash2 size={16} /> Delete</button>
                         </div>
                     )}
                 </div>

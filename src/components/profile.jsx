@@ -12,6 +12,7 @@ import ProfileHoverCard from "./Post/ProfileHoverCard";
 import ProfileHeader from "./ProfileHeader";
 import ProfileStats from "./ProfileStats";
 import ProfileTabs from "./ProfileTabs";
+import { createPortal } from "react-dom";
 
 const TABS = ["posts", "connections", "groups", "expertise"];
 
@@ -19,8 +20,8 @@ export default function ProfilePage() {
     const { customTab } = useParams();
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
-    const { setUser: setGlobalUser } = useUserContext(); 
-    const containerRef = useRef(null); 
+    const { setUser: setGlobalUser } = useUserContext();
+    const containerRef = useRef(null);
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
@@ -237,8 +238,20 @@ export default function ProfilePage() {
     useEffect(() => {
         const isModalOpen = showExpertiseModal || showImageViewer || showLogoutPopup || showUploadConfirm;
         document.body.style.overflow = isModalOpen ? "hidden" : "unset";
+
+        // GLOBAL BLUR SYNC
+        const rootElement = document.getElementById("root");
+        if (rootElement) {
+            if (isModalOpen) {
+                rootElement.classList.add("global-modal-blur");
+            } else {
+                rootElement.classList.remove("global-modal-blur");
+            }
+        }
+
         return () => {
             document.body.style.overflow = "unset";
+            if (rootElement) rootElement.classList.remove("global-modal-blur");
         };
     }, [showExpertiseModal, showImageViewer, showLogoutPopup, showUploadConfirm]);
 
@@ -246,12 +259,15 @@ export default function ProfilePage() {
     if (!user) return <div className="text-center text-white mt-10 font-bold">No user found</div>;
 
     return (
-        <div ref={containerRef} className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-300 relative">
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-neutral-900/40 rounded-full blur-[120px] pointer-events-none" />
+        <div ref={containerRef} className="min-h-screen bg-transparent text-white relative overflow-x-hidden no-scrollbar transition-all duration-500">
+            <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; }` }} />
+            {/* Cinematic Background Glows */}
+            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#8b5cf6]/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse transition-opacity duration-[3000ms]" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#ec4899]/5 rounded-full blur-[140px] pointer-events-none -z-10" />
 
-            <div className="w-full max-w-2xl mx-auto pt-6 px-4 pb-20 relative z-10 transition-all duration-500">
-                
-                <ProfileHeader 
+            <div className="w-full max-w-2xl mx-auto pt-24 md:pt-6 px-4 pb-20 relative z-10 transition-all duration-500">
+
+                <ProfileHeader
                     user={user}
                     isOwnProfile={true}
                     onEditProfile={() => navigate("/edit-profile")}
@@ -270,8 +286,8 @@ export default function ProfilePage() {
                     onChange={handleFileSelect}
                 />
 
-                <div className="px-6 sm:px-10 mt-6">
-                    <ProfileStats 
+                <div className="px-4 sm:px-10 mt-6 md:mt-8 transition-all duration-500">
+                    <ProfileStats
                         stats={{
                             posts: user.postsCount || posts.length,
                             connections: user.connectionsCount || "0",
@@ -279,14 +295,14 @@ export default function ProfilePage() {
                         }}
                     />
 
-                    <ProfileTabs 
+                    <ProfileTabs
                         activeTab={activeTab}
                         onTabChange={handleTabChange}
                     />
                 </div>
 
                 {/* TAB CONTENT SECTION */}
-                <div className="mt-8 min-h-[600px] px-4">
+                <div className="mt-4 min-h-[600px] px-2 md:px-4">
                     <AnimatePresence mode="popLayout" custom={direction} initial={false}>
                         <motion.div
                             key={activeTab}
@@ -299,25 +315,25 @@ export default function ProfilePage() {
                         >
                             {activeTab === "posts" && (
                                 <>
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                    <div className="flex items-center justify-between mb-4 px-2">
+                                        <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase italic tracking-wider">
                                             My Posts
-                                            <span className="text-sm font-normal text-gray-500 bg-white/10 px-2 py-0.5 rounded-full">{posts.length}</span>
+                                            <span className="text-[10px] font-black text-white/30 bg-white/5 px-2.5 py-1 rounded-full border border-white/10 not-italic tracking-widest">{posts.length}</span>
                                         </h2>
                                     </div>
 
                                     {!loadingPosts && posts.length === 0 && (
-                                        <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-gray-700">
-                                            <p className="text-gray-400">You haven't posted anything yet.</p>
+                                        <div className="text-center py-20 bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-white/10 mx-2">
+                                            <p className="text-white/30 font-black uppercase tracking-widest italic">No posts yet</p>
                                         </div>
                                     )}
 
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                                    <div className="grid grid-cols-3 gap-1 md:gap-4 transition-all duration-500">
                                         {posts.map((post) => (
                                             <Link
                                                 to={`/post/${post.id}`}
                                                 key={post.id}
-                                                className="group relative aspect-square bg-[#111] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
+                                                className="group relative aspect-square bg-white/[0.03] backdrop-blur-xl rounded-[16px] md:rounded-[28px] overflow-hidden border border-white/10 shadow-lg hover:border-white/30 hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-500 active:scale-95"
                                             >
                                                 {post.video ? (
                                                     <>
@@ -328,8 +344,8 @@ export default function ProfilePage() {
                                                             playsInline
                                                             preload="metadata"
                                                         />
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none" />
-                                                        <div className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-black/65 border border-white/10 flex items-center justify-center text-white shadow-lg pointer-events-none">
+                                                        <div className="absolute inset-0 bg-white/0 pointer-events-none" />
+                                                        <div className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white shadow-lg pointer-events-none">
                                                             <Play size={16} fill="currentColor" />
                                                         </div>
                                                     </>
@@ -357,33 +373,35 @@ export default function ProfilePage() {
 
                             {activeTab === "groups" && (
                                 <>
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                    <div className="flex items-center justify-between mb-4 px-2">
+                                        <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase italic tracking-wider">
                                             Groups
-                                            <span className="text-sm font-normal text-gray-500 bg-white/10 px-2 py-0.5 rounded-full">0</span>
+                                            <span className="text-[10px] font-black text-white/30 bg-white/5 px-2.5 py-1 rounded-full border border-white/10 not-italic tracking-widest">0</span>
                                         </h2>
                                     </div>
-                                    <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10 flex flex-col items-center justify-center gap-4">
-                                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-gray-500">
+                                    <div className="text-center py-20 bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-white/10 flex flex-col items-center justify-center gap-6 mx-2 group cursor-pointer hover:bg-white/[0.06] transition-all duration-500">
+                                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-white/20 group-hover:scale-110 group-hover:bg-white/10 transition-all border border-white/5">
                                             <Plus size={32} />
                                         </div>
-                                        <p className="text-gray-400 font-medium">No groups found</p>
+                                        <p className="text-white/30 font-black uppercase tracking-widest italic group-hover:text-white/50 transition-colors">Start a Group</p>
                                     </div>
                                 </>
                             )}
 
                             {activeTab === "expertise" && (
                                 <>
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold text-white">My Expertise</h2>
+                                    <div className="flex items-center justify-between mb-4 px-2">
+                                        <h2 className="text-xl font-black text-white uppercase italic tracking-wider">My Expertise</h2>
                                         <button
                                             onClick={() => setShowExpertiseModal(true)}
-                                            className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-gray-400"
+                                            className="p-2.5 bg-white/5 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-all border border-white/20"
                                         >
-                                            <Eye size={20} />
+                                            <Eye size={18} />
                                         </button>
                                     </div>
-                                    <div className="bg-white/5 rounded-3xl p-6 border border-white/10">
+                                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-[32px] p-8 border border-white/10 shadow-2xl overflow-hidden relative group transition-all duration-500">
+                                        {/* Subtle Glow */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                         <MyExperties expertise={user.expertise} />
                                     </div>
                                 </>
@@ -411,39 +429,86 @@ export default function ProfilePage() {
                 confirmText={uploading ? "Uploading..." : "Update"}
             />
 
-            {showImageViewer && (
-                <div 
-                    className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
-                    onClick={() => setShowImageViewer(false)}
-                >
-                    <button className="absolute top-4 right-4 text-white p-2">
-                        <X size={32} />
-                    </button>
-                    <img
-                        src={user.imageUrl}
-                        alt="Profile"
-                        className="max-w-full max-h-[85vh] rounded-2xl shadow-2xl border border-white/10"
-                    />
-                </div>
+            {createPortal(
+                <AnimatePresence>
+                    {showImageViewer && (
+                        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.4 }}
+                                className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+                                onClick={() => setShowImageViewer(false)}
+                            />
+
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                                className="relative z-10 max-w-full max-h-[90vh] flex flex-col items-center gap-6"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                <button
+                                    onClick={() => setShowImageViewer(false)}
+                                    className="absolute -top-12 right-0 text-white/40 hover:text-white transition-colors"
+                                >
+                                    <X size={32} />
+                                </button>
+                                <img
+                                    src={user.imageUrl}
+                                    alt="Profile"
+                                    className="max-w-full max-h-[85vh] rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
+                                />
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>,
+                document.body
             )}
 
-            {showExpertiseModal && (
-                <div 
-                    className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
-                    onClick={() => setShowExpertiseModal(false)}
-                >
-                    <div className="bg-[#0f0f0f] w-full max-w-2xl rounded-3xl p-8 border border-white/10 relative" onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-8">
-                            <h2 className="text-3xl font-bold text-white">User Expertise</h2>
-                            <button onClick={() => setShowExpertiseModal(false)} className="bg-white/5 p-2 rounded-full text-gray-500">
-                                <X size={20} />
-                            </button>
+            {createPortal(
+                <AnimatePresence>
+                    {showExpertiseModal && (
+                        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+                            {/* Backdrop */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                                onClick={() => setShowExpertiseModal(false)}
+                            />
+
+                            {/* Modal Content */}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                                className="bg-black/90 w-full md:max-w-5xl rounded-[40px] p-6 md:p-10 border border-white/20 relative shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                {/* Glows */}
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-[#8b5cf6]/10 rounded-full blur-3xl pointer-events-none" />
+                                <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#ec4899]/5 rounded-full blur-3xl pointer-events-none" />
+
+                                <div className="flex justify-between items-center mb-8 relative z-10">
+                                    <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">User Expertise</h2>
+                                    <button onClick={() => setShowExpertiseModal(false)} className="bg-white/5 p-3 rounded-full text-white/40 hover:text-white transition-all border border-white/10 active:scale-90">
+                                        <X size={24} />
+                                    </button>
+                                </div>
+                                <div className="max-h-[75vh] md:max-h-[85vh] overflow-y-auto pr-4 custom-scrollbar relative z-10">
+                                    <MyExperties expertise={user.expertise} />
+                                </div>
+                            </motion.div>
                         </div>
-                        <div className="max-h-[85vh] overflow-y-auto pr-2 custom-scrollbar">
-                            <MyExperties expertise={user.expertise} />
-                        </div>
-                    </div>
-                </div>
+                    )}
+                </AnimatePresence>,
+                document.body
             )}
 
             <ProfileHoverCard
