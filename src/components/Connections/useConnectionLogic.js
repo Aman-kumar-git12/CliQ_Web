@@ -513,9 +513,27 @@ export const useConnectionLogic = () => {
 
     useEffect(() => {
         initializeUsers();
-        refreshInsights();
         fetchViewerProfile();
+        fetchPreferences({ silent: true });
     }, []);
+
+    useEffect(() => {
+        if (activePanel === "dashboard") {
+            fetchAnalytics();
+            fetchAdminAnalytics();
+            return;
+        }
+
+        if (activePanel === "history") {
+            fetchHistory();
+            fetchPreferences({ silent: true });
+            return;
+        }
+
+        if (activePanel === "saved") {
+            fetchSavedProfiles();
+        }
+    }, [activePanel]);
 
     useEffect(() => {
         if (user?.id) trackShownCard(user);
