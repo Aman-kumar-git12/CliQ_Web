@@ -24,6 +24,8 @@ import LikesHoverCard from "./LikesHoverCard";
 import { AnimatePresence } from "framer-motion";
 
 
+import IndividualPostShimmering from "../shimmering/IndividualPostShimmering";
+
 export default function IndividualPost() {
     const { postId } = useParams();
     const containerRef = useRef(null);
@@ -56,6 +58,7 @@ export default function IndividualPost() {
     const [isReporting, setIsReporting] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
+    const [toastType, setToastType] = useState("info");
     const [reportedPost, setReportedPost] = useState(false);
     const [activeTooltip, setActiveTooltip] = useState(null);
     const tooltipTimeoutRef = useRef(null);
@@ -415,8 +418,9 @@ export default function IndividualPost() {
         }
     };
 
-    const handleActionClick = (message) => {
+    const handleActionClick = (message, type = "info") => {
         setToastMessage(message);
+        setToastType(type);
         setShowToast(true);
     };
 
@@ -449,6 +453,7 @@ export default function IndividualPost() {
 
             await axiosClient.post(endpoint, { reason }, { withCredentials: true });
             setToastMessage(`${reportTarget.type === 'post' ? 'Post' : 'Comment'} reported successfully 🫡`);
+            setToastType("success");
             setShowToast(true);
             closeReportModal();
 
@@ -462,63 +467,82 @@ export default function IndividualPost() {
         } catch (error) {
             console.error("Error reporting:", error);
             setToastMessage("Failed to report ❌");
+            setToastType("error");
             setShowToast(true);
         } finally {
             setIsReporting(false);
         }
     };
 
-    if (loading) return (
-        <div className="flex items-center justify-center min-h-screen bg-black">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#8b5cf6]"></div>
-        </div>
-    );
+    if (loading) return <IndividualPostShimmering />;
 
     if (!post) return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
-            <h2 className="text-2xl font-bold mb-4">Post Not Found</h2>
-            <button
-                onClick={() => navigate('/')}
-                className="px-6 py-2 bg-[#8b5cf6] hover:bg-[#7c3aed] rounded-full transition-colors"
-            >
-                Return Home
-            </button>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#08080C] text-white p-4 relative overflow-hidden">
+            {/* Ambient Background Glows for Not Found State */}
+            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#8b5cf6]/10 rounded-full blur-[140px] pointer-events-none" />
+            
+            <div className="relative z-10 flex flex-col items-center">
+                <h2 className="text-2xl font-black mb-6 italic uppercase tracking-wider">Post Not Found</h2>
+                <button
+                    onClick={() => navigate('/')}
+                    className="px-8 py-3 bg-white text-black font-black uppercase text-[12px] tracking-widest rounded-full hover:bg-gray-200 transition-all active:scale-95 shadow-2xl"
+                >
+                    Return Home
+                </button>
+            </div>
         </div>
     );
 
-    const isOwner = currentUser?.id === post.userId; // Changed user to currentUser
+    const isOwner = currentUser?.id === post.userId;
 
     return (
-        <div ref={containerRef} className="min-h-screen bg-[#06060A] transition-colors duration-300 relative">
+        <div ref={containerRef} className="min-h-screen bg-[#08080C] text-white relative overflow-x-hidden no-scrollbar transition-all duration-500">
+            <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; }` }} />
 
-            {/* Header: Fixed at top to prevent jumping against Layout's constant pt-16 */}
-            <header className="fixed top-0 left-0 md:left-28 right-0 h-14 z-50 bg-[#06060A]/80 backdrop-blur-xl border-b border-white/5 flex items-center px-4 transition-colors duration-300">
-                <div className="max-w-2xl mx-auto flex-1 flex items-center justify-between">
-                    <div className="flex items-center space-x-6">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors text-white"
-                        >
-                            <ArrowLeft size={20} strokeWidth={2.5} />
-                        </button>
-                        <h1 className="text-[19px] font-black text-white tracking-tight">Post</h1>
-                    </div>
+            {/* Cinematic Background Glows - Restored locally as Layout.jsx was reverted */}
+            <div className="fixed top-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#8b5cf6]/10 rounded-full blur-[140px] pointer-events-none z-0 animate-pulse transition-opacity duration-[3000ms]" />
+            <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#ec4899]/5 rounded-full blur-[140px] pointer-events-none z-0" />
+            
+            {/* Grid Overlay */}
+            <div 
+                className="fixed inset-0 z-0 pointer-events-none opacity-[0.03]" 
+                style={{ 
+                    backgroundImage: `linear-gradient(#8b5cf6 1px, transparent 1px), linear-gradient(90deg, #8b5cf6 1px, transparent 1px)`,
+                    backgroundSize: '40px 40px' 
+                }} 
+            />
+
+            <main className="max-w-[640px] mx-auto pt-6 md:pt-10 pb-24 relative z-10">
+                {/* Integrated Navigation Row */}
+                <div className="px-4 mb-6 flex items-center justify-between">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group"
+                    >
+                        <div className="p-2 bg-white/5 rounded-full group-hover:bg-white/10 transition-all border border-white/5">
+                            <ArrowLeft size={18} />
+                        </div>
+                        <span className="text-[11px] font-black uppercase tracking-widest hidden sm:inline">Back</span>
+                    </button>
+                    
                     <div className="flex items-center gap-2">
                         {isOwner ? (
-                            <div className="flex space-x-2">
+                            <div className="flex items-center gap-2">
                                 {!isEditing && (
                                     <>
                                         <button
                                             onClick={() => navigate(`/post/${postId}/edit`)}
-                                            className="p-2 hover:bg-white/10 rounded-full text-blue-400 transition-colors"
+                                            className="p-2 text-blue-400/60 hover:text-blue-400 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5"
+                                            title="Edit Post"
                                         >
-                                            <Edit2 size={20} />
+                                            <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => setShowDeletePostConfirm(true)}
-                                            className="p-2 hover:bg-white/10 rounded-full text-red-500 transition-colors"
+                                            className="p-2 text-red-400/60 hover:text-red-400 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5"
+                                            title="Delete Post"
                                         >
-                                            <Trash2 size={20} />
+                                            <Trash2 size={16} />
                                         </button>
                                     </>
                                 )}
@@ -527,12 +551,12 @@ export default function IndividualPost() {
                             <div className="relative post-menu-container">
                                 <button
                                     onClick={() => setShowPostMenu(!showPostMenu)}
-                                    className="p-2 hover:bg-white/10 rounded-full text-gray-400 flex items-center justify-center transition-colors"
+                                    className="p-2 text-white/30 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5"
                                 >
-                                    <MoreHorizontal size={24} />
+                                    <MoreHorizontal size={18} />
                                 </button>
                                 {showPostMenu && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-[#0A0A0F] border border-white/5 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
+                                    <div className="absolute right-0 mt-2 w-48 bg-[#0F0F1A] border border-white/[0.08] rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 backdrop-blur-3xl">
                                         <button
                                             onClick={reportedPost ? null : () => openReportModal('post', postId)}
                                             disabled={reportedPost}
@@ -541,8 +565,8 @@ export default function IndividualPost() {
                                                 : 'text-red-500 hover:bg-white/5'
                                                 }`}
                                         >
-                                            <Flag size={18} className={reportedPost ? 'text-gray-500' : 'text-red-500'} />
-                                            <span className="font-medium text-sm">{reportedPost ? 'Reported' : 'Report Post'}</span>
+                                            <Flag size={14} className={reportedPost ? 'text-gray-500' : 'text-red-500'} />
+                                            <span className="font-bold text-[11px] uppercase tracking-wider">{reportedPost ? 'Reported' : 'Report Post'}</span>
                                         </button>
                                     </div>
                                 )}
@@ -550,12 +574,7 @@ export default function IndividualPost() {
                         )}
                     </div>
                 </div>
-            </header>
 
-            {/* Content Spacer to account for fixed header */}
-            <div className="h-16 w-full"></div>
-
-            <main className="max-w-2xl mx-auto pb-24">
                 {/* Post Body */}
                 <article className="px-4 py-2 space-y-3">
                     {/* User Profile Info */}
@@ -627,7 +646,7 @@ export default function IndividualPost() {
                         )}
 
                         {(post.image || post.video) && (
-                            <div className="rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-[#050505] border border-white/5 mb-2 group/media">
+                            <div className="rounded-[32px] overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-white/[0.02] border border-white/[0.05] mb-2 group/media mt-2">
                                 {post.video ? (
                                     <video
                                         src={post.video}
@@ -649,7 +668,7 @@ export default function IndividualPost() {
                     </div>
 
                     {/* Interaction Buttons - Re-styled with counts, border-b, and tooltips */}
-                    <div className="flex items-center justify-between py-3 border-y border-white/5">
+                    <div className="flex items-center justify-between py-4 border-y border-white/[0.05]">
                         {isEditing ? (
                             <div className="flex justify-end gap-3 w-full">
                                 <button
@@ -708,7 +727,7 @@ export default function IndividualPost() {
                                 </button>
 
                                 <button
-                                    onClick={() => handleActionClick("Remix is on a coffee break ☕")}
+                                    onClick={() => handleActionClick("Remix is on a coffee break ☕", "funny")}
                                     onMouseEnter={() => handleMouseEnter('remix')}
                                     onMouseLeave={handleMouseLeave}
                                     className="flex items-center gap-1.5 group relative text-[#8b86a6] hover:text-[#10b981] transition-colors"
@@ -724,7 +743,7 @@ export default function IndividualPost() {
                                 </button>
 
                                 <button
-                                    onClick={() => handleActionClick("This post is feeling a little too private 🤫")}
+                                    onClick={() => handleActionClick("This post is feeling a little too private 🤫", "funny")}
                                     onMouseEnter={() => handleMouseEnter('share')}
                                     onMouseLeave={handleMouseLeave}
                                     className="flex items-center group relative text-[#8b86a6] hover:text-[#8b5cf6] transition-colors"
@@ -745,6 +764,7 @@ export default function IndividualPost() {
                         showToast && (
                             <Toastbar
                                 message={toastMessage}
+                                type={toastType}
                                 onClose={() => setShowToast(false)}
                             />
                         )
@@ -754,7 +774,7 @@ export default function IndividualPost() {
                 {showComments && (
                     <div ref={commentsRef} className="animate-slideDown">
                         {/* Comment Input */}
-                        <div className="p-4 border-b border-white/5 bg-[#06060A]/80 backdrop-blur-xl z-10 flex space-x-3 w-full relative">
+                        <div className="p-4 border-b border-white/[0.05] bg-transparent z-10 flex space-x-3 w-full relative">
                             <form onSubmit={handleAddComment} className="flex flex-1 items-start space-x-3 w-full">
                                 <Link
                                     to="/profile"

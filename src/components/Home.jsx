@@ -1,9 +1,12 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Loader2, Smile, Plus, LayoutGrid as PostIcon } from "lucide-react";
 import axiosClient from "../api/axiosClient";
 import PostCard from "./Postcard";
 import HomeSidebar from "./HomeSidebar";
 import StoriesBar from "./StoriesBar";
 import PostInput from "./PostInput";
+import IndividualPost from "./Post/IndividualPost";
 import { useFeedContext } from "../context/FeedContext";
 import HomeShimmering from "./shimmering/HomeShimmering";
 import Chatbot from "./Chatbot/Chatbot";
@@ -190,8 +193,20 @@ export default function Home() {
     }
   }, [feedPage]);
 
-
   const [activeTab, setActiveTab] = useState("For You");
+  const [toast, setToast] = useState({ show: false, message: "", icon: null });
+
+  const showToast = (message, icon = "info") => {
+    setToast({ show: true, message, icon });
+    setTimeout(() => setToast({ show: false, message: "", icon: null }), 3000);
+  };
+
+  const toastIcons = {
+    info: <Loader2 size={16} className="text-violet-400" />,
+    funny: <Smile size={16} className="text-yellow-400" />,
+    story: <Plus size={16} className="text-pink-400" />,
+    trend: <PostIcon size={16} className="text-blue-400" />
+  };
 
   if (loading && feedPage === 1 && feedPosts.length === 0) {
     return <HomeShimmering />;
@@ -203,22 +218,46 @@ export default function Home() {
 
   return (
     <div className="relative flex justify-center gap-10 w-full pt-[85px] md:pt-4 pb-24 md:pb-8 min-h-screen px-4 xl:px-0 bg-transparent">
+      {/* GLOBAL SNACKBAR */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="fixed bottom-28 right-20 sm:bottom-10 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto z-[200] flex items-center gap-3 px-4 py-3 bg-[#11111a]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-auto max-w-[calc(100vw-6rem)] sm:w-auto"
+          >
+            <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                {toastIcons[toast.icon] || toastIcons.info}
+            </div>
+            <span className="text-[12px] sm:text-[13px] font-bold text-[#ece8f8] tracking-tight leading-snug">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* FEED COLUMN */}
       <div className="relative flex-grow max-w-[640px] w-full flex flex-col items-center md:items-stretch">
         {/* STORIES */}
-        <StoriesBar />
+        <StoriesBar onTriggerToast={showToast} />
 
         {/* POST INPUT */}
-        <PostInput onPostSuccess={() => fetchFeed(1)} />
+        <PostInput onPostSuccess={() => fetchFeed(1)} onTriggerToast={showToast} />
 
         {/* TABS */}
-        {/* TABS */}
-        <div className="flex items-center gap-10 mb-6 border-b cliq-feed-divider px-4 max-w-[560px] w-full self-center">
+        <div className="flex items-center gap-6 sm:gap-10 mb-6 border-b cliq-feed-divider px-4 max-w-[560px] w-full self-center overflow-x-auto hide-scrollbar">
           {["For You", "Following", "Trending"].map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-3 text-[11px] font-black uppercase tracking-[0.12em] transition-all relative
+              onClick={() => {
+                if (tab === "For You") {
+                  setActiveTab(tab);
+                } else if (tab === "Following") {
+                  showToast("Following? You're already a leader! 😉", "funny");
+                } else if (tab === "Trending") {
+                  showToast("Trending... just like your fashion sense! 🔥", "trend");
+                }
+              }}
+              className={`pb-3 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.12em] transition-all relative shrink-0
                 ${activeTab === tab ? "text-white" : "text-[#6f6a86] hover:text-[#b2aed0]"}`}
             >
               {tab}

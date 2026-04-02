@@ -1,29 +1,48 @@
-import React, { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Info, CheckCircle2, AlertCircle, X, Smile, Loader2 } from 'lucide-react';
 
-const Toastbar = ({ message, onClose, duration = 3000 }) => {
-    const [isVisible, setIsVisible] = useState(false);
-
+const Toastbar = ({ message, onClose, duration = 3000, type = "info" }) => {
     useEffect(() => {
-        setIsVisible(true);
         const timer = setTimeout(() => {
-            setIsVisible(false);
-            setTimeout(onClose, 300); // Wait for transition out
+            onClose();
         }, duration);
 
         return () => clearTimeout(timer);
     }, [duration, onClose]);
 
+    const icons = {
+        info: <Info size={16} className="text-violet-400" />,
+        success: <CheckCircle2 size={16} className="text-emerald-400" />,
+        error: <AlertCircle size={16} className="text-red-400" />,
+        funny: <Smile size={16} className="text-yellow-400" />,
+        loading: <Loader2 size={16} className="text-violet-400 animate-spin" />
+    };
+
     return (
-        <div className={`fixed bottom-24 left-1/2 md:left-[54%] -translate-x-1/2 z-[150] flex items-center gap-3 px-5 py-3 bg-[#1c1c1e] text-white rounded-full shadow-[0_10px_40px_rgba(16,185,129,0.2)] border border-emerald-500/40 transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'}`}>
-            <span className="text-[14px] font-bold tracking-wide text-emerald-400">{message}</span>
-            <button
-                onClick={() => { setIsVisible(false); setTimeout(onClose, 300); }}
-                className="p-0.5 hover:bg-white/10 rounded-full transition-colors"
+        <AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0, x: 20, y: 0 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                exit={{ opacity: 0, x: 20, y: 0 }}
+                className="fixed bottom-28 right-20 sm:bottom-24 sm:left-1/2 sm:-translate-x-1/2 sm:right-auto z-[200] flex items-center gap-3 px-4 py-3 bg-[#11111a]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-auto max-w-[calc(100vw-6rem)] sm:max-w-[420px]"
             >
-                <X size={14} className="text-white/50" />
-            </button>
-        </div>
+                <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                    {icons[type] || icons.info}
+                </div>
+                <div className="flex-1 flex flex-col min-w-0">
+                    <span className="text-[12px] sm:text-[13px] font-black uppercase italic tracking-tighter text-[#ece8f8] truncate">
+                        {message}
+                    </span>
+                </div>
+                <button
+                    onClick={onClose}
+                    className="p-1.5 hover:bg-white/10 rounded-full transition-all group shrink-0"
+                >
+                    <X size={14} className="text-[#6f6a86] group-hover:text-white transition-colors" />
+                </button>
+            </motion.div>
+        </AnimatePresence>
     );
 };
 
