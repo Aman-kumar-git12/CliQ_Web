@@ -138,9 +138,9 @@ export default function Sidebar() {
             <div className="flex-1 overflow-y-auto custom-scrollbar pt-2 scroll-smooth">
                 <Section title="Feed" isChatView={isChatView}>
                     <NavItem to="/home" icon={Home} label="Feed" active={isActive("/home")} isChatView={isChatView} />
-                    <NavItem to="/messages" icon={MessageSquare} label="Messages" badge="3" active={isActive("/messages")} isChatView={isChatView} />
-                    <NavItem to="/requests" icon={Users} label="Requests" badge={pendingRequestsCount > 0 ? pendingRequestsCount.toString() : null} active={isActive("/requests")} isChatView={isChatView} />
                     <NavItem to="/find/getconnection" icon={Compass} label="Explore" active={isActive("/find/getconnection")} isChatView={isChatView} />
+                    <NavItem to="/requests" icon={Users} label="Requests" badge={pendingRequestsCount > 0 ? pendingRequestsCount.toString() : null} active={isActive("/requests")} isChatView={isChatView} />
+                    <NavItem to="/messages" icon={MessageSquare} label="Messages" active={isActive("/messages")} isChatView={isChatView} />
                 </Section>
 
                 <Section title="Create" isChatView={isChatView}>

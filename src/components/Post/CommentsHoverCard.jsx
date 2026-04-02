@@ -96,11 +96,20 @@ const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMous
                                     <div key={comment.id} className="flex gap-3 items-start group/comment">
                                         <div className="relative shrink-0">
                                             <div className="absolute -inset-0.5 bg-gradient-to-tr from-blue-500/20 to-purple-500/20 rounded-full blur opacity-0 group-hover/comment:opacity-100 transition duration-300"></div>
-                                            <img
-                                                src={comment.avatar || "https://github.com/shadcn.png"}
-                                                alt={comment.username}
-                                                className="relative w-8 h-8 rounded-full object-cover border border-neutral-100 dark:border-neutral-800 shadow-sm"
-                                            />
+                                            {comment.avatar ? (
+                                                <img
+                                                    src={comment.avatar}
+                                                    alt={comment.username}
+                                                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                                                    className="relative w-8 h-8 rounded-full object-cover border border-neutral-100 dark:border-neutral-800 shadow-sm"
+                                                />
+                                            ) : null}
+                                            <div
+                                                style={{ display: comment.avatar ? 'none' : 'flex' }}
+                                                className="relative w-8 h-8 rounded-full bg-gradient-to-tr from-[#8b5cf6] to-[#f472b6] items-center justify-center text-white text-[11px] font-black border border-neutral-800 shadow-sm"
+                                            >
+                                                {comment.username?.charAt(0)?.toUpperCase() || "?"}
+                                            </div>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-[13px] font-bold text-black dark:text-white leading-tight truncate">

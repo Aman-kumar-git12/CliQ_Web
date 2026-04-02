@@ -91,11 +91,20 @@ const LikesHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMouseLe
                             <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
                                 {users.map((user) => (
                                     <div key={user.id} className="flex items-center gap-2.5 group/user">
-                                        <img
-                                            src={user.avatar}
-                                            alt={user.username}
-                                            className="w-7 h-7 rounded-full object-cover border border-neutral-100 dark:border-neutral-800 group-hover/user:scale-105 transition-transform"
-                                        />
+                                        {user.avatar ? (
+                                            <img
+                                                src={user.avatar}
+                                                alt={user.username}
+                                                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                                                className="w-7 h-7 rounded-full object-cover border border-neutral-100 dark:border-neutral-800 group-hover/user:scale-105 transition-transform"
+                                            />
+                                        ) : null}
+                                        <div
+                                            style={{ display: user.avatar ? 'none' : 'flex' }}
+                                            className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#8b5cf6] to-[#f472b6] items-center justify-center text-white text-[10px] font-black border border-neutral-800 group-hover/user:scale-105 transition-transform"
+                                        >
+                                            {user.username?.charAt(0)?.toUpperCase() || "?"}
+                                        </div>
                                         <span className="text-[12px] font-bold text-black dark:text-white truncate">
                                             {user.username}
                                         </span>

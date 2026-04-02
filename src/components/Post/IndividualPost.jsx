@@ -470,7 +470,7 @@ export default function IndividualPost() {
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-screen bg-black">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#8b5cf6]"></div>
         </div>
     );
 
@@ -479,7 +479,7 @@ export default function IndividualPost() {
             <h2 className="text-2xl font-bold mb-4">Post Not Found</h2>
             <button
                 onClick={() => navigate('/')}
-                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-full transition-colors"
+                className="px-6 py-2 bg-[#8b5cf6] hover:bg-[#7c3aed] rounded-full transition-colors"
             >
                 Return Home
             </button>
@@ -489,19 +489,19 @@ export default function IndividualPost() {
     const isOwner = currentUser?.id === post.userId; // Changed user to currentUser
 
     return (
-        <div ref={containerRef} className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-300 relative">
+        <div ref={containerRef} className="min-h-screen bg-[#06060A] transition-colors duration-300 relative">
 
             {/* Header: Fixed at top to prevent jumping against Layout's constant pt-16 */}
-            <header className="fixed top-0 left-0 md:left-28 right-0 h-16 z-50 bg-black/99 backdrop-blur-md border-b border-neutral-800 flex items-center px-4 transition-colors duration-300 shadow-xl">
+            <header className="fixed top-0 left-0 md:left-28 right-0 h-14 z-50 bg-[#06060A]/80 backdrop-blur-xl border-b border-white/5 flex items-center px-4 transition-colors duration-300">
                 <div className="max-w-2xl mx-auto flex-1 flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-6">
                         <button
                             onClick={() => navigate(-1)}
                             className="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors text-white"
                         >
-                            <ArrowLeft size={24} />
+                            <ArrowLeft size={20} strokeWidth={2.5} />
                         </button>
-                        <h1 className="text-xl font-bold text-white tracking-tight">Post</h1>
+                        <h1 className="text-[19px] font-black text-white tracking-tight">Post</h1>
                     </div>
                     <div className="flex items-center gap-2">
                         {isOwner ? (
@@ -532,7 +532,7 @@ export default function IndividualPost() {
                                     <MoreHorizontal size={24} />
                                 </button>
                                 {showPostMenu && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
+                                    <div className="absolute right-0 mt-2 w-48 bg-[#0A0A0F] border border-white/5 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
                                         <button
                                             onClick={reportedPost ? null : () => openReportModal('post', postId)}
                                             disabled={reportedPost}
@@ -567,38 +567,38 @@ export default function IndividualPost() {
                             onMouseLeave={handleProfileMouseLeave}
                         >
                             <div className="relative">
-                                <div className="absolute -inset-0.5 bg-gradient-to-tr from-emerald-500 to-cyan-500 rounded-full blur opacity-30 group-hover:opacity-100 transition duration-300"></div>
+                                <div className="absolute -inset-0.5 bg-gradient-to-tr from-[#8b5cf6] to-[#f472b6] rounded-full blur-sm opacity-50 group-hover:opacity-100 transition duration-300"></div>
                                 <img
                                     src={post.avatar || "https://github.com/shadcn.png"}
                                     alt={post.username}
-                                    className="relative w-12 h-12 rounded-full object-cover border-2 border-black"
+                                    className="relative w-11 h-11 rounded-full object-cover border-2 border-black"
                                 />
                             </div>
                             <div>
-                                <h3 className="font-bold text-white group-hover:text-emerald-400 transition-colors tracking-tight">
+                                <h3 className="font-black text-[15px] text-white group-hover:text-[var(--cliq-lilac)] transition-colors tracking-tight">
                                     {post.username}
                                 </h3>
-                                <p className="text-gray-500 text-sm">@{post.username?.replace(/\s+/g, '').toLowerCase() || "user"}</p>
+                                <p className="text-[#8b86a6] text-[15px] leading-tight">@{post.username?.replace(/\s+/g, '').toLowerCase() || "user"}</p>
                             </div>
                         </Link>
                         {!isOwner && (
                             <button
                                 onClick={handleFollow}
                                 disabled={connectionStatus === 'accepted' || connectionStatus === 'interested'}
-                                className={`px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-300 ${connectionStatus === 'accepted'
-                                    ? 'bg-transparent border-emerald-500/50 text-emerald-500 cursor-default'
+                                className={`px-4 py-1.5 rounded-full text-[14px] font-bold transition-all duration-300 ${connectionStatus === 'accepted'
+                                    ? 'bg-transparent border border-white/20 text-white cursor-default'
                                     : connectionStatus === 'interested'
-                                        ? 'bg-transparent border-white/20 text-white/60 cursor-default'
-                                        : 'bg-white text-black border-transparent hover:bg-gray-200 shadow-lg shadow-white/10'
+                                        ? 'bg-transparent border border-white/20 text-white/60 cursor-default'
+                                        : 'bg-white text-black hover:bg-gray-200'
                                     }`}
                             >
-                                {connectionStatus === 'accepted' ? 'Connected' : connectionStatus === 'interested' ? 'Requested' : 'Follow'}
+                                {connectionStatus === 'accepted' ? 'Following' : connectionStatus === 'interested' ? 'Requested' : 'Follow'}
                             </button>
                         )}
                     </div>
 
                     {/* Content */}
-                    <div className="space-y-3">
+                    <div className="space-y-4 mt-2">
                         {isEditing ? (
                             <>
                                 <style>
@@ -609,25 +609,25 @@ export default function IndividualPost() {
                                             border-color: transparent transparent #555 transparent;
                                         }
                                         .custom-resize-handle:hover::-webkit-resizer {
-                                             border-color: transparent transparent #3b82f6 transparent;
+                                             border-color: transparent transparent #8b5cf6 transparent;
                                         }
                                     `}
                                 </style>
                                 <textarea
                                     value={editContent}
                                     onChange={(e) => setEditContent(e.target.value)}
-                                    className="custom-resize-handle w-full h-24 bg-[#111] border border-gray-700 rounded-xl p-4 text-white focus:outline-none focus:border-blue-500 resize-y text-xl leading-relaxed"
+                                    className="custom-resize-handle w-full h-24 bg-[#111] border border-[#2f3336] rounded-xl p-4 text-white focus:outline-none focus:border-[#8b5cf6] resize-y text-[15px] md:text-[17px] leading-relaxed"
                                     placeholder="Edit your post content..."
                                 />
                             </>
                         ) : (
-                            <p className="text-xl leading-relaxed text-gray-100 whitespace-pre-wrap">
+                            <p className="text-[15px] md:text-[17px] leading-relaxed text-[#ebe7f7] font-medium whitespace-pre-wrap">
                                 {post.content}
                             </p>
                         )}
 
                         {(post.image || post.video) && (
-                            <div className="rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-[#121212] border border-white/10 mb-6">
+                            <div className="rounded-2xl overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-[#050505] border border-white/5 mb-2 group/media">
                                 {post.video ? (
                                     <video
                                         src={post.video}
@@ -643,23 +643,26 @@ export default function IndividualPost() {
                                 )}
                             </div>
                         )}
+                        <div className="text-[15px] text-[#8b86a6] my-3">
+                            {post.time || "4:20 PM · Apr 1, 2026"}
+                        </div>
                     </div>
 
                     {/* Interaction Buttons - Re-styled with counts, border-b, and tooltips */}
-                    <div className="flex items-center justify-between px-2 py-4 border-y border-white/10">
+                    <div className="flex items-center justify-between py-3 border-y border-white/5">
                         {isEditing ? (
                             <div className="flex justify-end gap-3 w-full">
                                 <button
                                     onClick={handleCancelEdit}
                                     disabled={isSavingEdit}
-                                    className="px-4 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition font-medium"
+                                    className="px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition font-bold text-sm"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleSaveEdit}
                                     disabled={isSavingEdit}
-                                    className="px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition font-bold shadow-lg shadow-blue-900/20 disabled:opacity-50"
+                                    className="px-6 py-2 rounded-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white transition font-bold shadow-lg disabled:opacity-50 text-sm"
                                 >
                                     {isSavingEdit ? "Saving..." : "Save Changes"}
                                 </button>
@@ -676,12 +679,12 @@ export default function IndividualPost() {
                                         handleMouseLeave();
                                         handleLikesMouseLeave();
                                     }}
-                                    className={`flex items-center group relative transition-colors ${liked ? 'text-rose-500' : 'text-gray-500 md:hover:text-rose-500'}`}
+                                    className={`flex items-center gap-1.5 group relative transition-colors ${liked ? 'text-[var(--cliq-pink)]' : 'text-[#8b86a6] hover:text-[var(--cliq-pink)]'}`}
                                 >
-                                    {likesCount > 0 && <span className="text-sm font-bold mr-1">{likesCount}</span>}
-                                    <div className={`p-2 rounded-full transition-colors ${liked ? 'bg-rose-500/10' : 'group-hover:bg-rose-500/10'}`}>
-                                        <Heart size={20} fill={liked ? "currentColor" : "none"} strokeWidth={liked ? 0 : 2} />
+                                    <div className={`p-2 rounded-full transition-colors ${liked ? 'bg-[var(--cliq-pink)]/10' : 'group-hover:bg-[var(--cliq-pink)]/10'}`}>
+                                        <Heart size={20} fill={liked ? "currentColor" : "none"} strokeWidth={liked ? 0 : 2} className="group-hover:scale-110 transition-transform" />
                                     </div>
+                                    {likesCount > 0 && <span className="text-[13px] font-bold">{likesCount}</span>}
                                     {/* Tooltip */}
                                     <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'like' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
                                         Like
@@ -692,12 +695,12 @@ export default function IndividualPost() {
                                     onClick={toggleComments}
                                     onMouseEnter={() => handleMouseEnter('comments')}
                                     onMouseLeave={handleMouseLeave}
-                                    className={`flex items-center group relative transition-colors ${showComments ? 'text-blue-500' : 'text-gray-500 md:hover:text-blue-500'}`}
+                                    className={`flex items-center gap-1.5 group relative transition-colors ${showComments ? 'text-[#8b5cf6]' : 'text-[#8b86a6] hover:text-[#8b5cf6]'}`}
                                 >
-                                    {comments.length > 0 && <span className="text-sm font-bold mr-1">{comments.length}</span>}
-                                    <div className={`p-2 rounded-full transition-colors ${showComments ? 'bg-blue-500/10' : 'group-hover:bg-blue-500/10'}`}>
-                                        <MessageCircle size={20} fill={showComments ? "currentColor" : "none"} strokeWidth={showComments ? 0 : 2} />
+                                    <div className={`p-2 rounded-full transition-colors ${showComments ? 'bg-[#8b5cf6]/10' : 'group-hover:bg-[#8b5cf6]/10'}`}>
+                                        <MessageCircle size={20} fill={showComments ? "currentColor" : "none"} strokeWidth={showComments ? 0 : 2} className="group-hover:scale-110 transition-transform" />
                                     </div>
+                                    {comments.length > 0 && <span className="text-[13px] font-bold">{comments.length}</span>}
                                     {/* Tooltip */}
                                     <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'comments' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
                                         Comments
@@ -708,11 +711,12 @@ export default function IndividualPost() {
                                     onClick={() => handleActionClick("Remix is on a coffee break ☕")}
                                     onMouseEnter={() => handleMouseEnter('remix')}
                                     onMouseLeave={handleMouseLeave}
-                                    className="flex items-center group relative text-gray-500 md:hover:text-emerald-500 transition-colors"
+                                    className="flex items-center gap-1.5 group relative text-[#8b86a6] hover:text-[#10b981] transition-colors"
                                 >
-                                    <div className="p-2 rounded-full group-hover:bg-emerald-500/10">
-                                        <Repeat size={20} />
+                                    <div className="p-2 rounded-full group-hover:bg-[#10b981]/10">
+                                        <Repeat size={20} className="group-hover:scale-110 transition-transform" />
                                     </div>
+                                    <span className="text-[13px] font-bold">18</span>
                                     {/* Tooltip */}
                                     <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'remix' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
                                         Remix
@@ -723,10 +727,10 @@ export default function IndividualPost() {
                                     onClick={() => handleActionClick("This post is feeling a little too private 🤫")}
                                     onMouseEnter={() => handleMouseEnter('share')}
                                     onMouseLeave={handleMouseLeave}
-                                    className="flex items-center group relative text-gray-500 md:hover:text-amber-500 transition-colors"
+                                    className="flex items-center group relative text-[#8b86a6] hover:text-[#8b5cf6] transition-colors"
                                 >
-                                    <div className="p-2 rounded-full group-hover:bg-amber-500/10">
-                                        <Share2 size={20} />
+                                    <div className="p-2 rounded-full group-hover:bg-[#8b5cf6]/10">
+                                        <Share2 size={20} className="group-hover:scale-110 transition-transform" />
                                     </div>
                                     {/* Tooltip */}
                                     <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'share' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
@@ -750,35 +754,38 @@ export default function IndividualPost() {
                 {showComments && (
                     <div ref={commentsRef} className="animate-slideDown">
                         {/* Comment Input */}
-                        <div className="p-4 border-t border-white/10 bg-black/50 sticky bottom-0 backdrop-blur-sm z-10">
-                            <form onSubmit={handleAddComment} className="flex items-center space-x-3">
+                        <div className="p-4 border-b border-white/5 bg-[#06060A]/80 backdrop-blur-xl z-10 flex space-x-3 w-full relative">
+                            <form onSubmit={handleAddComment} className="flex flex-1 items-start space-x-3 w-full">
                                 <Link
                                     to="/profile"
                                     onMouseEnter={(e) => handleProfileMouseEnter(e, currentUser?.id)}
                                     onMouseLeave={handleProfileMouseLeave}
+                                    className="shrink-0"
                                 >
-                                    <img src={currentUser?.imageUrl || "https://github.com/shadcn.png"} className="w-9 h-9 rounded-full object-cover hover:opacity-80 transition-opacity" alt="Me" />
+                                    <img src={currentUser?.imageUrl || "https://github.com/shadcn.png"} className="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity" alt="Me" />
                                 </Link>
-                                <div className="flex-1 relative">
+                                <div className="flex-1 flex flex-col gap-2">
                                     <input
                                         value={newComment}
                                         onChange={(e) => setNewComment(e.target.value)}
                                         placeholder="Post your reply"
-                                        className="w-full bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                                        className="w-full bg-transparent border-none px-0 py-2 text-[17px] text-white placeholder-[#8b86a6] focus:outline-none focus:ring-0 leading-relaxed"
                                     />
-                                    <button
-                                        type="submit"
-                                        disabled={!newComment.trim() || isSubmittingComment}
-                                        className="absolute right-2 top-1.5 p-1 text-emerald-500 disabled:opacity-50 disabled:text-gray-500"
-                                    >
-                                        <Send size={18} />
-                                    </button>
+                                    <div className="flex justify-end pt-2">
+                                        <button
+                                            type="submit"
+                                            disabled={!newComment.trim() || isSubmittingComment}
+                                            className="px-4 py-1.5 bg-[#8b5cf6] text-white rounded-full font-bold text-[14px] disabled:opacity-50 disabled:bg-[#8b5cf6]/50 transition-colors"
+                                        >
+                                            Reply
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
 
                         {/* Comments List - Scrollable Area */}
-                        <div className="divide-y divide-white/5 bg-black/20 max-h-[500px] overflow-y-auto custom-scrollbar">
+                        <div className="divide-y divide-white/5 max-h-[500px] overflow-y-auto custom-scrollbar">
                             {comments.length > 0 ? (
                                 comments.map((comment) => (
                                     <div key={comment.id} className="p-4 flex space-x-3 hover:bg-white/[0.02] transition-colors">
@@ -786,33 +793,39 @@ export default function IndividualPost() {
                                             to={currentUser?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
                                             onMouseEnter={(e) => handleProfileMouseEnter(e, comment.userId)}
                                             onMouseLeave={handleProfileMouseLeave}
+                                            className="shrink-0"
                                         >
                                             <img src={comment.avatar || "https://github.com/shadcn.png"} alt="" className="w-10 h-10 rounded-full object-cover" />
                                         </Link>
                                         <div className="flex-1 space-y-1">
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-2">
+                                                <div className="flex items-center space-x-1.5">
                                                     <Link
                                                         to={currentUser?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
-                                                        className="font-bold text-sm text-white hover:text-emerald-400 transition-colors"
+                                                        className="font-bold text-[15px] text-white hover:underline transition-colors"
                                                         onMouseEnter={(e) => handleProfileMouseEnter(e, comment.userId)}
                                                         onMouseLeave={handleProfileMouseLeave}
                                                     >
                                                         {comment.username || "Anonymous"}
                                                     </Link>
-                                                    <span className="text-gray-500 text-xs">·</span>
-                                                    <span className="text-gray-500 text-xs">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                                    <span className="text-[#8b86a6] text-[14px]">
+                                                        @{comment.username?.replace(/\s+/g, '').toLowerCase() || "user"}
+                                                    </span>
+                                                    <span className="text-[#8b86a6] text-[14px]">·</span>
+                                                    <span className="text-[#8b86a6] text-[14px] hover:underline cursor-pointer">
+                                                        {new Date(comment.createdAt).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}
+                                                    </span>
                                                 </div>
                                                 <div className="relative comment-menu-container">
                                                     <button
                                                         onClick={() => setActiveMenuId(activeMenuId === comment.id ? null : comment.id)}
-                                                        className="text-gray-600 hover:text-white p-1 hover:bg-white/5 rounded-full transition-colors"
+                                                        className="text-[#8b86a6] hover:text-[#8b5cf6] p-1.5 hover:bg-[#8b5cf6]/10 rounded-full transition-colors"
                                                     >
-                                                        <MoreHorizontal size={16} />
+                                                        <MoreHorizontal size={18} />
                                                     </button>
 
                                                     {activeMenuId === comment.id && (
-                                                        <div className="absolute right-0 mt-1 w-32 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-20 overflow-hidden animate-fadeIn">
+                                                        <div className="absolute right-0 mt-1 w-48 bg-[#0A0A0F] border border-white/5 rounded-xl shadow-2xl z-20 overflow-hidden animate-fadeIn">
                                                             {comment.userId === currentUser?.id ? (
                                                                 <button
                                                                     onClick={() => {
@@ -820,37 +833,55 @@ export default function IndividualPost() {
                                                                         setShowDeleteConfirm(true);
                                                                         setActiveMenuId(null);
                                                                     }}
-                                                                    className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-white/5 transition-colors flex items-center space-x-2"
+                                                                    className="w-full px-4 py-3 text-left text-sm text-red-500 hover:bg-white/5 transition-colors flex items-center space-x-3 font-bold"
                                                                 >
-                                                                    <Trash2 size={14} />
-                                                                    <span>Delete</span>
+                                                                    <Trash2 size={18} />
+                                                                    <span>Delete reply</span>
                                                                 </button>
                                                             ) : (
                                                                 <button
                                                                     onClick={comment.isReported ? null : () => openReportModal('comment', comment.id)}
                                                                     disabled={comment.isReported}
-                                                                    className={`w-full px-4 py-2.5 text-left text-sm flex items-center space-x-2 transition-colors ${comment.isReported ? 'text-gray-500 cursor-default' : 'text-gray-400 hover:bg-white/5'
+                                                                    className={`w-full px-4 py-3 text-left text-sm flex items-center space-x-3 transition-colors font-bold ${comment.isReported ? 'text-gray-500 cursor-default' : 'text-white hover:bg-white/5'
                                                                         }`}
                                                                 >
-                                                                    <Flag size={14} className={comment.isReported ? 'text-gray-500' : 'text-gray-400'} />
-                                                                    <span>{comment.isReported ? 'Reported' : 'Report'}</span>
+                                                                    <Flag size={18} className={comment.isReported ? 'text-gray-500' : 'text-white'} />
+                                                                    <span>{comment.isReported ? 'Reported' : 'Report reply'}</span>
                                                                 </button>
                                                             )}
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
-                                            <p className="text-white text-sm leading-relaxed">{comment.comment}</p>
-                                            <div className="flex items-center space-x-6 pt-2 text-gray-500">
-                                                <button className="hover:text-rose-500 transition-colors"><Heart size={14} /></button>
-                                                <button className="hover:text-blue-500 transition-colors"><MessageCircle size={14} /></button>
+                                            <p className="text-[#ebe7f7] text-[15px] leading-relaxed block mt-0">{comment.comment}</p>
+                                            <div className="flex items-center justify-between w-full max-w-[425px] pt-3 text-[#8b86a6]">
+                                                <button className="flex items-center gap-2 group transition flex-1">
+                                                    <div className="p-2 rounded-full group-hover:bg-[#8b5cf6]/10 group-hover:text-[#8b5cf6] transition-colors -ml-2">
+                                                        <MessageCircle size={16} />
+                                                    </div>
+                                                </button>
+                                                <button className="flex items-center gap-2 group transition flex-1">
+                                                    <div className="p-2 rounded-full group-hover:bg-[var(--cliq-pink)]/10 group-hover:text-[var(--cliq-pink)] transition-colors -ml-2">
+                                                        <Heart size={16} />
+                                                    </div>
+                                                </button>
+                                                <button className="flex items-center gap-2 group transition flex-1">
+                                                    <div className="p-2 rounded-full group-hover:bg-[#10b981]/10 group-hover:text-[#10b981] transition-colors -ml-2">
+                                                        <Repeat size={16} />
+                                                    </div>
+                                                </button>
+                                                <button className="flex items-center gap-2 group transition flex-1">
+                                                    <div className="p-2 rounded-full group-hover:bg-[#8b5cf6]/10 group-hover:text-[#8b5cf6] transition-colors -ml-2">
+                                                        <Share2 size={16} />
+                                                    </div>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 ))
                             ) : (
-                                <div className="p-10 text-center text-gray-500 text-sm">
-                                    No comments yet. Be the first to reply!
+                                <div className="p-10 text-center text-[#8b86a6] text-[15px] font-bold">
+                                    No replies yet. Be the first to answer!
                                 </div>
                             )}
                         </div>

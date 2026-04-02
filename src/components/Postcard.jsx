@@ -131,6 +131,8 @@ const PostCard = ({ post }) => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={handleLike}
+                        onMouseEnter={handleLikesMouseEnter}
+                        onMouseLeave={handleLikesMouseLeave}
                         className={`flex items-center gap-2 transition group ${liked ? 'text-[var(--cliq-pink)]' : 'text-[#8b86a6] hover:text-white'}`}
                     >
                         <Heart size={16} fill={liked ? "currentColor" : "none"} className="group-hover:scale-110 transition-transform" />
@@ -139,6 +141,8 @@ const PostCard = ({ post }) => {
 
                     <button
                         onClick={() => navigate(`/post/${post.id}`)}
+                        onMouseEnter={handleCommentsMouseEnter}
+                        onMouseLeave={handleCommentsMouseLeave}
                         className="flex items-center gap-2 text-[#8b86a6] hover:text-white transition group"
                     >
                         <MessageSquare size={16} className="group-hover:scale-110 transition-transform" />

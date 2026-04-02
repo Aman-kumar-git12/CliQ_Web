@@ -2,12 +2,15 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import axiosClient from "../../api/axiosClient";
 import { useMotionValue, useTransform, useAnimation, animate, useSpring } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
+import { useUserContext } from "../../context/userContext";
+import { readSmartConnectionsCache, writeSmartConnectionsCache, warmSmartConnectionsCache } from "../../utils/smartConnectionCache";
 
 const PLACEHOLDER_VALUES = new Set(["", "****", "professional seeker", "n/a", "na", "null", "undefined"]);
 
 export const useConnectionLogic = () => {
     const { panel } = useParams();
     const navigate = useNavigate();
+    const { user: authUser, loading: authLoading } = useUserContext();
 
     const [user, setUser] = useState(null);
     const [nextUser, setNextUser] = useState(null);
@@ -108,6 +111,20 @@ export const useConnectionLogic = () => {
         setTimeout(() => setSnack(""), 2000);
     };
 
+    const applyBatchToDeck = (batch = []) => {
+        if (batch.length > 0) {
+            setUser(batch[0]);
+            setNextUser(batch[1] || null);
+            setUserQueue(batch.slice(2));
+            return true;
+        }
+
+        setUser(null);
+        setNextUser(null);
+        setUserQueue([]);
+        return false;
+    };
+
     const getPanelFromUrl = (urlPanel) => {
         if (urlPanel === "recomendation=true") return "dashboard";
         if (urlPanel === "history=true") return "history";
@@ -139,7 +156,11 @@ export const useConnectionLogic = () => {
             excludeIds.forEach(id => params.append("excludeIds", id));
             if (refresh) params.append("refresh", "true");
             const res = await axiosClient.get(`/request/smart-users?${params.toString()}`);
-            return res.data || [];
+            const batch = Array.isArray(res.data) ? res.data : [];
+            if (authUser?.id && excludeIds.length === 0 && batch.length > 0) {
+                writeSmartConnectionsCache(authUser.id, batch);
+            }
+            return batch;
         } catch (err) {
             console.error("Error fetching smart users:", err);
             return [];
@@ -240,16 +261,21 @@ export const useConnectionLogic = () => {
     };
 
     const initializeUsers = async ({ excludeIds = [], refresh = false } = {}) => {
-        setLoading(true);
-        setUser(null);
-        setNextUser(null);
-        setUserQueue([]);
-        const batch = await fetchSmartBatch(excludeIds, { refresh });
-        if (batch.length > 0) {
-            setUser(batch[0]);
-            setNextUser(batch[1] || null);
-            setUserQueue(batch.slice(2));
+        const canUseCachedBatch = authUser?.id && excludeIds.length === 0 && !refresh;
+        if (canUseCachedBatch) {
+            const cachedBatch = readSmartConnectionsCache(authUser.id);
+            if (cachedBatch.length > 0) {
+                setLoading(false);
+                applyBatchToDeck(cachedBatch);
+                warmSmartConnectionsCache({ userId: authUser.id });
+                return;
+            }
         }
+
+        setLoading(true);
+        applyBatchToDeck([]);
+        const batch = await fetchSmartBatch(excludeIds, { refresh });
+        applyBatchToDeck(batch);
         setLoading(false);
     };
 
@@ -512,10 +538,11 @@ export const useConnectionLogic = () => {
     }, [panel]);
 
     useEffect(() => {
+        if (authLoading) return;
         initializeUsers();
         fetchViewerProfile();
         fetchPreferences({ silent: true });
-    }, []);
+    }, [authLoading, authUser?.id]);
 
     useEffect(() => {
         if (activePanel === "dashboard") {

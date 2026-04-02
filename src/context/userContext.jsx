@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
+import { warmSmartConnectionsCache } from "../utils/smartConnectionCache";
 
 
 const UserContext = createContext();
@@ -51,6 +52,11 @@ export const UserContextProvider = ({ children }) => {
 
         checkAuth();
     }, []); // Run ONLY once on mount
+
+    useEffect(() => {
+        if (!user?.id) return;
+        warmSmartConnectionsCache({ userId: user.id });
+    }, [user?.id]);
 
     return (
         <UserContext.Provider value={{ user, setUser, loading, blockedAccount, setBlockedAccount, blockedMessage, setBlockedMessage, blockedEmail, setBlockedEmail }}>
