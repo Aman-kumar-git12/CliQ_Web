@@ -89,7 +89,7 @@ export default function SplashScreen({ onFinish, isAppReady }) {
                     {particles.map((p) => (
                         <motion.div
                             key={p.id}
-                            className="absolute bg-emerald-500/30 rounded-full blur-[1px]"
+                            className="absolute bg-purple-500/35 rounded-full blur-[1px]"
                             style={{
                                 width: p.size,
                                 height: p.size,
@@ -98,7 +98,7 @@ export default function SplashScreen({ onFinish, isAppReady }) {
                             }}
                             animate={{
                                 y: ["0%", "-50%", "0%"],
-                                opacity: [0.1, 0.6, 0.1],
+                                opacity: [0.15, 0.7, 0.15],
                             }}
                             transition={{
                                 duration: p.duration,
@@ -111,7 +111,7 @@ export default function SplashScreen({ onFinish, isAppReady }) {
 
                     {/* Central Glow */}
                     <motion.div
-                        className="absolute w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px]"
+                        className="absolute w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px]"
                         animate={{
                             scale: [1, 1.2, 1],
                             opacity: [0.4, 0.7, 0.4],
@@ -137,18 +137,39 @@ export default function SplashScreen({ onFinish, isAppReady }) {
                         >
                             {/* Outer rotating ring */}
                             <motion.div
-                                className="absolute -inset-4 rounded-[2rem] border border-dashed border-emerald-500/30"
+                                className="absolute -inset-4 rounded-[2rem] border border-dashed border-purple-500/30"
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
                             />
 
-                            <div className="w-28 h-28 rounded-3xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-[0_0_60px_rgba(16,185,129,0.5)] relative overflow-hidden group">
+                            <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-[#8b5cf6] to-[#ec4899] flex items-center justify-center shadow-[0_0_60px_rgba(139,92,246,0.5)] relative overflow-hidden group">
                                 <motion.div
                                     className="absolute inset-0 bg-white/20"
                                     animate={{ y: ["100%", "-100%"] }}
                                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                                 />
-                                <span className="text-6xl font-black tracking-tighter text-white drop-shadow-lg z-10">C</span>
+                                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-20 h-20 z-10">
+                                    <defs>
+                                        <filter id="neon-glow-splash" x="-20%" y="-20%" width="140%" height="140%">
+                                            <feGaussianBlur stdDeviation="3.5" result="blur" />
+                                            <feMerge>
+                                                <feMergeNode in="blur" />
+                                                <feMergeNode in="SourceGraphic" />
+                                            </feMerge>
+                                        </filter>
+                                    </defs>
+                                    <rect x="4" y="4" width="92" height="92" rx="26" stroke="white" strokeOpacity="0.2" strokeWidth="2.5" />
+                                    <g filter="url(#neon-glow-splash)">
+                                        <path d="M 68 36 C 54 26, 38 34, 38 50 C 38 66, 54 74, 68 64" stroke="white" strokeWidth="5.5" strokeLinecap="round" fill="none" opacity="0.95" />
+                                        <path d="M 68 36 C 46 36, 46 64, 68 64" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.65" />
+                                        <path d="M 38 50 C 44 44, 62 44, 68 36" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.5" />
+                                        <path d="M 38 50 C 44 56, 62 56, 68 64" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.5" />
+                                        <path d="M 68 28 C 44 14, 26 32, 26 50 C 26 68, 44 86, 68 72" stroke="white" strokeWidth="3.5" strokeDasharray="1 6" strokeLinecap="round" fill="none" opacity="0.8" />
+                                        <circle cx="68" cy="36" r="7.5" fill="white" />
+                                        <circle cx="38" cy="50" r="7" fill="white" />
+                                        <circle cx="68" cy="64" r="7.5" fill="white" />
+                                    </g>
+                                </svg>
                             </div>
                         </motion.div>
 
@@ -173,7 +194,7 @@ export default function SplashScreen({ onFinish, isAppReady }) {
                         {/* Sleek Loading Line */}
                         <div className="relative w-64 h-[2px] mt-10 bg-white/10 rounded-full overflow-hidden">
                             <motion.div
-                                className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full"
+                                className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#8b5cf6] to-[#ec4899] rounded-full"
                                 initial={{ width: "0%" }}
                                 animate={{ width: "100%" }}
                                 transition={{ duration: 3.5, ease: "easeInOut" }}
@@ -189,7 +210,7 @@ export default function SplashScreen({ onFinish, isAppReady }) {
                                     animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                                     exit={{ y: -10, opacity: 0, filter: "blur(4px)" }}
                                     transition={{ duration: 0.3 }}
-                                    className="flex items-center space-x-3 text-emerald-300"
+                                    className="flex items-center space-x-3 text-purple-300"
                                 >
                                     <ActiveIcon className="w-5 h-5 animate-pulse" />
                                     <span className="text-sm tracking-widest uppercase font-medium">

@@ -351,6 +351,7 @@ export const useConnectionLogic = () => {
         await animate(dragX, -800, { duration: 0.35, ease: "easeOut" });
         
         // Let next card mount instantly
+        showSnack("User ignored");
         advanceToNextUser();
         setSending(false);
 
@@ -364,6 +365,7 @@ export const useConnectionLogic = () => {
             refreshInsights();
         }
     };
+
 
     const handleInterested = async () => {
         if (!user || sending) return;

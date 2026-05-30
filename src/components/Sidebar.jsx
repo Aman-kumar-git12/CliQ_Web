@@ -115,7 +115,28 @@ export default function Sidebar() {
             <div className="flex items-center px-10 h-[120px] shrink-0">
                 <Link to="/home" className={`flex items-center gap-4 group ${isChatView ? "w-full justify-center" : ""}`}>
                     <div className="w-11 h-11 rounded-[16px] bg-gradient-to-br from-[#8b5cf6] to-[#ec4899] flex items-center justify-center shadow-[0_0_24px_rgba(139,92,246,0.4)] group-hover:scale-110 transition-transform duration-300 shrink-0">
-                        <div className="w-4.5 h-4.5 border-[3.5px] border-white/50 rounded-full" />
+                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7">
+                            <defs>
+                                <filter id="neon-glow-sidebar" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="3.5" result="blur" />
+                                    <feMerge>
+                                        <feMergeNode in="blur" />
+                                        <feMergeNode in="SourceGraphic" />
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                            <rect x="4" y="4" width="92" height="92" rx="26" stroke="white" strokeOpacity="0.2" strokeWidth="2.5" />
+                            <g filter="url(#neon-glow-sidebar)">
+                                <path d="M 68 36 C 54 26, 38 34, 38 50 C 38 66, 54 74, 68 64" stroke="white" strokeWidth="5.5" strokeLinecap="round" fill="none" opacity="0.95" />
+                                <path d="M 68 36 C 46 36, 46 64, 68 64" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.65" />
+                                <path d="M 38 50 C 44 44, 62 44, 68 36" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.5" />
+                                <path d="M 38 50 C 44 56, 62 56, 68 64" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.5" />
+                                <path d="M 68 28 C 44 14, 26 32, 26 50 C 26 68, 44 86, 68 72" stroke="white" strokeWidth="3.5" strokeDasharray="1 6" strokeLinecap="round" fill="none" opacity="0.8" />
+                                <circle cx="68" cy="36" r="7.5" fill="white" />
+                                <circle cx="38" cy="50" r="7" fill="white" />
+                                <circle cx="68" cy="64" r="7.5" fill="white" />
+                            </g>
+                        </svg>
                     </div>
                     <AnimatePresence mode="wait">
                         {!isChatView && (

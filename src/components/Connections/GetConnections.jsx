@@ -203,38 +203,53 @@ export default function GetConnections() {
                             <button onClick={refreshMatches} className="mt-6 px-10 py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl">Refresh Matches</button>
                         </motion.div>
                     ) : (
-                        <ConnectionCard
-                            user={user}
-                            isPreferred={isPreferred}
-                            isNotPreferred={isNotPreferred}
-                            dragX={dragX}
-                            rotate={rotate}
-                            rotateX={springRotateX}
-                            rotateY={springRotateY}
-                            transformOrigin={transformOrigin}
-                            controls={controls}
-                            sending={sending}
-                            likeOpacity={likeOpacity}
-                            nopeOpacity={nopeOpacity}
-                            likeScale={likeScale}
-                            nopeScale={nopeScale}
-                            showCardMenu={showCardMenu}
-                            setShowCardMenu={setShowCardMenu}
-                            handleMarkPreferred={handleMarkPreferred}
-                            handleMarkNotPreferred={handleMarkNotPreferred}
-                            handleSaveProfile={handleSaveProfile}
-                            savedCandidateIds={savedCandidateIds}
-                            savingProfile={savingProfile}
-                            setShowExpertise={setShowExpertise}
-                            handleIgnore={handleIgnore}
-                            handleInterested={handleInterested}
-                            isFetchingMore={isFetchingMore}
-                            getConfidenceBadgeClass={getConfidenceBadgeClass}
-                            handleMouseMove={handleMouseMove}
-                            handleMouseLeave={handleMouseLeave}
-                            avatar={avatar}
-                            handleDragEnd={handleDragEnd}
-                        />
+                        <div className="relative flex flex-col items-center w-full max-w-full sm:max-w-md md:max-w-md mx-auto md:mx-0">
+                            <ConnectionCard
+                                user={user}
+                                isPreferred={isPreferred}
+                                isNotPreferred={isNotPreferred}
+                                dragX={dragX}
+                                rotate={rotate}
+                                rotateX={springRotateX}
+                                rotateY={springRotateY}
+                                transformOrigin={transformOrigin}
+                                controls={controls}
+                                sending={sending}
+                                likeOpacity={likeOpacity}
+                                nopeOpacity={nopeOpacity}
+                                likeScale={likeScale}
+                                nopeScale={nopeScale}
+                                showCardMenu={showCardMenu}
+                                setShowCardMenu={setShowCardMenu}
+                                handleMarkPreferred={handleMarkPreferred}
+                                handleMarkNotPreferred={handleMarkNotPreferred}
+                                handleSaveProfile={handleSaveProfile}
+                                savedCandidateIds={savedCandidateIds}
+                                savingProfile={savingProfile}
+                                setShowExpertise={setShowExpertise}
+                                handleIgnore={handleIgnore}
+                                handleInterested={handleInterested}
+                                isFetchingMore={isFetchingMore}
+                                getConfidenceBadgeClass={getConfidenceBadgeClass}
+                                handleMouseMove={handleMouseMove}
+                                handleMouseLeave={handleMouseLeave}
+                                avatar={avatar}
+                                handleDragEnd={handleDragEnd}
+                            />
+                            <AnimatePresence>
+                                {snack && !activePanel && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 15, x: "-50%" }}
+                                        animate={{ opacity: 1, y: 0, x: "-50%" }}
+                                        exit={{ opacity: 0, y: 15, x: "-50%" }}
+                                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                        className="absolute left-1/2 bottom-[-40px] z-[100] px-10 py-5 bg-white text-black text-[10px] font-black uppercase italic tracking-[0.2em] rounded-2xl shadow-3xl pointer-events-none border border-white/20 whitespace-nowrap"
+                                    >
+                                        {snack}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     )}
                 </AnimatePresence>
             </div>
@@ -298,7 +313,7 @@ export default function GetConnections() {
 
             {createPortal(
                 <AnimatePresence>
-                    {snack && (
+                    {snack && activePanel && (
                         <motion.div initial={{ opacity: 0, y: 30, x: "-50%" }} animate={{ opacity: 1, y: 0, x: "-50%" }} exit={{ opacity: 0, y: 30, x: "-50%" }} className="fixed bottom-12 left-1/2 z-[100] px-10 py-5 bg-white text-black text-[10px] font-black uppercase italic tracking-[0.2em] rounded-2xl shadow-3xl pointer-events-none border border-white/20">
                             {snack}
                         </motion.div>
@@ -306,6 +321,7 @@ export default function GetConnections() {
                 </AnimatePresence>,
                 document.body
             )}
+
         </motion.div>
     );
 }
