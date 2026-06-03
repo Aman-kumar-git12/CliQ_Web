@@ -140,7 +140,7 @@ export default function MessagesInbox() {
                                                 damping: 38,
                                                 mass: 1
                                             }}
-                                            className="absolute inset-0 bg-white/[0.06] border border-white/10 z-0 shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]"
+                                            className="absolute inset-0 bg-gradient-to-r from-violet-500/15 to-pink-500/10 border border-violet-500/20 z-0 shadow-[inset_20px_0_20px_-20px_rgba(139,92,246,0.3),0_8px_16px_rgba(0,0,0,0.2)]"
                                         />
                                     )}
                                 </AnimatePresence>

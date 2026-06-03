@@ -33,7 +33,7 @@ const SuggestionChips = ({ title, items = [], onUseText, onSendText, accent = "b
 
     const colorClass = accent === "pink"
         ? "border-pink-500/20 bg-[linear-gradient(180deg,rgba(78,32,57,0.42),rgba(20,20,24,0.92))] text-pink-100 shadow-[0_8px_30px_rgba(236,72,153,0.06)]"
-        : "border-[#1a4f9c] bg-[linear-gradient(180deg,rgba(28,40,63,0.92),rgba(16,18,24,0.98))] text-blue-100 shadow-[0_8px_30px_rgba(0,122,255,0.06)]";
+        : "border-violet-500/20 bg-[linear-gradient(180deg,rgba(40,28,63,0.42),rgba(16,16,24,0.92))] text-violet-100 shadow-[0_8px_30px_rgba(139,92,246,0.06)]";
 
     return (
         <div className="space-y-3">
@@ -119,6 +119,12 @@ export default function MessageAssistantPanel({
     const rewrites = data?.rewrites
         ? [data.rewrites.clean, data.rewrites.short, data.rewrites.warm, data.rewrites.confident].filter(Boolean)
         : [];
+    const repliesWithEmojis = data?.emoji_replies_with_emojis?.length
+        ? data.emoji_replies_with_emojis
+        : (data?.emoji_replies || []);
+    const repliesWithoutEmojis = data?.emoji_replies_without_emojis?.length
+        ? data.emoji_replies_without_emojis
+        : (data?.emoji_replies || []);
 
     const hasResults = !!data && !loading;
 
@@ -139,7 +145,7 @@ export default function MessageAssistantPanel({
                         </div>
                     )}
                     <div className="flex items-center gap-2.5">
-                        <div className={`rounded-xl p-1.5 ${hasResults ? 'bg-indigo-600/20 text-indigo-400' : 'bg-blue-600/20 text-[#007aff]'}`}>
+                        <div className={`rounded-xl p-1.5 ${hasResults ? 'bg-indigo-600/20 text-indigo-400' : 'bg-violet-600/20 text-violet-400'}`}>
                             <Sparkles size={18} />
                         </div>
                         <div>
@@ -226,7 +232,7 @@ export default function MessageAssistantPanel({
                                         onClick={() => onToneChange(tone)}
                                         className={`rounded-full px-4 py-1.5 text-[11px] font-black uppercase tracking-wider transition-all duration-200 ${
                                             selectedTone === tone
-                                                ? "bg-[#007aff] text-white shadow-[0_0_15px_rgba(0,122,255,0.4)] scale-105"
+                                                ? "bg-gradient-to-r from-[#8b5cf6] to-[#ec4899] text-white shadow-[0_0_15px_rgba(139,92,246,0.4)] scale-105"
                                                 : "bg-white/5 text-neutral-400 hover:bg-white/10 hover:text-white"
                                         }`}
                                     >
@@ -240,7 +246,7 @@ export default function MessageAssistantPanel({
                             <button
                                 onClick={onGenerate}
                                 disabled={loading}
-                                className="w-full flex items-center justify-center gap-3 rounded-2xl bg-[#007aff] py-4 text-sm font-black uppercase tracking-[0.1em] text-white transition-all hover:scale-[1.01] hover:brightness-110 shadow-lg shadow-blue-900/20 disabled:opacity-50"
+                                className="w-full flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-[#8b5cf6] to-[#ec4899] py-4 text-sm font-black uppercase tracking-[0.1em] text-white transition-all hover:scale-[1.01] hover:brightness-110 shadow-lg shadow-violet-900/20 disabled:opacity-50"
                             >
                                 <Wand2 size={18} strokeWidth={2.5} />
                                 {draft?.trim() ? "Refresh Intent Suggestions" : "Generate Best Replies"}
@@ -285,9 +291,9 @@ export default function MessageAssistantPanel({
                         {data.top_reply && (
                             <div className="space-y-3">
                                 <p className="text-[10px] uppercase font-bold tracking-[0.25em] text-neutral-500 ml-1">AI Pick: Top Reply</p>
-                                <div className="rounded-[32px] border border-[#1452a7] bg-[linear-gradient(180deg,rgba(31,41,60,0.98),rgba(29,39,58,0.98))] p-8 backdrop-blur-md shadow-[0_18px_50px_rgba(8,20,40,0.35)]">
+                                <div className="rounded-[32px] border border-violet-500/20 bg-[linear-gradient(180deg,rgba(40,31,60,0.98),rgba(29,29,38,0.98))] p-8 backdrop-blur-md shadow-[0_18px_50px_rgba(139,92,246,0.15)]">
                                     <div className="flex gap-2 mb-3">
-                                        <div className="rounded-full bg-[#2a4b7d] px-4 py-2 text-[10px] font-black uppercase text-blue-100 tracking-tight">Recommended</div>
+                                        <div className="rounded-full bg-violet-600/30 px-4 py-2 text-[10px] font-black uppercase text-violet-100 tracking-tight">Recommended</div>
                                         <div className="rounded-full bg-[#5a3562] px-4 py-2 text-[10px] font-black uppercase text-pink-100 tracking-tight">98% Match</div>
                                     </div>
                                     <p className="text-[20px] leading-relaxed text-white font-medium">
@@ -314,7 +320,8 @@ export default function MessageAssistantPanel({
 
                         {/* 3. Grid of Suggestions */}
                         <SuggestionChips title="Standard Suggestions" items={data.reply_suggestions} onUseText={onUseText} onSendText={onSendText} />
-                        <SuggestionChips title="Emoji Variants" items={data.emoji_replies} onUseText={onUseText} onSendText={onSendText} accent="pink" />
+                        <SuggestionChips title="With Emojis" items={repliesWithEmojis} onUseText={onUseText} onSendText={onSendText} accent="pink" />
+                        <SuggestionChips title="Without Emojis" items={repliesWithoutEmojis} onUseText={onUseText} onSendText={onSendText} accent="blue" />
                         <SuggestionChips title="Tone Rewrites" items={rewrites} onUseText={onUseText} onSendText={onSendText} />
                         <SuggestionChips title="Alternative Phrasings" items={data.same_message_variants} onUseText={onUseText} onSendText={onSendText} />
 

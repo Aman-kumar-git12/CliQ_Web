@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, X, Bot, Search, Brain, CheckCircle2, Loader2, Info, SendHorizontal, Wand2, History, Trash2, MessageSquarePlus } from 'lucide-react';
+import { Sparkles, X, Bot, Search, Brain, CheckCircle2, Loader2, Info, SendHorizontal, Wand2, History, Trash2, MessageSquarePlus, Smile, ChevronDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents, parseStructuredSteps } from '../../utils/aiUtils';
 
@@ -9,16 +9,16 @@ const ThinkingStep = ({ icon: Icon, label, status = 'pending' }) => {
     const isActive = status === 'active';
 
     return (
-        <div className={`flex items-center gap-2.5 py-1 px-2 rounded-lg transition-all duration-500 ${isActive ? 'bg-indigo-500/10 border border-indigo-500/20' : ''}`}>
+        <div className={`flex items-center gap-2.5 py-1 px-2 rounded-lg transition-all duration-500 ${isActive ? 'bg-violet-500/10 border border-violet-500/20' : ''}`}>
             {isCompleted ? (
                 <CheckCircle2 size={14} className="text-emerald-400" />
             ) : isActive ? (
-                <Loader2 size={14} className="text-indigo-400 animate-spin" />
+                <Loader2 size={14} className="text-violet-400 animate-spin" />
             ) : (
                 <div className="w-3.5 h-3.5 rounded-full border border-white/20" />
             )}
-            <Icon size={14} className={isActive ? 'text-indigo-300' : isCompleted ? 'text-neutral-400' : 'text-neutral-600'} />
-            <span className={`text-[12px] font-medium tracking-tight ${isActive ? 'text-indigo-100' : isCompleted ? 'text-neutral-400' : 'text-neutral-600'}`}>
+            <Icon size={14} className={isActive ? 'text-violet-300' : isCompleted ? 'text-neutral-400' : 'text-neutral-600'} />
+            <span className={`text-[12px] font-medium tracking-tight ${isActive ? 'text-violet-100' : isCompleted ? 'text-neutral-400' : 'text-neutral-600'}`}>
                 {label}
             </span>
         </div>
@@ -45,6 +45,8 @@ export default function AIAssistantOverlay({
     error = "",
     selectedTone = 'polite',
     onToneChange,
+    emojiPreference = 'both',
+    onEmojiPreferenceChange,
     onGenerateReplies,
     onUseReply,
     onSendReply,
@@ -61,6 +63,7 @@ export default function AIAssistantOverlay({
     const inputRef = useRef(null);
     const [showHistoryToggle, setShowHistoryToggle] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
+    const [toneDropdownOpen, setToneDropdownOpen] = useState(false);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -80,10 +83,27 @@ export default function AIAssistantOverlay({
 
     if (!isOpen) return null;
 
-    const tones = ["casual", "polite", "formal", "flirty", "professional", "witty", "direct", "friendly", "empathetic", "confident"];
+    const tones = [
+        { key: "casual", emoji: "😎" },
+        { key: "polite", emoji: "🤝" },
+        { key: "formal", emoji: "👔" },
+        { key: "flirty", emoji: "😏" },
+        { key: "professional", emoji: "💼" },
+        { key: "witty", emoji: "🧠" },
+        { key: "direct", emoji: "🎯" },
+        { key: "friendly", emoji: "😊" },
+        { key: "empathetic", emoji: "💛" },
+        { key: "confident", emoji: "💪" },
+    ];
     const rewrites = replyData?.rewrites
         ? [replyData.rewrites.clean, replyData.rewrites.short, replyData.rewrites.warm, replyData.rewrites.confident].filter(Boolean)
         : [];
+    const emojiRepliesWith = replyData?.emoji_replies_with_emojis?.length
+        ? replyData.emoji_replies_with_emojis
+        : (replyData?.emoji_replies || []);
+    const emojiRepliesWithout = replyData?.emoji_replies_without_emojis?.length
+        ? replyData.emoji_replies_without_emojis
+        : (replyData?.emoji_replies || []);
     const groupedReplies = replyData?.grouped_replies
         ? [
             { label: 'Top Reply', value: replyData.grouped_replies.top_reply },
@@ -106,38 +126,62 @@ export default function AIAssistantOverlay({
         .filter(Boolean)
         .join(' ');
 
-    const renderReplyCard = (text, key, { highlighted = false } = {}) => (
-        <div
+    const renderReplyCard = (text, key, { highlighted = false, label = '' } = {}) => (
+        <motion.div
             key={key}
-            className={`rounded-2xl p-3 space-y-3 ${
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`group relative rounded-xl p-3 space-y-2 transition-all duration-300 ${
                 highlighted
-                    ? 'border border-white/12 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03)_42%,rgba(255,255,255,0.02))] shadow-[0_14px_34px_rgba(0,0,0,0.22)]'
-                    : 'border border-white/10 bg-white/[0.03]'
+                    ? 'border border-violet-500/25 bg-gradient-to-br from-violet-500/[0.08] via-white/[0.04] to-transparent shadow-[0_8px_32px_rgba(99,102,241,0.12)]'
+                    : 'border border-white/[0.06] bg-white/[0.025] hover:bg-white/[0.04] hover:border-white/[0.10]'
             }`}
         >
-            <p className={`${highlighted ? 'text-[17px] leading-8 text-white font-medium tracking-[-0.01em]' : 'text-[13px] leading-relaxed text-neutral-200'}`}>
+            {highlighted && (
+                <div className="absolute -top-px left-4 right-4 h-[1px] bg-gradient-to-r from-transparent via-violet-500/60 to-transparent rounded-full" />
+            )}
+            {label && (
+                <p className={`text-[9px] uppercase tracking-[0.2em] font-bold ${highlighted ? 'text-violet-300/80' : 'text-neutral-500'}`}>
+                    {label}
+                </p>
+            )}
+            <p className={`${highlighted ? 'text-[14px] leading-6 text-white font-medium tracking-[-0.01em]' : 'text-[13px] leading-relaxed text-neutral-200'}`}>
                 {text}
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 pt-0.5">
                 <button
                     onClick={() => onUseReply?.(text)}
-                    className={`rounded-full px-3 py-1.5 text-[11px] font-semibold text-white transition ${
-                        highlighted ? 'bg-white/12 hover:bg-white/18' : 'bg-white/10 hover:bg-white/15'
+                    className={`rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white transition-all duration-200 active:scale-95 ${
+                        highlighted ? 'bg-white/[0.10] hover:bg-white/[0.16] border border-white/[0.06]' : 'bg-white/[0.07] hover:bg-white/[0.12]'
                     }`}
                 >
                     Insert
                 </button>
                 <button
                     onClick={() => onSendReply?.(text)}
-                    className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
-                        highlighted
-                            ? 'bg-emerald-500/20 text-emerald-100 hover:bg-emerald-500/30'
-                            : 'bg-emerald-500/20 text-emerald-100 hover:bg-emerald-500/30'
-                    }`}
+                    className="rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-[0.12em] bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/10 transition-all duration-200 active:scale-95"
                 >
                     Send Now
                 </button>
             </div>
+        </motion.div>
+    );
+
+    const SectionCard = ({ children, className = '' }) => (
+        <div className={`rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 ${className}`}>
+            {children}
+        </div>
+    );
+
+    const SectionLabel = ({ children, icon: LabelIcon, className = '' }) => (
+        <div className={`flex items-center gap-2 mb-2 ${className}`}>
+            {LabelIcon && (
+                <div className="w-5 h-5 rounded-md bg-white/[0.06] flex items-center justify-center">
+                    <LabelIcon size={11} className="text-neutral-400" />
+                </div>
+            )}
+            <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 font-bold">{children}</p>
         </div>
     );
 
@@ -202,18 +246,18 @@ export default function AIAssistantOverlay({
             {/* Premium Header */}
             <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-5 border-b border-white/5 bg-gradient-to-r from-[#16172a] via-[#0f1018] to-[#0a0a0d] backdrop-blur-xl">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-600/20 flex items-center justify-center border border-indigo-500/30 shadow-[0_0_15px_rgba(79,70,229,0.3)]">
-                        <Sparkles size={18} className="text-indigo-400" />
+                    <div className="w-9 h-9 rounded-xl bg-violet-600/20 flex items-center justify-center border border-violet-500/30 shadow-[0_0_15px_rgba(79,70,229,0.3)]">
+                        <Sparkles size={18} className="text-violet-400" />
                     </div>
                     <div>
                         <h3 className="text-sm font-bold text-white tracking-wide">{title}</h3>
-                        <p className="text-[10px] text-indigo-300/60 uppercase tracking-[0.2em] font-medium">{subtitle}</p>
+                        <p className="text-[10px] text-violet-300/60 uppercase tracking-[0.2em] font-medium">{subtitle}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={() => setShowHistoryToggle(!showHistoryToggle)}
-                        className={`px-3 py-2 rounded-full transition-all active:scale-95 flex items-center justify-center gap-2 ${showHistoryToggle ? 'bg-indigo-600/20 text-indigo-300' : 'hover:bg-white/10 text-neutral-400 hover:text-white'}`}
+                        className={`px-3 py-2 rounded-full transition-all active:scale-95 flex items-center justify-center gap-2 ${showHistoryToggle ? 'bg-violet-600/20 text-violet-300' : 'hover:bg-white/10 text-neutral-400 hover:text-white'}`}
                         title={mode === 'ask' ? 'Toggle Ask AI History' : 'Toggle Generated Reply History'}
                     >
                         <History size={18} strokeWidth={2} />
@@ -234,13 +278,13 @@ export default function AIAssistantOverlay({
                 <div className="inline-flex rounded-full border border-white/10 bg-white/[0.03] p-1">
                     <button
                         onClick={() => onModeChange?.('ask')}
-                        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${mode === 'ask' ? 'bg-indigo-600 text-white' : 'text-neutral-400 hover:text-white'}`}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${mode === 'ask' ? 'bg-violet-600 text-white' : 'text-neutral-400 hover:text-white'}`}
                     >
                         Ask AI
                     </button>
                     <button
                         onClick={() => onModeChange?.('replies')}
-                        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${mode === 'replies' ? 'bg-indigo-600 text-white' : 'text-neutral-400 hover:text-white'}`}
+                        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${mode === 'replies' ? 'bg-violet-600 text-white' : 'text-neutral-400 hover:text-white'}`}
                     >
                         Generate Reply
                     </button>
@@ -310,8 +354,8 @@ export default function AIAssistantOverlay({
                                     ))
                                 ) : (
                                     <div className="flex flex-col items-center justify-center p-8 space-y-4 text-center">
-                                        <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-2">
-                                            <Bot size={32} className="text-indigo-400" />
+                                        <div className="w-16 h-16 rounded-3xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-2">
+                                            <Bot size={32} className="text-violet-400" />
                                         </div>
                                         <p className="text-sm text-neutral-300 font-medium">No Ask AI history yet.</p>
                                     </div>
@@ -354,8 +398,8 @@ export default function AIAssistantOverlay({
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center p-8 space-y-4">
-                                        <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-2">
-                                            <Bot size={32} className="text-indigo-400" />
+                                        <div className="w-16 h-16 rounded-3xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-2">
+                                            <Bot size={32} className="text-violet-400" />
                                         </div>
                                         <p className="text-sm text-neutral-300 font-medium">No Reply History yet.</p>
                                     </div>
@@ -384,7 +428,7 @@ export default function AIAssistantOverlay({
                                     repeat: Infinity, 
                                     ease: "easeInOut" 
                                 }}
-                                className="absolute inset-x-0 inset-y-0 bg-indigo-500/20 blur-[30px] rounded-full"
+                                className="absolute inset-x-0 inset-y-0 bg-violet-500/20 blur-[30px] rounded-full"
                             />
                             
                             <motion.div 
@@ -398,13 +442,13 @@ export default function AIAssistantOverlay({
                                 }}
                                 className="relative w-24 h-24 rounded-full bg-[#1c1c1e] border-2 border-white/5 flex items-center justify-center shadow-2xl z-10"
                             >
-                                <Bot size={44} className="text-indigo-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.4)]" />
+                                <Bot size={44} className="text-violet-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.4)]" />
                                 
                                 {/* Micro-Sparkles */}
                                 <motion.div 
                                     animate={{ opacity: [0, 1, 0] }}
                                     transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                                    className="absolute -top-2 -right-2 text-indigo-300"
+                                    className="absolute -top-2 -right-2 text-violet-300"
                                 >
                                     <Sparkles size={16} />
                                 </motion.div>
@@ -438,23 +482,23 @@ export default function AIAssistantOverlay({
                         <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
                             {msg.role === 'ai' && (
                                 <div className="flex items-center gap-2 mb-2 ml-1">
-                                    <Bot size={13} className="text-indigo-400" />
-                                    <span className="text-[10px] uppercase tracking-[0.15em] text-indigo-300/80 font-bold font-mono">CLI-Q_AGENT</span>
+                                    <Bot size={13} className="text-violet-400" />
+                                    <span className="text-[10px] uppercase tracking-[0.15em] text-violet-300/80 font-bold font-mono">CLI-Q_AGENT</span>
                                 </div>
                             )}
 
                             <div className={`p-4 rounded-2xl text-[13.5px] leading-relaxed ${
                                 msg.role === 'user' 
-                                    ? 'bg-indigo-600 text-white rounded-tr-sm shadow-lg shadow-indigo-900/20' 
+                                    ? 'bg-violet-600 text-white rounded-tr-sm shadow-lg shadow-violet-900/20' 
                                     : 'bg-white/5 border border-white/10 text-neutral-300 rounded-tl-sm backdrop-blur-xl'
                             } max-w-[92%]`}>
                                 {msg.role === 'user' ? (
                                     msg.text
                                 ) : parsedSteps ? (
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                                            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-                                                <Brain size={16} className="text-indigo-300" />
+                                        <div className="flex items-center gap-3 p-3 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                                            <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center border border-violet-500/30">
+                                                <Brain size={16} className="text-violet-300" />
                                             </div>
                                             <span className="text-white font-bold text-[14px]">{parsedSteps.title}</span>
                                         </div>
@@ -467,7 +511,7 @@ export default function AIAssistantOverlay({
                                                     key={sIdx} 
                                                     className="flex gap-3 bg-white/[0.03] border border-white/[0.04] p-3 rounded-xl hover:bg-white/[0.05] transition-colors"
                                                 >
-                                                    <span className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-200 text-[11px] font-bold flex items-center justify-center border border-indigo-500/10 shrink-0">
+                                                    <span className="w-6 h-6 rounded-lg bg-violet-500/20 text-violet-200 text-[11px] font-bold flex items-center justify-center border border-violet-500/10 shrink-0">
                                                         {sIdx + 1}
                                                     </span>
                                                     <span className="text-neutral-200 text-[13px] font-medium leading-relaxed">{step}</span>
@@ -511,157 +555,244 @@ export default function AIAssistantOverlay({
                 )}
 
                 {mode === 'replies' && (
-                    <div className="space-y-5">
-                        <div className="space-y-3">
-                            <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Tone</p>
-                            <div className="flex flex-wrap gap-2">
-                                {tones.map((tone) => (
+                    <div className="space-y-4">
+                        <div className="space-y-2 px-1 relative z-20">
+                            <SectionLabel icon={MessageSquarePlus} className="!mb-0">Tone Selection</SectionLabel>
+                            
+                            <div className="relative">
+                                <button
+                                    onClick={() => setToneDropdownOpen(!toneDropdownOpen)}
+                                    className="w-full flex items-center justify-between bg-[#0a0a0d] border border-white/5 rounded-xl px-4 py-2.5 transition-colors hover:border-white/10"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-[16px]">{tones.find(t => t.key === selectedTone)?.emoji || '😎'}</span>
+                                        <span className="text-[12px] font-bold uppercase tracking-[0.15em] text-violet-200">
+                                            {selectedTone}
+                                        </span>
+                                    </div>
+                                    <ChevronDown size={16} className={`text-neutral-400 transition-transform duration-300 ${toneDropdownOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                                
+                                <AnimatePresence>
+                                    {toneDropdownOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="absolute top-full left-0 right-0 mt-2 bg-[#121217] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 p-1 grid grid-cols-2 gap-1 max-h-[180px] overflow-y-auto scrollbar-hide"
+                                        >
+                                            {tones.map(({ key, emoji }) => (
+                                                <button
+                                                    key={key}
+                                                    onClick={() => {
+                                                        onToneChange?.(key);
+                                                        setToneDropdownOpen(false);
+                                                    }}
+                                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                                                        selectedTone === key
+                                                            ? 'bg-violet-600/20 text-violet-200'
+                                                            : 'hover:bg-white/5 text-neutral-400 hover:text-white'
+                                                    }`}
+                                                >
+                                                    <span className="text-[15px]">{emoji}</span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-[0.15em]">{key}</span>
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 px-1">
+                            <SectionLabel icon={Smile} className="!mb-0">Emoji Preference</SectionLabel>
+                            <div className="flex bg-[#0a0a0d] rounded-xl p-1 border border-white/5 relative isolate overflow-hidden">
+                                <motion.div
+                                    className="absolute inset-y-1 rounded-lg bg-violet-600/30 border border-violet-500/30 -z-10"
+                                    initial={false}
+                                    animate={{
+                                        left: emojiPreference === 'both' ? '0.25rem' : emojiPreference === 'with' ? '33.33%' : '66.66%',
+                                        width: 'calc(33.33% - 0.25rem)'
+                                    }}
+                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                />
+                                {[
+                                    { key: 'both', label: 'Balanced', icon: null },
+                                    { key: 'with', label: 'More Emoji', icon: <Smile size={14} className="mb-0.5" /> },
+                                    { key: 'without', label: 'No Emoji', icon: null },
+                                ].map((opt) => (
                                     <button
-                                        key={tone}
-                                        onClick={() => onToneChange?.(tone)}
-                                        className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] transition ${
-                                            selectedTone === tone
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'bg-white/5 text-neutral-400 hover:bg-white/10 hover:text-white'
+                                        key={opt.key}
+                                        onClick={() => onEmojiPreferenceChange?.(opt.key)}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2 text-[11px] font-bold uppercase tracking-[0.15em] transition-colors duration-300 ${
+                                            emojiPreference === opt.key ? 'text-violet-200' : 'text-neutral-500 hover:text-neutral-300'
                                         }`}
                                     >
-                                        {tone}
+                                        {opt.icon}{opt.label}
                                     </button>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="px-1">
                             <button
                                 onClick={() => onGenerateReplies?.()}
                                 disabled={replyLoading}
-                                className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+                                className="relative w-full overflow-hidden rounded-2xl group transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
                             >
-                                {replyLoading ? <Loader2 size={16} className="animate-spin" /> : <Wand2 size={16} />}
-                                Generate Replies
+                                <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-violet-600 to-violet-600 opacity-90 group-hover:opacity-100 transition-opacity" />
+                                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:10px_10px] opacity-[0.05]" />
+                                <div className="relative px-6 py-3 flex items-center justify-center gap-3">
+                                    {replyLoading ? (
+                                        <Loader2 size={18} className="animate-spin text-white" />
+                                    ) : (
+                                        <Wand2 size={18} className="text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+                                    )}
+                                    <span className="text-[14px] font-bold tracking-wide text-white drop-shadow-md">
+                                        {replyLoading ? "Generating Magic..." : "Generate Smart Replies"}
+                                    </span>
+                                </div>
                             </button>
                         </div>
 
                         {replyLoading && (
-                            <div className="space-y-3 animate-pulse">
-                                <div className="h-4 w-28 rounded bg-white/10" />
-                                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
-                                    <div className="h-4 w-2/3 rounded bg-white/10" />
-                                    <div className="h-4 w-full rounded bg-white/5" />
-                                    <div className="h-4 w-5/6 rounded bg-white/5" />
+                            <SectionCard className="animate-pulse space-y-4 border-violet-500/20 bg-violet-500/[0.02]">
+                                <div className="h-3 w-24 rounded bg-violet-500/20" />
+                                <div className="space-y-3">
+                                    <div className="h-4 w-3/4 rounded bg-white/10" />
+                                    <div className="h-4 w-full rounded bg-white/[0.06]" />
+                                    <div className="h-4 w-5/6 rounded bg-white/[0.06]" />
                                 </div>
-                            </div>
+                                <div className="flex gap-2 pt-2">
+                                    <div className="h-8 w-16 rounded-full bg-white/[0.06]" />
+                                    <div className="h-8 w-24 rounded-full bg-emerald-500/10" />
+                                </div>
+                            </SectionCard>
                         )}
 
                         {!replyLoading && error && (
-                            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 space-y-3">
+                            <SectionCard className="border-red-500/20 bg-red-500/10 space-y-4">
                                 <div>
-                                    <p className="text-[11px] uppercase tracking-[0.2em] text-red-200/80 font-bold">Reply Generator Unavailable</p>
-                                    <p className="mt-2 text-sm leading-relaxed text-red-100">{error}</p>
+                                    <SectionLabel className="text-red-300">Reply Generator Unavailable</SectionLabel>
+                                    <p className="mt-1 text-[13px] leading-relaxed text-red-200">{error}</p>
                                 </div>
                                 <button
                                     onClick={() => onGenerateReplies?.()}
-                                    className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+                                    className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-white transition hover:bg-white/15"
                                 >
-                                    <Wand2 size={16} />
+                                    <Wand2 size={14} />
                                     Try Again
                                 </button>
-                            </div>
+                            </SectionCard>
                         )}
 
                         {!replyLoading && !error && !replyData?.top_reply && !replyData?.reply_suggestions?.length && (
-                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center">
-                                <p className="text-sm text-neutral-300">Choose a tone and tap <span className="font-semibold text-white">Generate Replies</span> to create message suggestions.</p>
-                            </div>
+                            <SectionCard className="flex flex-col items-center justify-center p-8 text-center border-dashed border-white/10 bg-transparent">
+                                <div className="w-16 h-16 rounded-3xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
+                                    <Bot size={32} className="text-violet-400" />
+                                </div>
+                                <h4 className="text-[15px] font-bold text-white tracking-wide mb-2">Ready to assist</h4>
+                                <p className="text-[13px] text-neutral-400 max-w-[240px] leading-relaxed">Choose a tone and tap <span className="font-semibold text-white">Generate</span> to create smart message suggestions.</p>
+                            </SectionCard>
                         )}
 
-                        {!replyLoading && !error && replyData?.detected_intent && (
-                            <div className="flex flex-wrap gap-2">
-                                <div className="rounded-full border border-pink-500/20 bg-pink-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-pink-100">
-                                    Intent: {replyData.detected_intent}
-                                </div>
-                                <div className="rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-100">
-                                    Tone: {replyData.tone || selectedTone}
-                                </div>
-                                <div className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
-                                    Mode: {replyModeLabel}
-                                </div>
-                                <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-200">
-                                    Model Path: {replyModelLabel}
-                                </div>
+                        {!replyLoading && !error && (replyData?.context_preview || aiUnderstandingParagraph || replyData?.last_other_message) && (
+                            <div className="grid gap-3 md:grid-cols-2">
+                                <SectionCard>
+                                    <SectionLabel icon={History}>Actual Context</SectionLabel>
+                                    {replyData?.context_preview ? (
+                                        <div className="rounded-xl bg-black/20 p-3 border border-white/[0.03]">
+                                            <pre className="whitespace-pre-wrap text-[13px] text-neutral-300 font-sans leading-relaxed">{replyData.context_preview}</pre>
+                                        </div>
+                                    ) : (
+                                        <p className="text-[13px] text-neutral-500 italic">No recent chat context.</p>
+                                    )}
+                                    {replyData?.last_other_message && (
+                                        <div className="mt-3 rounded-xl border border-violet-500/10 bg-violet-500/[0.02] p-3">
+                                            <p className="text-[10px] uppercase tracking-[0.18em] text-violet-300/70 font-bold mb-1.5">Last Message</p>
+                                            <p className="text-[13px] text-neutral-200">{replyData.last_other_message}</p>
+                                        </div>
+                                    )}
+                                </SectionCard>
+
+                                <SectionCard>
+                                    <SectionLabel icon={Brain}>AI Understanding</SectionLabel>
+                                    <p className="text-[13.5px] leading-relaxed text-neutral-300">
+                                        {aiUnderstandingParagraph || "The assistant is still forming an interpretation of the conversation context."}
+                                    </p>
+                                    {replyData?.detected_intent && (
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            <div className="rounded-md bg-white/[0.04] border border-white/[0.06] px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold">
+                                                <span className="text-neutral-500">Intent: </span>
+                                                <span className="text-pink-300">{replyData.detected_intent}</span>
+                                            </div>
+                                            <div className="rounded-md bg-white/[0.04] border border-white/[0.06] px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold">
+                                                <span className="text-neutral-500">Tone: </span>
+                                                <span className="text-violet-300">{replyData.tone || selectedTone}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </SectionCard>
                             </div>
                         )}
 
                         {!replyLoading && !error && replyData?.safety_message && (
-                            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4">
-                                <p className="text-[11px] uppercase tracking-[0.2em] text-amber-200/80 font-bold">Safety Notice</p>
-                                <p className="mt-2 text-sm leading-relaxed text-amber-100">{replyData.safety_message}</p>
-                            </div>
-                        )}
-
-                        {!replyLoading && !error && (replyData?.context_preview || aiUnderstandingParagraph || replyData?.last_other_message) && (
-                            <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
-                                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 min-h-[260px]">
-                                    <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Actual Context</p>
-                                    {replyData?.context_preview ? (
-                                        <pre className="mt-2 whitespace-pre-wrap text-sm text-neutral-300 font-sans leading-relaxed">{replyData.context_preview}</pre>
-                                    ) : (
-                                        <p className="mt-2 text-sm text-neutral-400">No recent chat context available.</p>
-                                    )}
-                                    {replyData?.last_other_message && (
-                                        <div className="mt-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-                                            <p className="text-[10px] uppercase tracking-[0.18em] text-neutral-500 font-semibold">Last Message</p>
-                                            <p className="mt-2 text-sm text-neutral-200">{replyData.last_other_message}</p>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 min-h-[260px]">
-                                    <p className="text-[11px] uppercase tracking-[0.2em] text-indigo-200/90 font-bold">What AI Understands</p>
-                                    <p className="mt-3 text-sm leading-7 text-neutral-200">
-                                        {aiUnderstandingParagraph || "The assistant is still forming an interpretation of the conversation context."}
-                                    </p>
-                                </div>
-                            </div>
+                            <SectionCard className="border-amber-500/20 bg-amber-500/10">
+                                <SectionLabel className="text-amber-400">Safety Notice</SectionLabel>
+                                <p className="text-[13px] leading-relaxed text-amber-200/90">{replyData.safety_message}</p>
+                            </SectionCard>
                         )}
 
                         {!replyLoading && !error && replyData?.top_reply && (
-                            <div className="space-y-2">
-                                <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Top Reply</p>
+                            <SectionCard>
+                                <SectionLabel icon={Sparkles} className="!text-violet-400">Top Recommendation</SectionLabel>
                                 {renderReplyCard(replyData.top_reply, 'top-reply', { highlighted: true })}
-                            </div>
+                            </SectionCard>
                         )}
 
                         {!replyLoading && !error && groupedReplies.length > 0 && (
-                            <div className="space-y-2">
-                                <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Reply Types</p>
-                                <div className="grid gap-3 md:grid-cols-2">
-                                    {groupedReplies.map((item) => (
-                                        <div key={item.label} className="space-y-2">
-                                            <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-500">{item.label}</p>
-                                            {renderReplyCard(item.value, item.label)}
-                                        </div>
-                                    ))}
+                            <SectionCard>
+                                <SectionLabel icon={MessageSquarePlus}>Categorized Options</SectionLabel>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                    {groupedReplies.map((item) => renderReplyCard(item.value, item.label, { label: item.label }))}
                                 </div>
-                            </div>
+                            </SectionCard>
                         )}
 
                         {!replyLoading && !error && replyData?.reply_suggestions?.length > 0 && (
-                            <div className="space-y-2">
-                                <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Possible Replies</p>
-                                <div className="grid gap-3">
+                            <SectionCard>
+                                <SectionLabel icon={Wand2}>More Suggestions</SectionLabel>
+                                <div className="grid gap-2">
                                     {replyData.reply_suggestions.map((item, index) => renderReplyCard(item, `suggestion-${index}`))}
                                 </div>
-                            </div>
+                            </SectionCard>
+                        )}
+
+                        {!replyLoading && !error && emojiRepliesWith.length > 0 && (
+                            <SectionCard>
+                                <SectionLabel className="!text-pink-300">With Emojis</SectionLabel>
+                                <div className="grid gap-2">
+                                    {emojiRepliesWith.map((item, index) => renderReplyCard(item, `emoji-with-${index}`))}
+                                </div>
+                            </SectionCard>
+                        )}
+
+                        {!replyLoading && !error && emojiRepliesWithout.length > 0 && (
+                            <SectionCard>
+                                <SectionLabel>Without Emojis</SectionLabel>
+                                <div className="grid gap-2">
+                                    {emojiRepliesWithout.map((item, index) => renderReplyCard(item, `emoji-without-${index}`))}
+                                </div>
+                            </SectionCard>
                         )}
 
                         {!replyLoading && !error && rewrites.length > 0 && (
-                            <div className="space-y-2">
-                                <p className="text-[11px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Rewrite Options</p>
-                                <div className="grid gap-3">
+                            <SectionCard>
+                                <SectionLabel>Rewrite Options</SectionLabel>
+                                <div className="grid gap-2">
                                     {rewrites.map((item, index) => renderReplyCard(item, `rewrite-${index}`))}
                                 </div>
-                            </div>
+                            </SectionCard>
                         )}
 
                     </div>
@@ -691,7 +822,7 @@ export default function AIAssistantOverlay({
                     <button
                         onClick={() => onSubmit?.()}
                         disabled={isLoading || !inputValue.trim()}
-                        className="rounded-full bg-indigo-600 p-3 text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-full bg-violet-600 p-3 text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                         title="Send"
                     >
                         {isLoading ? <Loader2 size={18} className="animate-spin" /> : <SendHorizontal size={18} />}

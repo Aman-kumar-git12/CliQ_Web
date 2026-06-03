@@ -148,6 +148,7 @@ const ChatUI = () => {
     const [assistantAskHistory, setAssistantAskHistory] = useState([]);
     const [pendingAssistantHistory, setPendingAssistantHistory] = useState(null);
     const [assistantTone, setAssistantTone] = useState("polite");
+    const [emojiPreference, setEmojiPreference] = useState("both"); // 'both' | 'with' | 'without'
 
     // Multi-Select State
     const [isSelectMode, setIsSelectMode] = useState(false);
@@ -331,10 +332,21 @@ const ChatUI = () => {
     useEffect(() => {
         if (!loading && !hasInitialScrolled) {
             if (messages.length > 0) {
-                scrollToBottom('auto');
+                // Aggressive scroll to handle delayed DOM rendering and image loading
+                let attempts = 0;
+                const scrollInterval = setInterval(() => {
+                    scrollToBottom('auto');
+                    attempts++;
+                    if (attempts >= 15) { // Try for 750ms (15 * 50ms)
+                        clearInterval(scrollInterval);
+                        setHasInitialScrolled(true);
+                    }
+                }, 50);
+                
+                return () => clearInterval(scrollInterval);
+            } else {
+                setHasInitialScrolled(true);
             }
-            setHasInitialScrolled(true);
-            return () => {};
         }
     }, [loading, hasInitialScrolled, messages.length]);
 
@@ -554,12 +566,8 @@ const ChatUI = () => {
     }, [targetuserId]);
 
     const scrollToBottom = (behavior = 'smooth') => {
-        if (!scrollContainerRef.current) return;
-        if (behavior === 'auto') {
-            scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-        } else {
-            messagesEndRef.current?.scrollIntoView({ behavior });
-        }
+        if (!scrollContainerRef.current || !messagesEndRef.current) return;
+        messagesEndRef.current.scrollIntoView({ behavior, block: 'end' });
     };
 
     // Intersection Observer
@@ -685,6 +693,8 @@ const ChatUI = () => {
         return [
             snapshot.top_reply,
             ...(snapshot.reply_suggestions || []),
+            ...(snapshot.emoji_replies_with_emojis || []),
+            ...(snapshot.emoji_replies_without_emojis || []),
             ...(snapshot.emoji_replies || []),
             ...(snapshot.same_message_variants || []),
             snapshot.grouped_replies?.top_reply,
@@ -881,10 +891,16 @@ const ChatUI = () => {
                 mode: "replies",
                 draft: activeDraft,
                 tone: assistantTone,
+                emojiPreference,
             });
             setAiThinkingStep('generating');
             setAssistantData(data);
             setAiThinkingStep('idle');
+            
+            // Save the generation to history immediately
+            if (data) {
+                saveAssistantHistory(data.top_reply || activeDraft || "Generated Reply", data);
+            }
         } catch (error) {
             console.error("Message assistant failed:", error);
             setAssistantError("Could not load message suggestions right now.");
@@ -1197,6 +1213,8 @@ const ChatUI = () => {
                         error={aiOverlayMode === 'replies' ? assistantError : ''}
                         selectedTone={assistantTone}
                         onToneChange={setAssistantTone}
+                        emojiPreference={emojiPreference}
+                        onEmojiPreferenceChange={setEmojiPreference}
                         onGenerateReplies={handleAssistantGenerate}
                         onUseReply={applyAssistantText}
                         onSendReply={sendAssistantReply}
@@ -1212,14 +1230,14 @@ const ChatUI = () => {
             </AnimatePresence>
 
             {/* Premium Glass Header */}
-            <header className="flex items-center justify-between pl-2 pr-6 py-4 bg-white/[0.03] backdrop-blur-3xl border-b border-white/10 sticky top-0 z-20 h-[88px] shadow-[0_10px_50px_rgba(0,0,0,0.3)]">
+            <header className="flex items-center justify-between pl-2 pr-6 py-4 bg-white/[0.03] backdrop-blur-3xl border-b border-white/10 shrink-0 z-20 h-[88px] shadow-[0_10px_50px_rgba(0,0,0,0.3)]">
                 <div className="flex items-center gap-2">
                     <button onClick={() => navigate('/messages')} className="p-2 -ml-1 mr-2 text-white/50 hover:bg-white/10 hover:text-white rounded-full transition-all active:scale-95 group">
                         <ArrowLeft size={24} strokeWidth={3} className="group-hover:-translate-x-0.5 transition-transform" />
                     </button>
                     <div className="flex items-center gap-4">
                         <div className="relative group cursor-pointer">
-                            <div className="w-[56px] h-[56px] rounded-[24px] overflow-hidden border border-white/20 p-[2px] bg-gradient-to-br from-[#3b82f6] to-[#8b5cf6] shadow-2xl transition-all duration-500 group-hover:scale-105">
+                            <div className="w-[56px] h-[56px] rounded-[24px] overflow-hidden border border-white/20 p-[2px] bg-gradient-to-br from-[#8b5cf6] to-[#ec4899] shadow-2xl transition-all duration-500 group-hover:scale-105">
                                 <img src={targetUser?.imageUrl || "https://cdn-icons-png.flaticon.com/512/219/219969.png"} alt="User" className="w-full h-full rounded-[21px] object-cover bg-[#0a0a0f]" />
                             </div>
                             {isTargetOnline && (
@@ -1246,7 +1264,7 @@ const ChatUI = () => {
             </header>
 
             {/* Chat Area */}
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden pl-2 pr-2 py-4 space-y-1 scrollbar-hide relative z-10 opacity-100">
+            <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pl-2 pr-2 py-4 space-y-1 scrollbar-hide relative z-10 opacity-100">
                 {messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center gap-6 animate-in fade-in zoom-in duration-500">
                         <div
@@ -1326,28 +1344,28 @@ const ChatUI = () => {
             </div>
 
             {/* Input Bar */}
-            <footer className="sticky bottom-0 z-30 pt-4 pb-[calc(env(safe-area-inset-bottom)+24px)] pl-2 pr-2 bg-white/[0.03] backdrop-blur-3xl border-t border-white/10">
+            <footer className="shrink-0 z-30 pt-4 pb-[calc(env(safe-area-inset-bottom)+24px)] pl-2 pr-2 bg-white/[0.03] backdrop-blur-3xl border-t border-white/10">
                 <div className="w-full flex items-center gap-1 md:gap-1">
                     {/* Plus Action */}
                     {!isRecording && (
                         <button
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isUploading}
-                            className="w-[44px] h-[44px] shrink-0 flex items-center justify-center text-[#3b82f6] hover:bg-white/5 rounded-full transition-all active:scale-95 group/plus"
+                            className="w-[44px] h-[44px] shrink-0 flex items-center justify-center text-[#8b5cf6] hover:bg-white/5 rounded-full transition-all active:scale-95 group/plus"
                         >
                             <Plus size={28} strokeWidth={3} className="group-hover/plus:rotate-90 transition-transform duration-300" />
                         </button>
                     )}
 
-                    <div className="flex-1 bg-[#1c1c1e]/90 backdrop-blur-3xl border border-white/5 rounded-[32px] px-2 py-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.4)] flex flex-col relative group/input focus-within:border-[#3b82f6]/50 focus-within:shadow-[0_0_30px_rgba(59,130,246,0.2)] focus-within:bg-[#252528] transition-all duration-300">
+                    <div className="flex-1 bg-[#1c1c1e]/90 backdrop-blur-3xl border border-white/5 rounded-[32px] px-2 py-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.4)] flex flex-col relative group/input focus-within:border-[#8b5cf6]/50 focus-within:shadow-[0_0_30px_rgba(139,92,246,0.2)] focus-within:bg-[#252528] transition-all duration-300">
                         {replyTo && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="mx-1 mb-2 px-4 py-3 bg-white/[0.03] backdrop-blur-xl border-l-[4px] border-[#3b82f6] rounded-[20px] flex items-center justify-between shadow-lg"
+                                className="mx-1 mb-2 px-4 py-3 bg-white/[0.03] backdrop-blur-xl border-l-[4px] border-[#8b5cf6] rounded-[20px] flex items-center justify-between shadow-lg"
                             >
                                 <div className="flex flex-col overflow-hidden">
-                                    <span className="text-[#3b82f6] text-[9px] font-black uppercase tracking-[0.2em] mb-0.5">Replying to {replyTo.firstname}</span>
+                                    <span className="text-[#8b5cf6] text-[9px] font-black uppercase tracking-[0.2em] mb-0.5">Replying to {replyTo.firstname}</span>
                                     <span className="text-white/60 text-[13px] truncate font-medium">{replyTo.text}</span>
                                 </div>
                                 <button onClick={() => setReplyTo(null)} className="p-1.5 text-white/20 hover:text-white transition-colors">
@@ -1361,7 +1379,7 @@ const ChatUI = () => {
                                 <>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setShowAIOverlay(true); }}
-                                        className={`ml-3 p-1.5 rounded-xl transition-all duration-300 ${showAIOverlay ? 'text-[#3b82f6] scale-110' : 'text-white/20 hover:text-white/60'}`}
+                                        className={`ml-3 p-1.5 rounded-xl transition-all duration-300 ${showAIOverlay ? 'text-[#8b5cf6] scale-110' : 'text-white/20 hover:text-white/60'}`}
                                     >
                                         <Sparkles size={20} strokeWidth={2.5} />
                                     </button>
@@ -1387,14 +1405,14 @@ const ChatUI = () => {
                                         className="flex-1 bg-transparent text-white text-[15px] font-medium py-3 px-1 focus:outline-none placeholder-white/20 resize-none max-h-48 transition-all scrollbar-hide"
                                     />
 
-                                    <button onClick={(e) => { e.stopPropagation(); setShowEmojiPicker(!showEmojiPicker); }} className={`p-1.5 mr-2 transition-all duration-300 ${showEmojiPicker ? "text-[#3b82f6] scale-110" : "text-white/20 hover:text-white/60"}`}>
+                                    <button onClick={(e) => { e.stopPropagation(); setShowEmojiPicker(!showEmojiPicker); }} className={`p-1.5 mr-2 transition-all duration-300 ${showEmojiPicker ? "text-[#8b5cf6] scale-110" : "text-white/20 hover:text-white/60"}`}>
                                         <Smile size={24} strokeWidth={2.5} />
                                     </button>
                                 </>
                             ) : (
-                                <div className="flex-1 flex items-center justify-between px-4 py-2 text-[#3b82f6] font-bold">
+                                <div className="flex-1 flex items-center justify-between px-4 py-2 text-[#8b5cf6] font-bold">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-2 h-2 bg-[#3b82f6] rounded-full animate-pulse shadow-[0_0_10px_#3b82f6]" />
+                                        <div className="w-2 h-2 bg-[#8b5cf6] rounded-full animate-pulse shadow-[0_0_10px_#8b5cf6]" />
                                         <span className="tabular-nums text-lg">{formatTime(recordingTime)}</span>
                                     </div>
                                     <button onClick={cancelRecording} className="text-[10px] uppercase tracking-widest text-white/30 hover:text-white transition-colors">Cancel</button>
@@ -1411,7 +1429,7 @@ const ChatUI = () => {
 
                     {/* Mic / Send Button */}
                     <button
-                        className={`rounded-full w-[48px] h-[48px] shrink-0 flex items-center justify-center active:scale-90 transition-all duration-500 shadow-xl relative overflow-hidden ${isRecording || newMessage.trim() || updateMessage || (isUploading && audioBlob) ? "bg-[#3b82f6] text-white shadow-[0_5px_15px_rgba(59,130,246,0.3)]" : "bg-[#1c1c1e] text-white border border-white/5"}`}
+                        className={`rounded-full w-[48px] h-[48px] shrink-0 flex items-center justify-center active:scale-90 transition-all duration-500 shadow-xl relative overflow-hidden ${isRecording || newMessage.trim() || updateMessage || (isUploading && audioBlob) ? "bg-gradient-to-r from-[#8b5cf6] to-[#ec4899] text-white shadow-[0_5px_15px_rgba(139,92,246,0.4)]" : "bg-[#1c1c1e] text-white border border-white/5"}`}
                         onClick={isUploading ? null : (isRecording ? stopRecording : (newMessage.trim() || updateMessage ? sendMessage : startRecording))}
                         disabled={isUploading && !audioBlob}
                     >
@@ -1457,7 +1475,7 @@ const ChatUI = () => {
                             {canDeleteForEveryone && (
                                 <button onClick={() => handleBulkDelete('everyone')} className="w-full py-3.5 bg-red-500/10 text-red-500 font-black uppercase text-[11px] tracking-widest hover:bg-red-500/20 rounded-2xl transition-all active:scale-95">Delete for everyone</button>
                             )}
-                            <button onClick={() => handleBulkDelete('me')} className="w-full py-3.5 bg-white/[0.03] text-[#3b82f6] font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.08] rounded-2xl transition-all active:scale-95">Delete for me</button>
+                            <button onClick={() => handleBulkDelete('me')} className="w-full py-3.5 bg-white/[0.03] text-[#8b5cf6] font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.08] rounded-2xl transition-all active:scale-95">Delete for me</button>
                             <button onClick={() => setBulkDeleteConfirmOpen(false)} className="w-full py-3.5 text-white/30 font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.05] rounded-2xl transition-all">Cancel</button>
                         </div>
                     </div>
@@ -1473,7 +1491,7 @@ const ChatUI = () => {
                             {deleteConfirmation.isMe && (
                                 <button onClick={() => confirmDelete('everyone')} className="w-full py-3.5 bg-red-500/10 text-red-500 font-black uppercase text-[11px] tracking-widest hover:bg-red-500/20 rounded-2xl transition-all active:scale-95">Delete for everyone</button>
                             )}
-                            <button onClick={() => confirmDelete('me')} className="w-full py-3.5 bg-white/[0.03] text-[#3b82f6] font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.08] rounded-2xl transition-all active:scale-95">Delete for me</button>
+                            <button onClick={() => confirmDelete('me')} className="w-full py-3.5 bg-white/[0.03] text-[#8b5cf6] font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.08] rounded-2xl transition-all active:scale-95">Delete for me</button>
                             <button onClick={() => setDeleteConfirmation({ isOpen: false, messageId: null, isMe: false })} className="w-full py-3.5 text-white/30 font-black uppercase text-[11px] tracking-widest hover:bg-white/[0.05] rounded-2xl transition-all">Cancel</button>
                         </div>
                     </div>
@@ -1607,7 +1625,7 @@ const MessageBubble = ({ msg, targetUser, openMenuId, toggleMenu, handleEdit, ha
                         } ${msg.isDelete
                             ? "bg-white/5 backdrop-blur-xl italic text-white/20 rounded-[24px] border border-white/5"
                             : msg.isMe
-                                ? "bg-gradient-to-br from-blue-600 to-blue-500 rounded-[22px] rounded-br-[4px] text-white shadow-[0_4px_15px_rgba(37,99,235,0.3)]"
+                                ? "bg-gradient-to-br from-[#8b5cf6] to-[#ec4899] rounded-[22px] rounded-br-[4px] text-white shadow-[0_4px_15px_rgba(139,92,246,0.3)]"
                                 : "bg-white/[0.08] backdrop-blur-md border border-white/10 rounded-[22px] rounded-bl-[4px] text-white/95"
                         }`}
                     style={getBubbleRadius()}

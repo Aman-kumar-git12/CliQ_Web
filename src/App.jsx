@@ -47,7 +47,7 @@ const AuthenticatedLayout = () => {
     }, []);
 
     return (
-        <div id="root-container" className="flex w-full min-h-screen bg-[#050505] text-white relative overflow-hidden transition-all duration-700">
+        <div id="root-container" className={`flex w-full ${isChatView ? 'h-[100dvh] overflow-hidden' : 'min-h-screen overflow-x-hidden'} bg-[#050505] text-white relative transition-all duration-700`}>
             {/* ------------ Premium Global Background (Static during navigation) ------------- */}
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
                 <div className="absolute inset-0 bg-[#050505]" />
@@ -77,13 +77,13 @@ const AuthenticatedLayout = () => {
                 />
             </div>
 
-            <div className="flex w-full relative z-10">
+            <div className={`flex w-full relative z-10 ${isChatView ? 'h-full' : ''}`}>
                 <SidebarComponent />
                 <motion.div 
                     initial={false}
                     animate={{ paddingLeft: isMobile ? 0 : (isChatView ? 90 : 260) }}
                     transition={{ type: "tween", ease: "circOut", duration: 0.4 }}
-                    className="flex-1 w-full min-w-0"
+                    className={`flex-1 w-full min-w-0 ${isChatView ? 'h-full flex flex-col' : ''}`}
                 >
                     <RouterOutlet />
                 </motion.div>
