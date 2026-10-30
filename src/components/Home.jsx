@@ -9,7 +9,6 @@ import PostInput from "./PostInput";
 import IndividualPost from "./Post/IndividualPost";
 import { useFeedContext } from "../context/FeedContext";
 import HomeShimmering from "./shimmering/HomeShimmering";
-import Chatbot from "./Chatbot/Chatbot";
 
 export default function Home() {
   const {
@@ -303,8 +302,6 @@ export default function Home() {
         <HomeSidebar />
       </div>
 
-      {/* Floating Chatbot Extension */}
-      <Chatbot />
     </div>
   );
 }

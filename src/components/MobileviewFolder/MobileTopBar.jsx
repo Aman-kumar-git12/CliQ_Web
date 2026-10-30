@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, Settings, MessageSquare, LogOut, ArrowLeft } from "lucide-react";
+import { Menu, Settings, MessageSquare, LogOut, ArrowLeft, Search, Bookmark } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
 import LogoutConfirmation from "../Confirmation";
+import NotificationBell from "../Notifications/NotificationBell";
 
 export default function MobileTopBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -74,7 +75,7 @@ export default function MobileTopBar() {
                         </Link>
 
                         {/* Center: Context Tab */}
-                        <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
+                        <div className="absolute left-1/2 -translate-x-1/2 hidden min-[460px]:flex flex-col items-center">
                             <span className="text-[13px] font-black text-purple-100/90 tracking-tight">
                                 For you
                             </span>
@@ -83,6 +84,16 @@ export default function MobileTopBar() {
 
                         {/* Right: Actions */}
                         <div className="flex items-center gap-2">
+                            <Link
+                                to="/search"
+                                aria-label="Search"
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all text-purple-100/80 hover:text-white group shadow-[0_0_15px_rgba(168,85,247,0.1)]"
+                            >
+                                <Search size={20} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+                            </Link>
+
+                            <NotificationBell />
+
                             <Link
                                 to="/messages"
                                 className="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all text-purple-100/80 hover:text-white group shadow-[0_0_15px_rgba(168,85,247,0.1)]"
@@ -110,6 +121,17 @@ export default function MobileTopBar() {
                                                 <Settings size={16} className="text-purple-400" strokeWidth={2.5} />
                                             </div>
                                             Settings
+                                        </Link>
+
+                                        <Link
+                                            to="/saved"
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple-500/10 transition-all text-[13px] font-bold text-purple-100/70 hover:text-white group"
+                                        >
+                                            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                                                <Bookmark size={16} className="text-purple-400" strokeWidth={2.5} />
+                                            </div>
+                                            Saved
                                         </Link>
 
                                         <div className="h-px bg-purple-500/10 my-1 mx-2"></div>

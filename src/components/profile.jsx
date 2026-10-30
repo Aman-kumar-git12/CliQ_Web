@@ -3,7 +3,8 @@ import axiosClient from "../api/axiosClient";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import LogoutConfirmation from "./Confirmation";
 import MyExperties from "./MyExperties/MyExperties";
-import { Plus, Eye, X, Play } from "lucide-react";
+import { Plus, Eye, X, Play, Repeat2 } from "lucide-react";
+import { toProfileTiles } from "../utils/profilePostTiles";
 import { useUserContext } from "../context/userContext";
 import ProfileShimmering from "./shimmering/ProfileShimmering";
 import { motion, AnimatePresence } from "framer-motion";
@@ -329,12 +330,17 @@ export default function ProfilePage() {
                                     )}
 
                                     <div className="grid grid-cols-3 gap-1 md:gap-4 transition-all duration-500">
-                                        {posts.map((post) => (
+                                        {toProfileTiles(posts).map((post) => (
                                             <Link
                                                 to={`/post/${post.id}`}
-                                                key={post.id}
+                                                key={post.tileKey || post.id}
                                                 className="group relative aspect-square bg-white/[0.03] backdrop-blur-xl rounded-[16px] md:rounded-[28px] overflow-hidden border border-white/10 shadow-lg hover:border-white/30 hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-500 active:scale-95"
                                             >
+                                                {post.isRepostTile && (
+                                                    <div className="absolute top-2 left-2 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 border border-white/10 text-[9px] font-black uppercase tracking-wider text-emerald-300 pointer-events-none">
+                                                        <Repeat2 size={10} /> Repost
+                                                    </div>
+                                                )}
                                                 {post.video ? (
                                                     <>
                                                         <video

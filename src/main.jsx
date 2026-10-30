@@ -5,11 +5,14 @@ import './index.css'
 
 import { BrowserRouter } from 'react-router-dom'
 import { UserContextProvider } from './context/userContext.jsx'
+import { NotificationProvider } from './context/NotificationContext.jsx'
 
 createRoot(document.getElementById('root')).render(
     <BrowserRouter basename="/">
         <UserContextProvider>
-            <App />
+            <NotificationProvider>
+                <App />
+            </NotificationProvider>
         </UserContextProvider>
     </BrowserRouter>
 )

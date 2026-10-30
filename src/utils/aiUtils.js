@@ -2,6 +2,27 @@
  * Shared utilities for AI-powered components (Chatbot, MessageAssistant, etc.)
  */
 import { createElement } from 'react';
+import { Link } from 'react-router-dom';
+
+// Pages the AI may deep-link to. Keep in sync with LINKABLE_PAGES in WebsiteAgent/src/chat/pages.py.
+export const INTERNAL_LINK_ALLOWLIST = new Set([
+    '/home',
+    '/find/findpeople',
+    '/find/getconnection',
+    '/requests',
+    '/create/post',
+    '/edit-profile',
+    '/settings',
+    '/messages',
+    '/my-experties',
+    '/profile',
+]);
+
+const toAllowedPath = (href) => {
+    if (typeof href !== 'string' || !href.startsWith('/') || href.startsWith('//')) return null;
+    const path = href.split(/[?#]/)[0].replace(/\/+$/, '') || '/';
+    return INTERNAL_LINK_ALLOWLIST.has(path) ? path : null;
+};
 
 export const extractJsonBlock = (text) => {
     if (!text) return null;
@@ -80,6 +101,20 @@ export const markdownComponents = {
         createElement('span', { className: "flex-1 text-[13.5px] leading-relaxed" }, children)
     ),
     strong: ({ children }) => createElement('strong', { className: "text-white font-bold" }, children),
+    // Allowlisted pages become in-app buttons; any other link is shown as plain text
+    a: ({ href, children }) => {
+        const path = toAllowedPath(href);
+        if (!path) return createElement('span', null, children);
+        return createElement(
+            Link,
+            {
+                to: path,
+                className: "inline-flex items-center gap-1 mt-1 px-3 py-1.5 rounded-full bg-violet-600/20 hover:bg-violet-600/35 border border-violet-500/30 text-violet-200 text-[12.5px] font-medium no-underline transition-colors",
+            },
+            children,
+            createElement('span', { 'aria-hidden': true }, '→')
+        );
+    },
     code: ({ inline, children }) => inline
         ? createElement('code', { className: "px-1.5 py-0.5 rounded bg-white/10 text-indigo-200 text-[12px] font-mono" }, children)
         : createElement(

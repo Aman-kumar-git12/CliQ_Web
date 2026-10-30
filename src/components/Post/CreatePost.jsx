@@ -5,11 +5,16 @@ import { useNavigate } from "react-router-dom";
 import Confirmation from "../Confirmation";
 import CreatePostShimmering from "../shimmering/CreatePostShimmering";
 import { motion, AnimatePresence } from "framer-motion";
+import MentionTextarea from "./MentionTextarea";
+import LinkPreviewCard from "./LinkPreviewCard";
+import { useLinkPreview } from "./useLinkPreview";
 
 const CreatePost = () => {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
     const [content, setContent] = useState("");
+    const [mentionIds, setMentionIds] = useState([]);
+    const { preview: linkPreview } = useLinkPreview(content);
     const [selectedFile, setSelectedFile] = useState(null); // Store raw file
     const [preview, setPreview] = useState("");
     const [loading, setLoading] = useState(false);
@@ -78,6 +83,7 @@ const CreatePost = () => {
 
             const formData = new FormData();
             formData.append("content", content);
+            formData.append("mentionIds", JSON.stringify(mentionIds));
             if (selectedFile) {
                 const isVideo = selectedFile.type.startsWith("video/");
                 formData.append(isVideo ? "video" : "image", selectedFile);
@@ -178,13 +184,19 @@ const CreatePost = () => {
                         <label className="block text-[10px] font-black text-white/40 uppercase tracking-[0.4em] mb-3 ml-2">
                             Description
                         </label>
-                        <textarea
+                        <MentionTextarea
                             className="w-full bg-white/[0.02] border border-white/10 rounded-[24px] px-6 py-4 text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all resize-none font-medium leading-relaxed backdrop-blur-md"
                             rows={2}
-                            placeholder="What's on your mind?"
+                            maxLength={500}
+                            placeholder="What's on your mind? Use @ to mention, # for topics"
                             value={content}
-                            onChange={(e) => setContent(e.target.value)}
+                            onChange={setContent}
+                            onMentionIdsChange={setMentionIds}
                         />
+                        <div className="flex justify-end mt-1.5 mr-2 text-[10px] font-bold text-white/30">{content.length}/500</div>
+                        {!selectedFile && linkPreview && (
+                            <div className="mt-3"><LinkPreviewCard preview={linkPreview} /></div>
+                        )}
                     </div>
 
                     {/* Media Upload Area */}

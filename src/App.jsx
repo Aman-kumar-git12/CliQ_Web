@@ -33,6 +33,10 @@ import SplashScreen from "./components/SplashScreen";
 import BlockedAccount from "./components/BlockedAccount";
 import SidebarComponent from "./components/Sidebar";
 import MobileNav from "./components/MobileNav.jsx";
+import NotificationsPage from "./components/Notifications/NotificationsPage";
+import SearchPage from "./components/Search/SearchPage";
+import SavedPosts from "./components/Post/SavedPosts";
+import Chatbot from "./components/Chatbot/Chatbot";
 
 // Global layout to keep Sidebar persistent and animating smoothly
 const AuthenticatedLayout = () => {
@@ -91,6 +95,9 @@ const AuthenticatedLayout = () => {
             
             {/* Mobile Navigation Bar - Only visible on small screens */}
             {!isChatView && MobileNav && <MobileNav />}
+
+            {/* CliQ AI help chat on every page except open chat threads, where it would cover the message box */}
+            {!isChatView && <Chatbot />}
         </div>
     );
 };
@@ -179,6 +186,9 @@ function App() {
                   <Route path="getconnection/:panel?" element={<GetConnections />} />
                 </Route>
                 <Route path="/requests" element={<ConnectionsRequest />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/search" element={<SearchPage />} />
+                <Route path="/saved" element={<SavedPosts />} />
 
                 {/* Post Routes */}
                 <Route path="/post/:postId" element={<IndividualPost />} />

@@ -7,13 +7,17 @@ import {
     Settings,
     MessageSquare,
     MoreHorizontal,
-    Users
+    Users,
+    Bell,
+    Search,
+    Bookmark
 } from "lucide-react";
 
 import { Link, useLocation } from "react-router-dom";
 import { useUserContext } from "../context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import axiosClient from "../api/axiosClient";
+import { useNotifications } from "../context/NotificationContext";
 
 const NavItem = ({ to, icon: Icon, label, badge, active, isChatView }) => (
     <Link
@@ -78,6 +82,7 @@ export default function Sidebar() {
 
     const isChatView = location.pathname.startsWith("/messages") || location.pathname.startsWith("/chat");
     const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+    const { unreadCount } = useNotifications();
 
     useEffect(() => {
         const fetchRequestsCount = async () => {
@@ -95,7 +100,7 @@ export default function Sidebar() {
         // Refresh count every 60 seconds (simple polling)
         const interval = setInterval(fetchRequestsCount, 60000);
         return () => clearInterval(interval);
-    }, []);
+    }, [unreadCount]); // a new notification may be a new connection request
 
     const isActive = (path) => {
         if (path === "/profile") return location.pathname.startsWith("/profile");
@@ -159,9 +164,11 @@ export default function Sidebar() {
             <div className="flex-1 overflow-y-auto custom-scrollbar pt-2 scroll-smooth">
                 <Section title="Feed" isChatView={isChatView}>
                     <NavItem to="/home" icon={Home} label="Feed" active={isActive("/home")} isChatView={isChatView} />
+                    <NavItem to="/search" icon={Search} label="Search" active={isActive("/search")} isChatView={isChatView} />
                     <NavItem to="/find/getconnection" icon={Compass} label="Explore" active={isActive("/find/getconnection")} isChatView={isChatView} />
                     <NavItem to="/requests" icon={Users} label="Requests" badge={pendingRequestsCount > 0 ? pendingRequestsCount.toString() : null} active={isActive("/requests")} isChatView={isChatView} />
                     <NavItem to="/messages" icon={MessageSquare} label="Messages" active={isActive("/messages")} isChatView={isChatView} />
+                    <NavItem to="/notifications" icon={Bell} label="Notifications" badge={unreadCount > 0 ? (unreadCount > 99 ? "99+" : unreadCount.toString()) : null} active={isActive("/notifications")} isChatView={isChatView} />
                 </Section>
 
                 <Section title="Create" isChatView={isChatView}>
@@ -170,6 +177,7 @@ export default function Sidebar() {
 
                 <Section title="You" isChatView={isChatView}>
                     <NavItem to="/profile" icon={User} label="Profile" active={isActive("/profile")} isChatView={isChatView} />
+                    <NavItem to="/saved" icon={Bookmark} label="Saved" active={isActive("/saved")} isChatView={isChatView} />
                     <NavItem to="/settings" icon={Settings} label="Settings" active={isActive("/settings")} isChatView={isChatView} />
                 </Section>
             </div>

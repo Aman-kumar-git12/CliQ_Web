@@ -4,10 +4,15 @@ import { useUserContext } from "../context/userContext";
 import axiosClient from "../api/axiosClient";
 import EmojiPicker from "emoji-picker-react";
 import { motion, AnimatePresence } from "framer-motion";
+import MentionTextarea from "./Post/MentionTextarea";
+import LinkPreviewCard from "./Post/LinkPreviewCard";
+import { useLinkPreview } from "./Post/useLinkPreview";
 
 export default function PostInput({ onPostSuccess, onTriggerToast }) {
     const { user } = useUserContext();
     const [content, setContent] = useState("");
+    const [mentionIds, setMentionIds] = useState([]);
+    const { preview: linkPreview } = useLinkPreview(content);
     const [loading, setLoading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const pickerRef = useRef(null);
@@ -26,7 +31,7 @@ export default function PostInput({ onPostSuccess, onTriggerToast }) {
         if (!content.trim()) return;
         setLoading(true);
         try {
-            await axiosClient.post("/create/post", { content }, {
+            await axiosClient.post("/create/post", { content, mentionIds }, {
                 withCredentials: true
             });
             setContent("");
@@ -46,12 +51,15 @@ export default function PostInput({ onPostSuccess, onTriggerToast }) {
                     {user?.firstname?.substring(0, 1).toUpperCase() || "A"}
                 </div>
                 <div className="flex-1 flex flex-col gap-2.5">
-                    <textarea
+                    <MentionTextarea
                         value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder={`What's on your mind, ${user?.firstname || 'Aman'}?`}
+                        onChange={setContent}
+                        onMentionIdsChange={setMentionIds}
+                        maxLength={500}
+                        placeholder={`What's on your mind, ${user?.firstname || 'there'}?`}
                         className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-[14px] text-[#ece8f8] placeholder-[#6f6a86] focus:outline-none focus:border-[var(--cliq-lilac)]/25 transition-all resize-none min-h-[60px] leading-relaxed"
                     />
+                    {linkPreview && <LinkPreviewCard preview={linkPreview} compact />}
                     
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-3 gap-3 border-t cliq-feed-divider relative">
                         <div className="flex items-center gap-1.5 md:gap-2">

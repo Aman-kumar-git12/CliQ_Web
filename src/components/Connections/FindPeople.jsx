@@ -69,7 +69,8 @@ export default function FindPeople() {
             }
             setLoading(true);
             try {
-                const res = await axiosClient.get(`/user/search/${search}`);
+                // Encode so queries like "#ai" or "c++" survive as a path segment.
+                const res = await axiosClient.get(`/user/search/${encodeURIComponent(search.trim())}`);
                 setResults(res.data);
             } catch (err) {
                 console.error("Search error:", err);
@@ -224,7 +225,7 @@ export default function FindPeople() {
                         </div>
                         <input
                             type="text"
-                            placeholder="Search experts, builders..."
+                            placeholder="Search by name, skill or role..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full pl-12 pr-6 py-3.5 md:py-3 rounded-[16px] bg-[#0e0d14] border border-white/5 text-[13px] text-white font-medium placeholder-[#413c58] focus:outline-none focus:border-[#8b5cf6]/30 transition-all duration-500 shadow-inner"
@@ -315,7 +316,7 @@ export default function FindPeople() {
                                                     <motion.span layoutId={`handle-${user.id}`} className="text-[9px] md:text-[11.5px] text-[#5f5a78] font-bold uppercase tracking-[0.15em]">@{user.username || getPublicHandle(user)}</motion.span>
                                                     <span className="w-1 h-1 rounded-full bg-[#1c1a24]"></span>
                                                     <motion.p layoutId={`expertise-${user.id}`} className="text-[9px] md:text-[11.5px] text-[#413c58] font-medium italic line-clamp-1 truncate max-w-[120px] xs:max-w-xs">
-                                                        {user.expertise?.aboutYou || "Potential high-tier connector discovered."}
+                                                        {search && user.matchedOn?.length ? user.matchedOn.join(" · ") : (user.expertise?.aboutYou || "Potential high-tier connector discovered.")}
                                                     </motion.p>
                                                 </div>
                                             </div>

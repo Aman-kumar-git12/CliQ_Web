@@ -6,11 +6,9 @@ import {
     Trash2,
     Heart,
     MessageCircle,
-    Repeat,
-    Send,
     MoreHorizontal,
     Share2,
-    CheckCircle2,
+    Bookmark,
     Flag
 } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
@@ -21,7 +19,13 @@ import Toastbar from "../Chat/Toastbar";
 import ReportModal from "../ReportModal";
 import ProfileHoverCard from "./ProfileHoverCard";
 import LikesHoverCard from "./LikesHoverCard";
-import { AnimatePresence } from "framer-motion";
+import RichText from "./RichText";
+import LinkPreviewCard from "./LinkPreviewCard";
+import EmbeddedPost from "./EmbeddedPost";
+import RepostControl from "./RepostControl";
+import MentionTextarea from "./MentionTextarea";
+import CommentThread from "./CommentThread";
+import { usePostActions } from "./usePostActions";
 
 
 import IndividualPostShimmering from "../shimmering/IndividualPostShimmering";
@@ -40,8 +44,9 @@ export default function IndividualPost() {
     const [likesCount, setLikesCount] = useState(0);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
+    const [newCommentMentionIds, setNewCommentMentionIds] = useState([]);
+    const [editMentionIds, setEditMentionIds] = useState([]);
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-    const [isFollowed, setIsFollowed] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [deletingCommentId, setDeletingCommentId] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -275,6 +280,11 @@ export default function IndividualPost() {
                 // Fetch Post
                 const postRes = await axiosClient.get(`/user/post/${postId}`, { withCredentials: true });
                 const postData = Array.isArray(postRes.data) ? postRes.data[0] : postRes.data;
+                // A plain repost has nothing of its own to show; open the original.
+                if (postData.isRepost && !postData.isQuote && postData.repostOf) {
+                    navigate(`/post/${postData.repostOf.id}`, { replace: true });
+                    return;
+                }
                 setPost(postData);
                 setLikesCount(postData.likes || 0);
                 setLiked(postData.isLiked || false);
@@ -307,16 +317,12 @@ export default function IndividualPost() {
 
         setIsSubmittingComment(true);
         try {
-            const res = await axiosClient.post(`/user/post/comments/${postId}`, { comment: newComment }, { withCredentials: true });
+            const res = await axiosClient.post(`/user/post/comments/${postId}`, {
+                comment: newComment,
+                mentionIds: newCommentMentionIds
+            }, { withCredentials: true });
 
-            // Add new comment to UI immediately
-            const commentToAdd = {
-                ...res.data,
-                username: currentUser.firstname + " " + currentUser.lastname,
-                avatar: currentUser.imageUrl,
-                createdAt: new Date().toISOString()
-            };
-            setComments([commentToAdd, ...comments]);
+            setComments((prev) => [res.data, ...prev]);
             setNewComment("");
 
             // Update local post state
@@ -331,21 +337,40 @@ export default function IndividualPost() {
         }
     };
 
+    // `parent` may be a reply; the server files it under the top-level comment.
+    const handleSubmitReply = async (parent, text, mentionIds) => {
+        const res = await axiosClient.post(`/user/post/comments/${postId}`, {
+            comment: text,
+            parentId: parent.id,
+            mentionIds
+        }, { withCredentials: true });
+        const threadId = res.data.parentId;
+        setComments((prev) => prev.map((c) => (c.id === threadId
+            ? { ...c, replies: [...(c.replies || []), res.data], repliesCount: (c.repliesCount || 0) + 1 }
+            : c)));
+        setPost(prev => ({ ...prev, comments: (prev.comments || 0) + 1 }));
+        updateFeedPost(postId, (p) => ({ comments: (p.comments || 0) + 1 }));
+    };
+
     const handleDeleteComment = async () => {
         if (!deletingCommentId || isDeleting) return;
 
         setIsDeleting(true);
         try {
-            await axiosClient.delete(`/user/post/comments/${deletingCommentId}`, { withCredentials: true });
-            setComments(prev => prev.filter(c => c.id !== deletingCommentId));
+            const res = await axiosClient.delete(`/user/post/comments/${deletingCommentId}`, { withCredentials: true });
+            // Deleting a top-level comment also deletes its replies.
+            const removed = res.data?.deletedCount || 1;
+            setComments(prev => prev
+                .filter(c => c.id !== deletingCommentId)
+                .map(c => {
+                    const replies = (c.replies || []).filter(r => r.id !== deletingCommentId);
+                    return replies.length === (c.replies || []).length ? c : { ...c, replies, repliesCount: replies.length };
+                }));
             setShowDeleteConfirm(false);
             setDeletingCommentId(null);
 
-            // Update local post state
-            setPost(prev => ({ ...prev, comments: Math.max(0, (prev.comments || 0) - 1) }));
-
-            // Sync with global feed (Decremental)
-            updateFeedPost(postId, (p) => ({ comments: Math.max(0, (p.comments || 0) - 1) }));
+            setPost(prev => ({ ...prev, comments: Math.max(0, (prev.comments || 0) - removed) }));
+            updateFeedPost(postId, (p) => ({ comments: Math.max(0, (p.comments || 0) - removed) }));
         } catch (error) {
             console.error("Error deleting comment:", error);
         } finally {
@@ -370,8 +395,11 @@ export default function IndividualPost() {
     const handleSaveEdit = async () => {
         setIsSavingEdit(true);
         try {
-            await axiosClient.put(`/update/post/${postId}`, { content: editContent }, { withCredentials: true });
-            setPost(prev => ({ ...prev, content: editContent }));
+            const res = await axiosClient.put(`/update/post/${postId}`, { content: editContent, mentionIds: editMentionIds }, { withCredentials: true });
+            // The server re-derives mentions and the link preview from the new text.
+            const { content, mentions, linkPreview, hashtags } = res.data.updatedPost || {};
+            setPost(prev => ({ ...prev, content, mentions, linkPreview, hashtags }));
+            updateFeedPost(postId, { content, mentions, linkPreview, hashtags });
             navigate(`/post/${postId}`, { replace: true });
         } catch (error) {
             console.error("Update failed:", error);
@@ -403,13 +431,10 @@ export default function IndividualPost() {
             setLikesCount(countRes.data.likesCount);
 
             // Sync with global feed (Toggle)
-            updateFeedPost(postId, (p) => ({
+            updateFeedPost(postId, {
                 isLiked: res.data.isLiked,
                 likes: countRes.data.likesCount,
-                // Optional: if backend doesn't return count, we could toggle manually:
-                // isLiked: !p.isLiked,
-                // likes: !p.isLiked ? p.likes + 1 : p.likes - 1
-            }));
+            });
         } catch (error) {
             console.error("Error toggling like:", error);
             // Rollback on error
@@ -460,9 +485,8 @@ export default function IndividualPost() {
             if (reportTarget.type === 'post') {
                 setReportedPost(true);
             } else {
-                setComments(prev => prev.map(c =>
-                    c.id === reportTarget.id ? { ...c, isReported: true } : c
-                ));
+                const mark = (c) => (c.id === reportTarget.id ? { ...c, isReported: true } : c);
+                setComments(prev => prev.map(c => ({ ...mark(c), replies: (c.replies || []).map(mark) })));
             }
         } catch (error) {
             console.error("Error reporting:", error);
@@ -473,6 +497,8 @@ export default function IndividualPost() {
             setIsReporting(false);
         }
     };
+
+    const actions = usePostActions(post, handleActionClick);
 
     if (loading) return <IndividualPostShimmering />;
 
@@ -632,18 +658,26 @@ export default function IndividualPost() {
                                         }
                                     `}
                                 </style>
-                                <textarea
+                                <MentionTextarea
                                     value={editContent}
-                                    onChange={(e) => setEditContent(e.target.value)}
+                                    onChange={setEditContent}
+                                    onMentionIdsChange={setEditMentionIds}
+                                    maxLength={500}
                                     className="custom-resize-handle w-full h-24 bg-[#111] border border-[#2f3336] rounded-xl p-4 text-white focus:outline-none focus:border-[#8b5cf6] resize-y text-[15px] md:text-[17px] leading-relaxed"
                                     placeholder="Edit your post content..."
                                 />
                             </>
                         ) : (
-                            <p className="text-[15px] md:text-[17px] leading-relaxed text-[#ebe7f7] font-medium whitespace-pre-wrap">
-                                {post.content}
-                            </p>
+                            <RichText
+                                text={post.content}
+                                mentions={post.mentions}
+                                currentUserId={currentUser?.id}
+                                className="text-[15px] md:text-[17px] leading-relaxed text-[#ebe7f7] font-medium"
+                            />
                         )}
+
+                        {post.isRepost && <EmbeddedPost post={post.repostOf} currentUserId={currentUser?.id} />}
+                        {!post.image && !post.video && <LinkPreviewCard preview={post.linkPreview} />}
 
                         {(post.image || post.video) && (
                             <div className="rounded-[32px] overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-white/[0.02] border border-white/[0.05] mb-2 group/media mt-2">
@@ -663,7 +697,7 @@ export default function IndividualPost() {
                             </div>
                         )}
                         <div className="text-[15px] text-[#8b86a6] my-3">
-                            {post.time || "4:20 PM · Apr 1, 2026"}
+                            {new Date(post.createdAt).toLocaleString(undefined, { hour: "numeric", minute: "2-digit", month: "short", day: "numeric", year: "numeric" })}
                         </div>
                     </div>
 
@@ -719,42 +753,30 @@ export default function IndividualPost() {
                                     <div className={`p-2 rounded-full transition-colors ${showComments ? 'bg-[#8b5cf6]/10' : 'group-hover:bg-[#8b5cf6]/10'}`}>
                                         <MessageCircle size={20} fill={showComments ? "currentColor" : "none"} strokeWidth={showComments ? 0 : 2} className="group-hover:scale-110 transition-transform" />
                                     </div>
-                                    {comments.length > 0 && <span className="text-[13px] font-bold">{comments.length}</span>}
+                                    {post.comments > 0 && <span className="text-[13px] font-bold">{post.comments}</span>}
                                     {/* Tooltip */}
                                     <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'comments' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
                                         Comments
                                     </span>
                                 </button>
 
+                                <RepostControl post={post} actions={actions} currentUserId={currentUser?.id} size={20} className="p-2 rounded-full hover:bg-emerald-500/10" />
+
                                 <button
-                                    onClick={() => handleActionClick("Remix is on a coffee break ☕", "funny")}
-                                    onMouseEnter={() => handleMouseEnter('remix')}
-                                    onMouseLeave={handleMouseLeave}
-                                    className="flex items-center gap-1.5 group relative text-[#8b86a6] hover:text-[#10b981] transition-colors"
+                                    onClick={actions.toggleSave}
+                                    aria-pressed={actions.isSaved}
+                                    aria-label={actions.isSaved ? "Remove from saved" : "Save post"}
+                                    className={`p-2 rounded-full transition-colors ${actions.isSaved ? "text-[#a78bfa] bg-[#8b5cf6]/10" : "text-[#8b86a6] hover:text-[#a78bfa] hover:bg-[#8b5cf6]/10"}`}
                                 >
-                                    <div className="p-2 rounded-full group-hover:bg-[#10b981]/10">
-                                        <Repeat size={20} className="group-hover:scale-110 transition-transform" />
-                                    </div>
-                                    <span className="text-[13px] font-bold">18</span>
-                                    {/* Tooltip */}
-                                    <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'remix' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
-                                        Remix
-                                    </span>
+                                    <Bookmark size={20} fill={actions.isSaved ? "currentColor" : "none"} />
                                 </button>
 
                                 <button
-                                    onClick={() => handleActionClick("This post is feeling a little too private 🤫", "funny")}
-                                    onMouseEnter={() => handleMouseEnter('share')}
-                                    onMouseLeave={handleMouseLeave}
-                                    className="flex items-center group relative text-[#8b86a6] hover:text-[#8b5cf6] transition-colors"
+                                    onClick={actions.share}
+                                    aria-label="Share"
+                                    className="p-2 rounded-full text-[#8b86a6] hover:text-[#8b5cf6] hover:bg-[#8b5cf6]/10 transition-colors"
                                 >
-                                    <div className="p-2 rounded-full group-hover:bg-[#8b5cf6]/10">
-                                        <Share2 size={20} className="group-hover:scale-110 transition-transform" />
-                                    </div>
-                                    {/* Tooltip */}
-                                    <span className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === 'share' ? 'opacity-100 -translate-y-1' : 'opacity-0 translate-y-0'}`}>
-                                        Share
-                                    </span>
+                                    <Share2 size={20} />
                                 </button>
                             </>
                         )}
@@ -785,10 +807,13 @@ export default function IndividualPost() {
                                     <img src={currentUser?.imageUrl || "https://github.com/shadcn.png"} className="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity" alt="Me" />
                                 </Link>
                                 <div className="flex-1 flex flex-col gap-2">
-                                    <input
+                                    <MentionTextarea
+                                        multiline={false}
                                         value={newComment}
-                                        onChange={(e) => setNewComment(e.target.value)}
-                                        placeholder="Post your reply"
+                                        onChange={setNewComment}
+                                        onMentionIdsChange={setNewCommentMentionIds}
+                                        maxLength={1000}
+                                        placeholder="Post your reply · @ to mention"
                                         className="w-full bg-transparent border-none px-0 py-2 text-[17px] text-white placeholder-[#8b86a6] focus:outline-none focus:ring-0 leading-relaxed"
                                     />
                                     <div className="flex justify-end pt-2">
@@ -808,96 +833,16 @@ export default function IndividualPost() {
                         <div className="divide-y divide-white/5 max-h-[500px] overflow-y-auto custom-scrollbar">
                             {comments.length > 0 ? (
                                 comments.map((comment) => (
-                                    <div key={comment.id} className="p-4 flex space-x-3 hover:bg-white/[0.02] transition-colors">
-                                        <Link
-                                            to={currentUser?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
-                                            onMouseEnter={(e) => handleProfileMouseEnter(e, comment.userId)}
-                                            onMouseLeave={handleProfileMouseLeave}
-                                            className="shrink-0"
-                                        >
-                                            <img src={comment.avatar || "https://github.com/shadcn.png"} alt="" className="w-10 h-10 rounded-full object-cover" />
-                                        </Link>
-                                        <div className="flex-1 space-y-1">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-1.5">
-                                                    <Link
-                                                        to={currentUser?.id === comment.userId ? "/profile" : `/public-profile/${comment.userId}`}
-                                                        className="font-bold text-[15px] text-white hover:underline transition-colors"
-                                                        onMouseEnter={(e) => handleProfileMouseEnter(e, comment.userId)}
-                                                        onMouseLeave={handleProfileMouseLeave}
-                                                    >
-                                                        {comment.username || "Anonymous"}
-                                                    </Link>
-                                                    <span className="text-[#8b86a6] text-[14px]">
-                                                        @{comment.username?.replace(/\s+/g, '').toLowerCase() || "user"}
-                                                    </span>
-                                                    <span className="text-[#8b86a6] text-[14px]">·</span>
-                                                    <span className="text-[#8b86a6] text-[14px] hover:underline cursor-pointer">
-                                                        {new Date(comment.createdAt).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}
-                                                    </span>
-                                                </div>
-                                                <div className="relative comment-menu-container">
-                                                    <button
-                                                        onClick={() => setActiveMenuId(activeMenuId === comment.id ? null : comment.id)}
-                                                        className="text-[#8b86a6] hover:text-[#8b5cf6] p-1.5 hover:bg-[#8b5cf6]/10 rounded-full transition-colors"
-                                                    >
-                                                        <MoreHorizontal size={18} />
-                                                    </button>
-
-                                                    {activeMenuId === comment.id && (
-                                                        <div className="absolute right-0 mt-1 w-48 bg-[#0A0A0F] border border-white/5 rounded-xl shadow-2xl z-20 overflow-hidden animate-fadeIn">
-                                                            {comment.userId === currentUser?.id ? (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setDeletingCommentId(comment.id);
-                                                                        setShowDeleteConfirm(true);
-                                                                        setActiveMenuId(null);
-                                                                    }}
-                                                                    className="w-full px-4 py-3 text-left text-sm text-red-500 hover:bg-white/5 transition-colors flex items-center space-x-3 font-bold"
-                                                                >
-                                                                    <Trash2 size={18} />
-                                                                    <span>Delete reply</span>
-                                                                </button>
-                                                            ) : (
-                                                                <button
-                                                                    onClick={comment.isReported ? null : () => openReportModal('comment', comment.id)}
-                                                                    disabled={comment.isReported}
-                                                                    className={`w-full px-4 py-3 text-left text-sm flex items-center space-x-3 transition-colors font-bold ${comment.isReported ? 'text-gray-500 cursor-default' : 'text-white hover:bg-white/5'
-                                                                        }`}
-                                                                >
-                                                                    <Flag size={18} className={comment.isReported ? 'text-gray-500' : 'text-white'} />
-                                                                    <span>{comment.isReported ? 'Reported' : 'Report reply'}</span>
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <p className="text-[#ebe7f7] text-[15px] leading-relaxed block mt-0">{comment.comment}</p>
-                                            <div className="flex items-center justify-between w-full max-w-[425px] pt-3 text-[#8b86a6]">
-                                                <button className="flex items-center gap-2 group transition flex-1">
-                                                    <div className="p-2 rounded-full group-hover:bg-[#8b5cf6]/10 group-hover:text-[#8b5cf6] transition-colors -ml-2">
-                                                        <MessageCircle size={16} />
-                                                    </div>
-                                                </button>
-                                                <button className="flex items-center gap-2 group transition flex-1">
-                                                    <div className="p-2 rounded-full group-hover:bg-[var(--cliq-pink)]/10 group-hover:text-[var(--cliq-pink)] transition-colors -ml-2">
-                                                        <Heart size={16} />
-                                                    </div>
-                                                </button>
-                                                <button className="flex items-center gap-2 group transition flex-1">
-                                                    <div className="p-2 rounded-full group-hover:bg-[#10b981]/10 group-hover:text-[#10b981] transition-colors -ml-2">
-                                                        <Repeat size={16} />
-                                                    </div>
-                                                </button>
-                                                <button className="flex items-center gap-2 group transition flex-1">
-                                                    <div className="p-2 rounded-full group-hover:bg-[#8b5cf6]/10 group-hover:text-[#8b5cf6] transition-colors -ml-2">
-                                                        <Share2 size={16} />
-                                                    </div>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <CommentThread
+                                        key={comment.id}
+                                        comment={comment}
+                                        currentUser={currentUser}
+                                        onSubmitReply={handleSubmitReply}
+                                        onDelete={(c) => { setDeletingCommentId(c.id); setShowDeleteConfirm(true); }}
+                                        onReport={(c) => openReportModal('comment', c.id)}
+                                        onProfileEnter={handleProfileMouseEnter}
+                                        onProfileLeave={handleProfileMouseLeave}
+                                    />
                                 ))
                             ) : (
                                 <div className="p-10 text-center text-[#8b86a6] text-[15px] font-bold">
@@ -918,7 +863,7 @@ export default function IndividualPost() {
                 }}
                 onConfirm={handleDeleteComment}
                 title="Delete Comment?"
-                message="Are you sure you want to delete this comment? This action cannot be undone."
+                message="Are you sure you want to delete this comment? Replies to it will be deleted too. This action cannot be undone."
                 confirmText="Delete"
                 confirmColor="bg-red-600 hover:bg-red-700"
                 isLoading={isDeleting}

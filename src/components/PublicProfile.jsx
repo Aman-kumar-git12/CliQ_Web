@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
 import MyExperties from "./MyExperties/MyExperties";
-import { X, Plus, Eye, Play } from "lucide-react";
+import { X, Plus, Eye, Play, Repeat2 } from "lucide-react";
+import { toProfileTiles } from "../utils/profilePostTiles";
 import ProfileHoverCard from "./Post/ProfileHoverCard";
 import { useUserContext } from "../context/userContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -256,13 +257,18 @@ const PublicProfile = () => {
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-3 gap-1 md:gap-4 transition-all duration-500">
-                                            {posts.map((post) => (
+                                            {toProfileTiles(posts).map((post) => (
                                                 <Link
                                                     to={`/post/${post.id}`}
-                                                    key={post.id}
+                                                    key={post.tileKey || post.id}
                                                     className="group relative aspect-square bg-white/[0.03] backdrop-blur-xl rounded-sm md:rounded-[28px] overflow-hidden border border-white/10 shadow-lg hover:border-white/20 transition-all duration-500 active:scale-95"
                                                 >
-                                                    {post.video ? (
+                                                    {post.isRepostTile && (
+                                                    <div className="absolute top-2 left-2 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/70 border border-white/10 text-[9px] font-black uppercase tracking-wider text-emerald-300 pointer-events-none">
+                                                        <Repeat2 size={10} /> Repost
+                                                    </div>
+                                                )}
+                                                {post.video ? (
                                                         <>
                                                             <video
                                                                 src={post.video}

@@ -16,6 +16,7 @@ export const usePostcard = (post) => {
 
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
+    const [toastType, setToastType] = useState("info");
     const [showMenu, setShowMenu] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
     const [isReporting, setIsReporting] = useState(false);
@@ -169,10 +170,10 @@ export const usePostcard = (post) => {
             setLiked(res.data.isLiked);
             const countRes = await axiosClient.get(`/user/post/likes/count/${post.id}`, { withCredentials: true });
             setLikesCount(countRes.data.likesCount);
-            updateFeedPost(post.id, (p) => ({
+            updateFeedPost(post.id, {
                 isLiked: res.data.isLiked,
                 likes: countRes.data.likesCount
-            }));
+            });
         } catch (error) {
             console.error("Error toggling like:", error);
             setLiked(previousLiked);
@@ -180,6 +181,12 @@ export const usePostcard = (post) => {
         } finally {
             setIsLiking(false);
         }
+    };
+
+    const notify = (message, type = "info") => {
+        setToastMessage(message);
+        setToastType(type);
+        setShowToast(true);
     };
 
     const handleActionClick = (e, message) => {
@@ -207,7 +214,7 @@ export const usePostcard = (post) => {
     };
 
     return {
-        liked, likesCount, isLiking, showToast, setShowToast, toastMessage, showMenu, setShowMenu,
+        liked, likesCount, isLiking, showToast, setShowToast, toastMessage, toastType, notify, showMenu, setShowMenu,
         showReportModal, setShowReportModal, isReporting, reported, activeTooltip,
         hoverUserId, showHoverCard, hoverAnchorRect,
         showCommentsHover, commentsAnchorRect,
