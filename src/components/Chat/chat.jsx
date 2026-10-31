@@ -477,7 +477,7 @@ const ChatUI = () => {
             setRecordingTime(0);
         } catch (error) {
             console.error("Upload error:", error);
-            setToast("Failed to upload voice message");
+            setToast(error.response?.data?.message || "Failed to upload voice message");
         } finally {
             setIsUploading(false);
         }
@@ -506,7 +506,7 @@ const ChatUI = () => {
             handleCancelFile();
         } catch (error) {
             console.error("Upload error:", error);
-            setToast("❌ Upload failed.");
+            setToast(`❌ ${error.response?.data?.message || "Upload failed."}`);
         } finally {
             setIsUploading(false);
         }

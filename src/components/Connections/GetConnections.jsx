@@ -19,14 +19,14 @@ export default function GetConnections() {
     const [matcherMenuOpen, setMatcherMenuOpen] = useState(false);
     const {
         // State
-        user, nextUser, loading, sending, isFetchingMore,
+        user, loading, sending, isFetchingMore,
         showExpertise, activePanel, selectedSection, actionInProgress, panelLoading,
         savingProfile, snack, showCardMenu, historyData, preferencesData, savedProfiles,
-        analyticsData, adminAnalytics, viewerProfile,
+        analyticsData, adminAnalytics, isAdmin, viewerProfile,
 
         // Motion Values
         dragX, springRotateX, springRotateY, rotate, transformOrigin,
-        likeScale, nopeScale, likeOpacity, nopeOpacity, bgGlow, controls,
+        likeScale, nopeScale, likeOpacity, nopeOpacity, controls,
 
         // Handlers
         updateActivePanel, setShowExpertise, setSelectedSection, setShowCardMenu,
@@ -284,7 +284,7 @@ export default function GetConnections() {
                                     {panelLoading ? (
                                         <div className="grid place-items-center py-20 text-neutral-500">Loading...</div>
                                     ) : activePanel === "dashboard" ? (
-                                        <ConnectionDashboard analyticsData={analyticsData} adminAnalytics={adminAnalytics} />
+                                        <ConnectionDashboard analyticsData={analyticsData} adminAnalytics={adminAnalytics} isAdmin={isAdmin} />
                                     ) : activePanel === "history" ? (
                                         <ConnectionHistory
                                             historyData={historyData}

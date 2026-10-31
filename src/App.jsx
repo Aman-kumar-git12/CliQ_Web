@@ -12,7 +12,6 @@ import Profile from "./components/profile";
 import EditProfile from "./components/EditProfile";
 import Connections from "./components/Connections/connections";
 import ConnectionsRequest from "./components/Connections/connectionsRequests";
-import FindPeople from "./components/Connections/FindPeople";
 import GetConnections from "./components/Connections/GetConnections";
 
 import Settings from "./components/Settings";
@@ -181,8 +180,9 @@ function App() {
                 <Route path="/edit-profile" element={<EditProfile />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/find" element={<Connections />}>
-                  <Route index element={<Navigate to="findpeople" replace />} />
-                  <Route path="findpeople" element={<FindPeople />} />
+                  <Route index element={<Navigate to="getconnection" replace />} />
+                  {/* Find People moved into Search; keep old links working */}
+                  <Route path="findpeople" element={<Navigate to="/search" replace />} />
                   <Route path="getconnection/:panel?" element={<GetConnections />} />
                 </Route>
                 <Route path="/requests" element={<ConnectionsRequest />} />

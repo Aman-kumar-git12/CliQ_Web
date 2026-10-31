@@ -10,7 +10,7 @@ const formatBucketLabel = (value = "") =>
         .replace(/_/g, " ")
         .replace(/\b\w/g, (char) => char.toUpperCase());
 
-const ConnectionDashboard = ({ analyticsData, adminAnalytics }) => {
+const ConnectionDashboard = ({ analyticsData, adminAnalytics, isAdmin = false }) => {
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -27,7 +27,10 @@ const ConnectionDashboard = ({ analyticsData, adminAnalytics }) => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-                <TrendCard title="Your 14-Day Trend" trend={analyticsData.trend || []} />
+                <div className={isAdmin ? "" : "md:col-span-2"}>
+                    <TrendCard title="Your 14-Day Trend" trend={analyticsData.trend || []} />
+                </div>
+                {isAdmin && (
                 <div className="rounded-3xl border border-white/5 bg-white/[0.03] p-5 space-y-4">
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-neutral-400">Engine Snapshot</p>
@@ -40,12 +43,15 @@ const ConnectionDashboard = ({ analyticsData, adminAnalytics }) => {
                     <BreakdownInline label="Engine Delivery Mix" items={toPairs(adminAnalytics.deliveryBreakdown, 4)} formatter={formatBucketLabel} />
                     <BreakdownInline label="Top Profile Types" items={toPairs(adminAnalytics.diversityBreakdown?.profileTypes, 4)} formatter={formatBucketLabel} />
                 </div>
+                )}
             </div>
 
+            {isAdmin && (
             <div className="grid md:grid-cols-2 gap-4">
                 <BreakdownCard title="Top Clusters" items={toPairs(adminAnalytics.diversityBreakdown?.clusters)} formatter={formatBucketLabel} />
                 <BreakdownCard title="Top Locations" items={toPairs(adminAnalytics.diversityBreakdown?.locations)} formatter={formatBucketLabel} />
             </div>
+            )}
         </div>
     );
 };

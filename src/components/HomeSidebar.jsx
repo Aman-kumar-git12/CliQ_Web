@@ -74,7 +74,7 @@ const HomeSidebar = () => {
                     <h3 className="text-[11px] font-black text-white/50 uppercase tracking-[0.25em]">
                         Discover People
                     </h3>
-                    <Link to="/find/findpeople" className="text-[11px] font-bold text-[#a78bfa] hover:text-white transition-colors flex items-center gap-1">
+                    <Link to="/search" className="text-[11px] font-bold text-[#a78bfa] hover:text-white transition-colors flex items-center gap-1">
                         Explore <ChevronRight size={12} />
                     </Link>
                 </div>

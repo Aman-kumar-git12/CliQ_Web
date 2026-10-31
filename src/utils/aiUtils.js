@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 // Pages the AI may deep-link to. Keep in sync with LINKABLE_PAGES in WebsiteAgent/src/chat/pages.py.
 export const INTERNAL_LINK_ALLOWLIST = new Set([
     '/home',
-    '/find/findpeople',
+    '/search',
     '/find/getconnection',
     '/requests',
     '/create/post',

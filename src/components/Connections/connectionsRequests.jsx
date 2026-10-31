@@ -158,7 +158,7 @@ export default function ConnectionsRequest() {
                             <h3 className="text-[22px] font-black text-white tracking-tighter uppercase italic mb-1">No pending requests</h3>
                             <p className="text-white/30 max-w-sm text-xs font-medium uppercase tracking-widest">Your connection queue is currently clear.</p>
                             
-                            <Link to="/find/findpeople" className="mt-8 px-6 py-3.5 bg-white text-black text-[11px] font-black uppercase italic rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)]">
+                            <Link to="/search" className="mt-8 px-6 py-3.5 bg-white text-black text-[11px] font-black uppercase italic rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)]">
                                 Discover People
                             </Link>
                         </motion.div>

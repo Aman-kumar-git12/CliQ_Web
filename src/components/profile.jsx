@@ -202,7 +202,7 @@ export default function ProfilePage() {
             setSelectedFile(null);
         } catch (error) {
             console.error("Upload failed:", error);
-            alert("Failed to upload image");
+            alert(error.response?.data?.message || "Failed to upload image");
         } finally {
             setUploading(false);
         }

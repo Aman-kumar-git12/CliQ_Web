@@ -107,7 +107,7 @@ const CreatePost = () => {
 
         } catch (err) {
             console.log(err);
-            showSnack("Failed to create post");
+            showSnack(err.response?.data?.message || "Failed to create post");
         } finally {
             setLoading(false);
         }

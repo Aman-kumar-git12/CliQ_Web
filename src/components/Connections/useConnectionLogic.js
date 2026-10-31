@@ -11,6 +11,8 @@ export const useConnectionLogic = () => {
     const { panel } = useParams();
     const navigate = useNavigate();
     const { user: authUser, loading: authLoading } = useUserContext();
+    // Platform-wide stats are admin-only on the server, so only admins request them
+    const isAdmin = authUser?.role === "admin";
 
     const [user, setUser] = useState(null);
     const [nextUser, setNextUser] = useState(null);
@@ -549,7 +551,7 @@ export const useConnectionLogic = () => {
     useEffect(() => {
         if (activePanel === "dashboard") {
             fetchAnalytics();
-            fetchAdminAnalytics();
+            if (isAdmin) fetchAdminAnalytics();
             return;
         }
 
@@ -589,7 +591,7 @@ export const useConnectionLogic = () => {
         user, nextUser, userQueue, viewerProfile, loading, sending, isFetchingMore,
         showExpertise, activePanel, selectedSection, actionInProgress, panelLoading,
         savingProfile, snack, showCardMenu, historyData, preferencesData, savedProfiles,
-        analyticsData, adminAnalytics,
+        analyticsData, adminAnalytics, isAdmin,
         
         // Motion Values
         dragX, springRotateX, springRotateY, rotate, transformOrigin, 

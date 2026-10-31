@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Sparkles, Hash, Heart, MessageCircle, Loader2, Users, FileText } from "lucide-react";
+import { Search, Hash, Heart, MessageCircle, Loader2, FileText } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
-import { useUserContext } from "../../context/userContext";
 import { timeAgo } from "../../utils/timeAgo";
+import PeopleCards from "./PeopleCards";
 
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/219/219969.png";
 const TABS = [
@@ -18,35 +18,6 @@ const SectionTitle = ({ icon: Icon, children }) => (
     <h2 className="flex items-center gap-2 text-[11px] font-black text-[#6d6a86] uppercase tracking-[0.3em] mb-3">
         <Icon size={13} /> {children}
     </h2>
-);
-
-const PersonResult = ({ person, isMe }) => (
-    <Link
-        to={isMe ? "/profile" : `/public-profile/${person.id}`}
-        className="flex items-center gap-3.5 p-3.5 rounded-[18px] border border-white/5 bg-[#0e0d14] hover:bg-white/[0.03] hover:border-white/10 transition-colors no-underline"
-    >
-        <img src={person.imageUrl || DEFAULT_AVATAR} alt="" className="w-12 h-12 rounded-[14px] object-cover border border-white/10 shrink-0" />
-        <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-                <span className="font-black text-[15px] text-white truncate">{person.firstname} {person.lastname}</span>
-                {person.matchType !== "keyword" && (
-                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-violet-500/15 text-violet-300 text-[9px] font-black uppercase tracking-wider shrink-0" title="Matched by meaning, not just keywords">
-                        <Sparkles size={10} /> AI match
-                    </span>
-                )}
-            </div>
-            {person.expertise?.description && person.expertise.description !== "****" && (
-                <p className="text-[12px] text-[#8f89a7] truncate">{person.expertise.description}</p>
-            )}
-            {person.matchedOn?.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-1.5">
-                    {person.matchedOn.map((reason) => (
-                        <span key={reason} className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] text-[#a7a2c3] font-bold truncate max-w-[220px]">{reason}</span>
-                    ))}
-                </div>
-            )}
-        </div>
-    </Link>
 );
 
 const PostResult = ({ post, onHashtag }) => (
@@ -71,7 +42,6 @@ const PostResult = ({ post, onHashtag }) => (
 );
 
 export default function SearchPage() {
-    const { user } = useUserContext();
     const [searchParams, setSearchParams] = useSearchParams();
     const query = searchParams.get("q") || "";
     const tab = TABS.some((t) => t.key === searchParams.get("type")) ? searchParams.get("type") : "all";
@@ -79,6 +49,16 @@ export default function SearchPage() {
     const [input, setInput] = useState(query);
     const [results, setResults] = useState(EMPTY_RESULTS);
     const [loading, setLoading] = useState(false);
+    const [suggestions, setSuggestions] = useState([]);
+    const [suggestionsLoading, setSuggestionsLoading] = useState(true);
+
+    // People to discover while the search box is empty (formerly the Find People tab)
+    useEffect(() => {
+        axiosClient.get("/user/search/suggested")
+            .then((res) => setSuggestions(Array.isArray(res.data) ? res.data : []))
+            .catch((err) => console.error("Suggestions failed:", err))
+            .finally(() => setSuggestionsLoading(false));
+    }, []);
 
     // Keep the input in sync when the URL changes (back button, hashtag click).
     useEffect(() => setInput(query), [query]);
@@ -149,10 +129,13 @@ export default function SearchPage() {
             </div>
 
             {!query && (
-                <p className="text-[13px] text-[#6d6a86]">
-                    Search people by name, skill or role, find posts, or look up a <span className="text-violet-300">#hashtag</span>.
-                    Describe who you're looking for and AI matching finds similar profiles.
-                </p>
+                <>
+                    <p className="text-[13px] text-[#6d6a86] mb-8">
+                        Search people by name, skill or role, find posts, or look up a <span className="text-violet-300">#hashtag</span>.
+                        Describe who you're looking for and AI matching finds similar profiles.
+                    </p>
+                    <PeopleCards title="Suggested Network" users={suggestions} loading={suggestionsLoading} />
+                </>
             )}
 
             {query && !results.semantic.available && show("people") && (
@@ -177,12 +160,7 @@ export default function SearchPage() {
                 )}
 
                 {show("people") && results.people.length > 0 && (
-                    <section>
-                        <SectionTitle icon={Users}>People</SectionTitle>
-                        <div className="flex flex-col gap-2.5">
-                            {results.people.map((person) => <PersonResult key={person.id} person={person} isMe={person.id === user?.id} />)}
-                        </div>
-                    </section>
+                    <PeopleCards title="People" users={results.people} showMatchReasons />
                 )}
 
                 {show("posts") && results.posts.length > 0 && (
