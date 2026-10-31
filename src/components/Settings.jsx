@@ -4,10 +4,12 @@ import { ChevronRight, Trash2, UserCog, Briefcase, LogOut, Shield, Bell, Lock } 
 import axiosClient from "../api/axiosClient";
 import Confirmation from "./Confirmation";
 import SettingsShimmering from "./shimmering/SettingsShimmering";
+import { useUserContext } from "../context/userContext";
 
 export default function Settings() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const { logout, setUser: setGlobalUser } = useUserContext();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -33,6 +35,7 @@ export default function Settings() {
         setLoading(true);
         try {
             await axiosClient.delete(`/profile/delete`, { withCredentials: true });
+            setGlobalUser(null);
             navigate("/login");
         } catch (error) {
             console.error("Delete failed:", error);
@@ -47,11 +50,7 @@ export default function Settings() {
     const handleLogout = async () => {
         setLogoutLoading(true);
         try {
-            await axiosClient.post("/logout", {}, { withCredentials: true });
-            navigate("/login");
-        } catch (error) {
-            console.error("Logout failed:", error);
-            // Navigate anyway on error
+            await logout();
             navigate("/login");
         } finally {
             setLogoutLoading(false);

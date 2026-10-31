@@ -57,6 +57,8 @@ export default function Login() {
             });
             setResendMessage(response.data?.message || "Verification email sent.");
             setShowErr(false);
+            // The email contains a code, so go to the page where it can be entered (same as after signup)
+            navigate("/verify-otp", { state: { email: formData.email }, replace: true });
         } catch (err) {
             const errorMessage = err.response?.data?.message || err.response?.data?.error || "Unable to resend verification email.";
             setError(errorMessage);

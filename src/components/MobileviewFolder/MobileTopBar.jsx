@@ -1,30 +1,20 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, Settings, MessageSquare, LogOut, ArrowLeft, Search, Bookmark } from "lucide-react";
-import axiosClient from "../../api/axiosClient";
 import LogoutConfirmation from "../Confirmation";
 import NotificationBell from "../Notifications/NotificationBell";
+import { useUserContext } from "../../context/userContext";
 
 export default function MobileTopBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showLogoutPopup, setShowLogoutPopup] = useState(false);
     const navigate = useNavigate();
+    const { logout } = useUserContext();
     const location = useLocation();
 
     const HandleLogout = async () => {
-        try {
-            const res = await axiosClient.post(
-                "/logout",
-                {},
-                { withCredentials: true }
-            );
-
-            if (res.status === 200) {
-                navigate("/login");
-            }
-        } catch (err) {
-            console.log(err);
-        }
+        await logout();
+        navigate("/login");
     };
 
     return (

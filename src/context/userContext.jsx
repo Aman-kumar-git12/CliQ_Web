@@ -53,13 +53,25 @@ export const UserContextProvider = ({ children }) => {
         checkAuth();
     }, []); // Run ONLY once on mount
 
+    // Ends the session on the server and clears the user everywhere in the app,
+    // even if the request fails, so no screen keeps showing the old account
+    const logout = async () => {
+        try {
+            await axiosClient.post("/logout", {}, { withCredentials: true });
+        } catch (err) {
+            console.error("Logout failed:", err);
+        } finally {
+            setUser(null);
+        }
+    };
+
     useEffect(() => {
         if (!user?.id) return;
         warmSmartConnectionsCache({ userId: user.id });
     }, [user?.id]);
 
     return (
-        <UserContext.Provider value={{ user, setUser, loading, blockedAccount, setBlockedAccount, blockedMessage, setBlockedMessage, blockedEmail, setBlockedEmail }}>
+        <UserContext.Provider value={{ user, setUser, logout, loading, blockedAccount, setBlockedAccount, blockedMessage, setBlockedMessage, blockedEmail, setBlockedEmail }}>
             {children}
         </UserContext.Provider>
     );

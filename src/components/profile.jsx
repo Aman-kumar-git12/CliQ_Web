@@ -21,7 +21,7 @@ export default function ProfilePage() {
     const { customTab } = useParams();
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
-    const { setUser: setGlobalUser } = useUserContext();
+    const { logout } = useUserContext();
     const containerRef = useRef(null);
 
     const [user, setUser] = useState(null);
@@ -53,15 +53,13 @@ export default function ProfilePage() {
     const [showHoverCard, setShowHoverCard] = useState(false);
     const [hoverAnchorRect, setHoverAnchorRect] = useState(null);
     const hoverTimeoutRef = useRef(null);
-    const [hoverUserId, setHoverUserId] = useState(null);
 
-    const handleProfileMouseEnter = (e, userId) => {
+    const handleProfileMouseEnter = (e) => {
         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
         const rect = e.currentTarget.getBoundingClientRect();
         const parentRect = containerRef.current.getBoundingClientRect();
 
         hoverTimeoutRef.current = setTimeout(() => {
-            setHoverUserId(userId);
             setHoverAnchorRect({
                 top: rect.top - parentRect.top,
                 bottom: rect.bottom - parentRect.top,
@@ -175,14 +173,8 @@ export default function ProfilePage() {
     }, [user]);
 
     const handleLogout = async () => {
-        try {
-            await axiosClient.post("/logout", {}, { withCredentials: true });
-        } catch (error) {
-            console.error("Logout failed:", error);
-        } finally {
-            setUser(null);
-            setGlobalUser(null);
-        }
+        await logout();
+        setUser(null);
     };
 
     const handleFileSelect = (e) => {
@@ -275,7 +267,7 @@ export default function ProfilePage() {
                     onImageClick={() => setShowImageMenu(!showImageMenu)}
                     onImageOptionClick={handleImageOptionClick}
                     showImageMenu={showImageMenu}
-                    onAvatarMouseEnter={(e) => handleProfileMouseEnter(e, user.id)}
+                    onAvatarMouseEnter={(e) => handleProfileMouseEnter(e)}
                     onAvatarMouseLeave={handleProfileMouseLeave}
                 />
 

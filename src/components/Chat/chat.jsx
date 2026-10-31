@@ -114,6 +114,8 @@ const ChatUI = () => {
 
     // State
     const [targetUser, setTargetUser] = useState(null);
+    // null while checking; false hides the input because only connections can message each other
+    const [canMessage, setCanMessage] = useState(null);
     const [messages, setMessages] = useState([]);
     const [socket, setSocket] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -262,6 +264,20 @@ const ChatUI = () => {
             }
         };
         fetchTargetUser();
+
+        const fetchConnectionStatus = async () => {
+            if (!targetuserId) return;
+            setCanMessage(null);
+            try {
+                const res = await axiosClient.get(`/user/connections/${targetuserId}`);
+                setCanMessage(res.data?.status === "accepted");
+            } catch (error) {
+                // The server still enforces the rule, so let the user try rather than block on a failed check
+                console.error("Error checking connection status:", error);
+                setCanMessage(true);
+            }
+        };
+        fetchConnectionStatus();
     }, [targetuserId]);
 
     useEffect(() => {
@@ -496,6 +512,12 @@ const ChatUI = () => {
         }
     };
 
+    const handleSendFailure = (tempId, response) => {
+        setMessages(prev => prev.filter(msg => msg.id !== tempId));
+        setToast(response?.error || "Message not sent. Please try again.");
+        if (response?.error === "You can only message your connections") setCanMessage(false);
+    };
+
     const sendDirectMessage = (text, image = null, file = null, originalName = null) => {
         if (!socket || !user) return;
 
@@ -523,6 +545,7 @@ const ChatUI = () => {
             originalName,
             parentMessageId: null
         }, (response) => {
+            if (!response?.success) return handleSendFailure(tempId, response);
             if (response.success && response.id) {
                 setMessages(prev => prev.map(msg =>
                     msg.id === tempId ? { ...msg, id: response.id } : msg
@@ -841,6 +864,7 @@ const ChatUI = () => {
             file: null,
             parentMessageId: replyTo?.id
         }, (response) => {
+            if (!response?.success) return handleSendFailure(tempId, response);
             if (response.success && response.id) {
                 setMessages(prev => prev.map(msg =>
                     msg.id === tempId ? { ...msg, id: response.id } : msg
@@ -1011,6 +1035,7 @@ const ChatUI = () => {
                 file: null,
                 parentMessageId: replyTo?.id
             }, (response) => {
+                if (!response?.success) return handleSendFailure(tempId, response);
                 if (response.success && response.id) {
                     setMessages(prev => prev.map(msg =>
                         msg.id === tempId ? { ...msg, id: response.id } : msg
@@ -1343,7 +1368,17 @@ const ChatUI = () => {
                 <div ref={messagesEndRef} />
             </div>
 
+            {canMessage === false && (
+                <footer className="shrink-0 z-30 px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+24px)] bg-white/[0.03] backdrop-blur-3xl border-t border-white/10 text-center text-sm text-white/70">
+                    You can message {targetUser?.firstname || "this user"} once you're connected.{" "}
+                    <button onClick={() => navigate(`/user/${targetuserId}`)} className="text-purple-300 font-semibold hover:underline">
+                        View profile
+                    </button>
+                </footer>
+            )}
+
             {/* Input Bar */}
+            {canMessage !== false && (
             <footer className="shrink-0 z-30 pt-4 pb-[calc(env(safe-area-inset-bottom)+24px)] pl-2 pr-2 bg-white/[0.03] backdrop-blur-3xl border-t border-white/10">
                 <div className="w-full flex items-center gap-1 md:gap-1">
                     {/* Plus Action */}
@@ -1439,6 +1474,7 @@ const ChatUI = () => {
 
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt" />
             </footer>
+            )}
 
             {/* Bottom Selection Bar */}
             {isSelectMode && (

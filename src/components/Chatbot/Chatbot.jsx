@@ -25,7 +25,9 @@ const httpErrorMessage = (status, body) => {
     if (status === 401) return { kind: 'auth', text: "Your session has expired. Please log in again to keep chatting." };
     if (status === 404) return { kind: 'bad_request', text: "This chat no longer exists. Start a new chat and ask again." };
     if (status === 429) return { kind: 'busy', text: "You're sending messages too quickly. Please wait a minute and try again." };
-    if (status === 400) return { kind: 'bad_request', text: body?.error ? `${body.error}.` : "That message couldn't be sent. Please try rephrasing it." };
+    // The backend sends { message }; older versions sent { error }
+    const reason = body?.message || body?.error;
+    if (status === 400) return { kind: 'bad_request', text: reason ? `${reason}.` : "That message couldn't be sent. Please try rephrasing it." };
     return { kind: 'provider_down', text: "CliQ AI's server had a problem. Please try again in a few minutes." };
 };
 

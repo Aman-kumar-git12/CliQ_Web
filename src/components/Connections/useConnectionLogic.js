@@ -466,7 +466,7 @@ export const useConnectionLogic = () => {
     const handleResetSection = async (section) => {
         if (!window.confirm(`Are you sure you want to reset the list?`)) return;
         try {
-            await axiosClient.delete(`/request/smart-users/section/${section}`);
+            await axiosClient.delete(`/request/smart-users/section/reset/${section}`);
             showSnack("Section reset");
             setSelectedSection(null);
             refreshInsights();

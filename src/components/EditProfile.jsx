@@ -68,10 +68,9 @@ export default function EditProfile() {
             navigate("/profile");
         } catch (error) {
             console.error("Update failed:", error);
-            const apiError = error.response?.data?.error;
-            const errorMessage = typeof apiError === 'string'
-                ? apiError
-                : apiError?.message || "Something went wrong. Try again.";
+            // The backend sends { message }; older versions sent { error }
+            const data = error.response?.data;
+            const errorMessage = data?.message || (typeof data?.error === 'string' ? data.error : data?.error?.message) || "Something went wrong. Try again.";
             setErrorMsg(errorMessage);
         }
     };
