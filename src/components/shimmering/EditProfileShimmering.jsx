@@ -1,10 +1,10 @@
-import React from "react";
 import { Zap } from "lucide-react";
-import { motion } from "framer-motion";
 
 const ShimmerBar = ({ className, baseColor = "bg-white/5", shimmerColor = "via-white/10" }) => (
     <div className={`relative overflow-hidden ${baseColor} ${className}`}>
-        <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent ${shimmerColor} to-transparent" />
+        <div
+            className={`absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent ${shimmerColor} to-transparent`}
+        />
     </div>
 );
 
@@ -17,7 +17,7 @@ export default function EditProfileShimmering() {
                 {/* HEADER SHIMMER - Structural Matching */}
                 <div className="flex flex-col items-start justify-start mb-8 md:mb-6">
                     <div className="flex items-center gap-2 mb-1">
-                        <Zap size={14} className="fill-[#8b5cf6]/20 text-[#8b5cf6]" />
+                        <Zap size={14} className="fill-brand/20 text-brand" />
                         <ShimmerBar className="h-3 w-28 rounded-full" />
                     </div>
                     <div className="h-[22px] md:h-[32px] flex items-center">
@@ -63,7 +63,7 @@ export default function EditProfileShimmering() {
 
                         {/* Grid for Age & Password */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                             <div className="space-y-2">
+                            <div className="space-y-2">
                                 <div className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] ml-1 opacity-30">
                                     <ShimmerBar className="h-2.5 w-12 rounded-full" />
                                 </div>

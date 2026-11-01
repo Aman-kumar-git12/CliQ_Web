@@ -11,24 +11,32 @@ export const FeedProvider = ({ children }) => {
     // Also patches copies of the post embedded in reposts (post.repostOf).
     const updateFeedPost = (postId, updatesOrFn) => {
         const apply = (post) => {
-            const updates = typeof updatesOrFn === 'function' ? updatesOrFn(post) : updatesOrFn;
+            const updates = typeof updatesOrFn === "function" ? updatesOrFn(post) : updatesOrFn;
             return { ...post, ...updates };
         };
-        setFeedPosts(prev => prev.map(post => {
-            if (post.id === postId) return apply(post);
-            if (post.repostOf?.id === postId) return { ...post, repostOf: apply(post.repostOf) };
-            return post;
-        }));
+        setFeedPosts((prev) =>
+            prev.map((post) => {
+                if (post.id === postId) return apply(post);
+                if (post.repostOf?.id === postId) return { ...post, repostOf: apply(post.repostOf) };
+                return post;
+            }),
+        );
     };
 
     return (
-        <FeedContext.Provider value={{
-            feedPosts, setFeedPosts,
-            feedPage, setFeedPage,
-            feedHasMore, setFeedHasMore,
-            feedScrollY, setFeedScrollY,
-            updateFeedPost // Expose this
-        }}>
+        <FeedContext.Provider
+            value={{
+                feedPosts,
+                setFeedPosts,
+                feedPage,
+                setFeedPage,
+                feedHasMore,
+                setFeedHasMore,
+                feedScrollY,
+                setFeedScrollY,
+                updateFeedPost, // Expose this
+            }}
+        >
             {children}
         </FeedContext.Provider>
     );

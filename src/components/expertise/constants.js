@@ -1,0 +1,86 @@
+/** Constants for the Expertise Studio page: AI builder suggestion pills and layout templates. */
+
+export const FOCUS_AREAS_ALL = [
+    "Frontend",
+    "Backend",
+    "Fullstack",
+    "Mobile Apps",
+    "AI/ML",
+    "Cloud Native",
+    "DevOps",
+    "Cybersecurity",
+    "Blockchain",
+    "Data Engineering",
+    "UI Design",
+    "UX Research",
+    "Product Management",
+    "Quality Assurance",
+    "System Design",
+    "Microservices",
+    "API Design",
+    "Distributed Systems",
+    "Open Source",
+    "Tech Blogging",
+    "Mentorship",
+    "Agile Leadership",
+];
+
+export const FOCUS_AREAS_FEATURED = [
+    "Frontend",
+    "Backend",
+    "Fullstack",
+    "Mobile Apps",
+    "AI/ML",
+    "UI/UX Design",
+    "System Design",
+    "Cloud Native",
+    "DevOps",
+    "Open Source",
+];
+
+export const TECHNOLOGIES_ALL = [
+    "React",
+    "Node.js",
+    "Python",
+    "TypeScript",
+    "Next.js",
+    "AWS",
+    "Docker",
+    "PostgreSQL",
+    "Go",
+    "Java",
+    "Swift",
+    "Kotlin",
+    "Kubernetes",
+    "Redis",
+    "GraphQL",
+    "Tailwind",
+    "Figma",
+    "MongoDB",
+    "Rust",
+    "TensorFlow",
+    "FastAPI",
+    "Elasticsearch",
+    "CI/CD",
+    "Git",
+];
+
+export const TECHNOLOGIES_FEATURED = [
+    "React",
+    "Node.js",
+    "Python",
+    "TypeScript",
+    "Next.js",
+    "AWS",
+    "Docker",
+    "Go",
+    "Java",
+    "PostgreSQL",
+];
+
+export const EXPERTISE_TEMPLATES = [
+    { id: 1, name: "Studio", color: "from-blue-600 to-indigo-600" },
+    { id: 2, name: "Creative", color: "from-purple-600 to-pink-600" },
+    { id: 3, name: "Minimal", color: "from-slate-700 to-black" },
+    { id: 4, name: "Impact", color: "from-indigo-600 to-cyan-500" },
+];

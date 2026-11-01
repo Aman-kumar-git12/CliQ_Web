@@ -1,16 +1,20 @@
 export default function FindPeopleShimmering({ count = 8, viewMode = "list" }) {
     return (
         <div className="w-full animate-pulse space-y-6 max-w-full md:max-w-2xl mx-auto">
-            <div className={viewMode === "grid"
-                ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"
-                : "flex flex-col gap-3 md:gap-4"
-            }>
+            <div
+                className={
+                    viewMode === "grid"
+                        ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"
+                        : "flex flex-col gap-3 md:gap-4"
+                }
+            >
                 {Array.from({ length: count }).map((_, index) => (
                     <div
                         key={index}
-                        className={viewMode === "grid"
-                            ? "flex flex-col items-center p-3 md:p-4 rounded-[20px] md:rounded-[22px] border border-white/5 bg-purple-900/5 shadow-xl"
-                            : "flex items-center gap-3.5 md:gap-5 p-3 md:p-[18px] rounded-[20px] md:rounded-[22px] border border-white/5 bg-purple-900/5 shadow-xl"
+                        className={
+                            viewMode === "grid"
+                                ? "flex flex-col items-center p-3 md:p-4 rounded-[20px] md:rounded-[22px] border border-white/5 bg-purple-900/5 shadow-xl"
+                                : "flex items-center gap-3.5 md:gap-5 p-3 md:p-[18px] rounded-[20px] md:rounded-[22px] border border-white/5 bg-purple-900/5 shadow-xl"
                         }
                     >
                         {viewMode === "grid" ? (

@@ -1,10 +1,7 @@
-import React from "react";
-
 const RequestsShimmering = () => {
     return (
         <div className="w-full min-h-screen relative overflow-x-hidden pt-24 md:pt-12 bg-transparent animate-pulse">
             <div className="px-4 md:px-0 max-w-full md:max-w-2xl mx-auto w-full pb-32">
-                
                 {/* Header Skeleton Matching Precise Real UI */}
                 <div className="flex flex-col items-start justify-start relative z-10 mb-12">
                     <div className="flex items-center justify-between w-full mb-1">
@@ -24,7 +21,7 @@ const RequestsShimmering = () => {
                             <div className="h-6 md:h-8 w-36 bg-white/5 rounded-lg"></div>
                         </div>
                     </div>
-                    
+
                     {/* Security Status placeholder */}
                     <div className="mt-6 flex items-center gap-4">
                         <div className="h-3 w-48 bg-white/5 rounded-full"></div>
@@ -41,7 +38,7 @@ const RequestsShimmering = () => {
                             <div className="flex items-center gap-3.5 md:gap-5 flex-1 min-w-0">
                                 {/* Avatar rounded-[14px] md:rounded-[18px] */}
                                 <div className="w-[48px] h-[48px] md:w-[56px] md:h-[56px] rounded-[14px] md:rounded-[18px] bg-white/10 flex-shrink-0"></div>
-                                
+
                                 <div className="flex flex-col flex-1 min-w-0 space-y-2">
                                     {/* Name height match */}
                                     <div className="h-4 md:h-5 w-32 md:w-40 bg-white/10 rounded-full"></div>

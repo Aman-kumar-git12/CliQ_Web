@@ -1,5 +1,3 @@
-import React from "react";
-
 const HomeShimmering = () => {
     return (
         <div className="flex justify-center gap-12 w-full pt-8 px-4 bg-transparent animate-pulse">
@@ -14,27 +12,27 @@ const HomeShimmering = () => {
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2.5">
                                 {/* Avatar Skeleton (9x9) */}
-                                <div className="w-9 h-9 rounded-full bg-[#a78bfa]/15 border-2 border-black/20 flex-shrink-0"></div>
-                                
+                                <div className="w-9 h-9 rounded-full bg-brand-light/15 border-2 border-black/20 flex-shrink-0"></div>
+
                                 <div className="flex flex-col gap-1.5">
-                                    <div className="h-3.5 w-28 bg-[#a78bfa]/20 rounded-full"></div>
+                                    <div className="h-3.5 w-28 bg-brand-light/20 rounded-full"></div>
                                     <div className="flex items-center gap-1.5">
-                                        <div className="h-2 w-14 bg-[#a78bfa]/10 rounded-full"></div>
-                                        <div className="w-1 h-1 rounded-full bg-[#a78bfa]/10"></div>
+                                        <div className="h-2 w-14 bg-brand-light/10 rounded-full"></div>
+                                        <div className="w-1 h-1 rounded-full bg-brand-light/10"></div>
                                         <div className="h-2 w-10 bg-blue-500/10 rounded-full"></div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-[#a78bfa]/5"></div>
+                            <div className="w-8 h-8 rounded-full bg-brand-light/5"></div>
                         </div>
 
                         {/* Content Area Skeleton */}
                         <div className="px-0.5 mt-1">
                             {/* Text lines */}
                             <div className="space-y-2.5 mb-4">
-                                <div className="h-3 w-full bg-[#a78bfa]/15 rounded-full"></div>
-                                <div className="h-3 w-[92%] bg-[#a78bfa]/15 rounded-full"></div>
-                                <div className="h-3 w-[65%] bg-[#a78bfa]/15 rounded-full"></div>
+                                <div className="h-3 w-full bg-brand-light/15 rounded-full"></div>
+                                <div className="h-3 w-[92%] bg-brand-light/15 rounded-full"></div>
+                                <div className="h-3 w-[65%] bg-brand-light/15 rounded-full"></div>
                             </div>
 
                             {/* Media Area Skeleton (Realistic Match) */}
@@ -57,23 +55,23 @@ const HomeShimmering = () => {
                             <div className="flex items-center gap-5">
                                 {/* Like / Comment / Repeat */}
                                 <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-md bg-[#a78bfa]/10"></div>
-                                    <div className="h-2.5 w-6 bg-[#a78bfa]/10 rounded-full"></div>
+                                    <div className="w-4 h-4 rounded-md bg-brand-light/10"></div>
+                                    <div className="h-2.5 w-6 bg-brand-light/10 rounded-full"></div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-md bg-[#a78bfa]/10"></div>
-                                    <div className="h-2.5 w-6 bg-[#a78bfa]/10 rounded-full"></div>
+                                    <div className="w-4 h-4 rounded-md bg-brand-light/10"></div>
+                                    <div className="h-2.5 w-6 bg-brand-light/10 rounded-full"></div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-md bg-[#a78bfa]/10"></div>
-                                    <div className="h-2.5 w-6 bg-[#a78bfa]/10 rounded-full"></div>
+                                    <div className="w-4 h-4 rounded-md bg-brand-light/10"></div>
+                                    <div className="h-2.5 w-6 bg-brand-light/10 rounded-full"></div>
                                 </div>
                             </div>
 
                             {/* Share button */}
                             <div className="flex items-center gap-2">
-                                <div className="w-3.5 h-3.5 bg-[#a78bfa]/10 rounded-sm"></div>
-                                <div className="h-2.5 w-12 bg-[#a78bfa]/10 rounded-full"></div>
+                                <div className="w-3.5 h-3.5 bg-brand-light/10 rounded-sm"></div>
+                                <div className="h-2.5 w-12 bg-brand-light/10 rounded-full"></div>
                             </div>
                         </div>
                     </div>
@@ -83,13 +81,13 @@ const HomeShimmering = () => {
             {/* RIGHT SIDEBAR COLUMN SKELETON (Aligned with Purple Theme) */}
             <div className="hidden lg:block w-[320px] shrink-0 sticky top-8 h-fit">
                 {/* User Card Skeleton */}
-                <div className="flex items-center justify-between p-4 bg-[#0A0A0F] border border-white/5 rounded-2xl mb-8 shadow-2xl">
+                <div className="flex items-center justify-between p-4 bg-surface-850 border border-white/5 rounded-2xl mb-8 shadow-2xl">
                     <div className="flex items-center gap-3">
                         {/* Avatar (12x12) */}
-                        <div className="w-12 h-12 rounded-full bg-[#a78bfa]/15"></div>
+                        <div className="w-12 h-12 rounded-full bg-brand-light/15"></div>
                         <div className="flex flex-col gap-2">
-                            <div className="h-3.5 w-24 bg-[#a78bfa]/20 rounded-full"></div>
-                            <div className="h-2.5 w-16 bg-[#a78bfa]/10 rounded-full"></div>
+                            <div className="h-3.5 w-24 bg-brand-light/20 rounded-full"></div>
+                            <div className="h-2.5 w-16 bg-brand-light/10 rounded-full"></div>
                         </div>
                     </div>
                     <div className="w-9 h-9 bg-white/5 rounded-lg"></div>
@@ -97,7 +95,7 @@ const HomeShimmering = () => {
 
                 {/* Sidebar Header Skeleton */}
                 <div className="flex items-center justify-between mb-5 px-1 text-white/20 uppercase tracking-widest font-black text-[10px]">
-                    <div className="h-2.5 w-32 bg-[#a78bfa]/10 rounded-full"></div>
+                    <div className="h-2.5 w-32 bg-brand-light/10 rounded-full"></div>
                     <div className="w-4 h-4 rounded-full bg-white/5"></div>
                 </div>
 
@@ -108,10 +106,10 @@ const HomeShimmering = () => {
                             key={item}
                             className="flex items-center gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-2xl"
                         >
-                            <div className="w-10 h-10 rounded-full bg-[#a78bfa]/15"></div>
+                            <div className="w-10 h-10 rounded-full bg-brand-light/15"></div>
                             <div className="flex flex-col flex-1 min-w-0 gap-2">
-                                <div className="h-3.5 w-28 bg-[#a78bfa]/20 rounded-full"></div>
-                                <div className="h-2.5 w-20 bg-[#a78bfa]/10 rounded-full"></div>
+                                <div className="h-3.5 w-28 bg-brand-light/20 rounded-full"></div>
+                                <div className="h-2.5 w-20 bg-brand-light/10 rounded-full"></div>
                             </div>
                             <div className="w-9 h-9 bg-white/5 rounded-xl"></div>
                         </div>

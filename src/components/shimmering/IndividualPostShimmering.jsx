@@ -1,11 +1,10 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 const ShimmerBase = ({ className }) => (
     <div className={`relative overflow-hidden bg-white/5 ${className}`}>
         <motion.div
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent shadow-[0_0_20px_rgba(255,255,255,0.05)]"
-            animate={{ x: ['-150%', '150%'] }}
+            animate={{ x: ["-150%", "150%"] }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
         />
     </div>
@@ -15,16 +14,16 @@ export default function IndividualPostShimmering() {
     return (
         <div className="min-h-screen bg-[#08080C] text-white relative overflow-x-hidden no-scrollbar transition-all duration-500">
             {/* Cinematic Background Glows */}
-            <div className="fixed top-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#8b5cf6]/10 rounded-full blur-[140px] pointer-events-none z-0" />
-            <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#ec4899]/5 rounded-full blur-[140px] pointer-events-none z-0" />
-            
+            <div className="fixed top-[-10%] right-[-10%] w-[60%] h-[60%] bg-brand/10 rounded-full blur-[140px] pointer-events-none z-0" />
+            <div className="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-pink/5 rounded-full blur-[140px] pointer-events-none z-0" />
+
             {/* Grid Overlay */}
-            <div 
-                className="fixed inset-0 z-0 pointer-events-none opacity-[0.03]" 
-                style={{ 
+            <div
+                className="fixed inset-0 z-0 pointer-events-none opacity-[0.03]"
+                style={{
                     backgroundImage: `linear-gradient(#8b5cf6 1px, transparent 1px), linear-gradient(90deg, #8b5cf6 1px, transparent 1px)`,
-                    backgroundSize: '50px 50px' 
-                }} 
+                    backgroundSize: "50px 50px",
+                }}
             />
 
             <main className="w-full max-w-[640px] mx-auto pt-6 md:pt-10 pb-24 relative z-10">

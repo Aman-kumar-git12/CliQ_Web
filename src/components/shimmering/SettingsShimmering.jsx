@@ -1,9 +1,6 @@
-import React from "react";
-
 const SettingsShimmering = () => {
     return (
         <div className="w-full min-h-screen bg-transparent text-white pt-10 px-5 pb-24 max-w-2xl mx-auto animate-pulse">
-            
             {/* Header Skeleton Matching Exact Real UI Typography */}
             <div className="mb-10">
                 {/* 32px height for h1 title */}
@@ -31,7 +28,10 @@ const SettingsShimmering = () => {
                 <div className="h-2.5 w-16 bg-white/10 rounded-full mb-4 mx-1"></div>
                 <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className={`flex items-center justify-between px-5 py-4 ${i !== 3 ? 'border-b border-white/5' : ''}`}>
+                        <div
+                            key={i}
+                            className={`flex items-center justify-between px-5 py-4 ${i !== 3 ? "border-b border-white/5" : ""}`}
+                        >
                             <div className="flex items-center gap-4">
                                 {/* rounded-2xl from real SettingRow iconBg */}
                                 <div className="w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center">
@@ -53,7 +53,10 @@ const SettingsShimmering = () => {
                 <div className="h-2.5 w-24 bg-white/10 rounded-full mb-4 mx-1"></div>
                 <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[24px] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
                     {[1, 2].map((i) => (
-                        <div key={i} className={`flex items-center justify-between px-5 py-4 ${i !== 2 ? 'border-b border-white/5' : ''}`}>
+                        <div
+                            key={i}
+                            className={`flex items-center justify-between px-5 py-4 ${i !== 2 ? "border-b border-white/5" : ""}`}
+                        >
                             <div className="flex items-center gap-4">
                                 <div className="w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center">
                                     <div className="w-5 h-5 bg-white/10 rounded-lg"></div>

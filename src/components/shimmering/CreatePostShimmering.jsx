@@ -1,5 +1,3 @@
-import React from "react";
-
 const CreatePostShimmering = () => {
     return (
         <div className="w-full min-h-screen relative overflow-x-hidden pt-[80px] md:pt-4 bg-transparent text-white transition-all duration-500">
@@ -23,9 +21,9 @@ const CreatePostShimmering = () => {
                     <div className="mb-8 relative z-10">
                         <div className="h-3 w-16 bg-white/10 rounded-full mb-3 ml-2"></div>
                         <div className="w-full h-[220px] md:h-[260px] border-2 border-dashed border-white/10 rounded-[32px] flex flex-col items-center justify-center p-6 md:p-10 bg-white/[0.02]">
-                           <div className="w-14 h-14 bg-white/10 rounded-[24px] mb-4 border border-white/10"></div>
-                           <div className="h-6 w-40 bg-white/20 rounded-lg"></div>
-                           <div className="h-3 w-48 bg-white/10 rounded-full mt-3"></div>
+                            <div className="w-14 h-14 bg-white/10 rounded-[24px] mb-4 border border-white/10"></div>
+                            <div className="h-6 w-40 bg-white/20 rounded-lg"></div>
+                            <div className="h-3 w-48 bg-white/10 rounded-full mt-3"></div>
                         </div>
                     </div>
 
@@ -34,7 +32,6 @@ const CreatePostShimmering = () => {
                         <div className="h-14 w-full bg-white/5 rounded-[20px] border border-white/5"></div>
                         <div className="h-14 w-full bg-white/20 rounded-[20px] border border-white/10"></div>
                     </div>
-
                 </div>
             </div>
         </div>

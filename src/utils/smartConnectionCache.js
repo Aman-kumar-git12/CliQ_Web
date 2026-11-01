@@ -1,4 +1,4 @@
-import axiosClient from "../api/axiosClient";
+import * as connectionsApi from "../api/connections";
 
 const CACHE_PREFIX = "smart_connections_batch_v1";
 const MAX_CACHE_USERS = 10;
@@ -28,16 +28,14 @@ export const writeSmartConnectionsCache = (userId, users = []) => {
     if (!isBrowser() || !userId) return;
 
     try {
-        const normalizedUsers = users
-            .filter((candidate) => candidate?.id)
-            .slice(0, MAX_CACHE_USERS);
+        const normalizedUsers = users.filter((candidate) => candidate?.id).slice(0, MAX_CACHE_USERS);
 
         window.sessionStorage.setItem(
             getCacheKey(userId),
             JSON.stringify({
                 users: normalizedUsers,
                 cachedAt: Date.now(),
-            })
+            }),
         );
     } catch (error) {
         console.error("Failed to write smart connection cache:", error);
@@ -49,8 +47,8 @@ export const warmSmartConnectionsCache = async ({ userId, refresh = false } = {}
 
     try {
         const params = refresh ? "?refresh=true" : "";
-        const response = await axiosClient.get(`/request/smart-users${params}`);
-        const users = Array.isArray(response.data) ? response.data : [];
+        const data = await connectionsApi.getSmartUsers(params);
+        const users = Array.isArray(data) ? data : [];
         if (users.length > 0) {
             writeSmartConnectionsCache(userId, users);
         }

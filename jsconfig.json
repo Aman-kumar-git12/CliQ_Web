@@ -1,0 +1,16 @@
+{
+  "//": "Editor support only (VS Code IntelliSense): JSDoc types in src/api, hooks and utils show up as hints. Not a build step.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "checkJs": false,
+    "allowJs": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "types": ["vite/client", "vitest/globals"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

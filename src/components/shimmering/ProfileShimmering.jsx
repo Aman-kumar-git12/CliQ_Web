@@ -1,17 +1,13 @@
-import React from "react";
-
 const ProfileShimmering = () => {
     return (
         <div className="w-full min-h-screen relative overflow-x-hidden pt-24 md:pt-6 bg-transparent text-white transition-all duration-500">
             {/* Cinematic Background Glows */}
-            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#8b5cf6]/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse transition-opacity duration-[3000ms]" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#ec4899]/5 rounded-full blur-[140px] pointer-events-none -z-10" />
+            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-brand/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse transition-opacity duration-[3000ms]" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-pink/5 rounded-full blur-[140px] pointer-events-none -z-10" />
 
             <div className="w-full max-w-2xl mx-auto px-4 pb-20 relative z-10">
-
                 {/* PREMIUM GLASS PROFILE CARD SKELETON */}
                 <div className="relative bg-white/[0.03] backdrop-blur-2xl border border-white/20 shadow-2xl rounded-[36px] overflow-hidden animate-pulse">
-                    
                     {/* Header Banner Skeleton */}
                     <div className="h-[100px] md:h-[140px] bg-white/[0.05] transition-all duration-500"></div>
 
@@ -34,7 +30,10 @@ const ProfileShimmering = () => {
                         {/* STATS ROW (Glass Pill Layout) */}
                         <div className="flex gap-4 md:gap-8 mb-2 md:mb-6 overflow-x-auto scrollbar-hide pb-2 transition-all duration-500">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="bg-white/[0.03] backdrop-blur-xl p-3.5 md:p-6 h-[78px] md:h-[96px] rounded-[20px] md:rounded-[32px] border border-white/20 flex flex-col items-center justify-center min-w-[100px] md:min-w-[150px] flex-1 transition-all duration-500">
+                                <div
+                                    key={i}
+                                    className="bg-white/[0.03] backdrop-blur-xl p-3.5 md:p-6 h-[78px] md:h-[96px] rounded-[20px] md:rounded-[32px] border border-white/20 flex flex-col items-center justify-center min-w-[100px] md:min-w-[150px] flex-1 transition-all duration-500"
+                                >
                                     <div className="h-2 w-10 md:w-16 bg-white/5 rounded mb-2 md:mb-4"></div>
                                     <div className="h-5 md:h-8 w-10 md:w-16 bg-white/10 rounded"></div>
                                 </div>
@@ -62,13 +61,15 @@ const ProfileShimmering = () => {
 
                     <div className="grid grid-cols-3 gap-1 md:gap-4 transition-all duration-500">
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-                            <div key={i} className="aspect-square bg-white/[0.02] border border-white/10 rounded-[16px] md:rounded-[28px] overflow-hidden relative shadow-lg">
+                            <div
+                                key={i}
+                                className="aspect-square bg-white/[0.02] border border-white/10 rounded-[16px] md:rounded-[28px] overflow-hidden relative shadow-lg"
+                            >
                                 <div className="w-full h-full bg-white/5"></div>
                             </div>
                         ))}
                     </div>
                 </div>
-
             </div>
         </div>
     );
