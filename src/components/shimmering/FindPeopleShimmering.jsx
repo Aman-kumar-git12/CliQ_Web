@@ -1,6 +1,11 @@
-export default function FindPeopleShimmering({ count = 8, viewMode = "list" }) {
+// `nested`: part of a bigger skeleton that already announces the loading state and pulses
+export default function FindPeopleShimmering({ count = 8, viewMode = "list", nested = false }) {
+    const status = nested ? {} : { role: "status", "aria-label": "Loading people", "aria-busy": true };
     return (
-        <div className="w-full animate-pulse space-y-6 max-w-full md:max-w-2xl mx-auto">
+        <div
+            {...status}
+            className={`w-full space-y-6 max-w-full md:max-w-2xl mx-auto ${nested ? "" : "motion-safe:animate-pulse"}`}
+        >
             <div
                 className={
                     viewMode === "grid"

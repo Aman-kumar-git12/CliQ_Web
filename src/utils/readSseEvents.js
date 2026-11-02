@@ -1,6 +1,11 @@
+// @ts-check
 /** Async generator that parses a fetch Response body as Server-Sent Events. */
 
 // Reads a Server-Sent Events body. Uses getReader() because Safari can't async-iterate ReadableStream.
+/**
+ * @param {ReadableStream<Uint8Array>} body e.g. `response.body`
+ * @returns {AsyncGenerator<{ event: string, data: any }>} `data` is the parsed JSON payload
+ */
 export async function* readSseEvents(body) {
     const reader = body.getReader();
     const decoder = new TextDecoder("utf-8");

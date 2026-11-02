@@ -55,16 +55,24 @@ export default function VerifyEmailPage() {
         <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
             <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur">
                 <h1 className="text-3xl font-semibold mb-4">Email Verification</h1>
-                <p
-                    className={`${status === "error" ? "text-red-400" : status === "success" ? "text-green-400" : "text-neutral-300"} text-base leading-relaxed`}
-                >
-                    {message}
-                </p>
-
-                {status === "loading" && (
-                    <div className="mt-6 flex justify-center">
-                        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-white" />
+                {status === "loading" ? (
+                    // The result message (and its button) are on their way: placeholder lines in their place
+                    <div
+                        role="status"
+                        aria-label="Verifying your email"
+                        aria-busy="true"
+                        className="flex flex-col items-center motion-safe:animate-pulse"
+                    >
+                        <div className="h-4 w-3/4 rounded-full bg-white/10 mt-1.5"></div>
+                        <div className="h-4 w-1/2 rounded-full bg-white/5 mt-2.5"></div>
+                        <div className="mt-8 h-12 w-36 rounded-full bg-white/10"></div>
                     </div>
+                ) : (
+                    <p
+                        className={`${status === "error" ? "text-red-400" : "text-green-400"} text-base leading-relaxed`}
+                    >
+                        {message}
+                    </p>
                 )}
 
                 {status === "success" && (

@@ -5,6 +5,10 @@ import { Link } from "react-router-dom";
 import * as connectionsApi from "../../api/connections";
 import * as usersApi from "../../api/users";
 import { DEFAULT_AVATAR } from "../../utils/avatar";
+import { cachedRequest, invalidateCachedRequests } from "../../utils/requestCache";
+
+// Hovering the same person again within this time reuses the card instead of loading it again
+const HOVER_CARD_MAX_AGE_MS = 30000;
 
 const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouseLeave }) => {
     const [data, setData] = useState(null);
@@ -19,7 +23,11 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
         const fetchData = async () => {
             setLoading(true);
             try {
-                const card = await usersApi.getHoverCard(userId, { silent: true });
+                const card = await cachedRequest(
+                    `hover-card:${userId}`,
+                    () => usersApi.getHoverCard(userId, { silent: true }),
+                    HOVER_CARD_MAX_AGE_MS,
+                );
                 if (cancelled) return;
                 setData(card);
                 setConnectionStatus(card.connectionStatus);
@@ -39,6 +47,9 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
         };
     }, [isVisible, userId]);
 
+    // "interested" alone can't say who asked; the server adds requestDirection for that
+    const isIncomingRequest = connectionStatus === "interested" && data?.requestDirection === "incoming";
+
     const handleFollow = async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -47,6 +58,7 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
         try {
             await connectionsApi.sendConnectionRequest(userId);
             setConnectionStatus("interested");
+            invalidateCachedRequests(`hover-card:${userId}`);
         } catch (error) {
             console.error("Follow failed:", error);
         }
@@ -215,8 +227,18 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                                     </div>
                                 )}
 
+                                {/* They sent you a request: answer it on the Requests page */}
+                                {!data.isMe && isIncomingRequest && (
+                                    <Link
+                                        to="/requests"
+                                        className="w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-blue-500/25 active:scale-[0.98]"
+                                    >
+                                        <UserPlus size={16} /> Respond to Request
+                                    </Link>
+                                )}
+
                                 {/* Action Button */}
-                                {!data.isMe && (
+                                {!data.isMe && !isIncomingRequest && (
                                     <button
                                         onClick={handleFollow}
                                         disabled={connectionStatus === "interested" || connectionStatus === "accepted"}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronRight, Trash2, UserCog, Briefcase, LogOut } from "lucide-react";
+import { ChevronRight, Trash2, UserCog, Briefcase, LogOut, Download } from "lucide-react";
 import * as usersApi from "../api/users";
 import ConfirmDialog from "../components/common/ConfirmDialog";
 import SettingsShimmering from "../components/shimmering/SettingsShimmering";
@@ -46,6 +46,27 @@ export default function SettingsPage() {
         } finally {
             setLoading(false);
             setShowDeleteConfirm(false);
+        }
+    };
+
+    const [exporting, setExporting] = useState(false);
+
+    // Saves the account's data as a JSON file (data portability)
+    const handleExportData = async () => {
+        setExporting(true);
+        try {
+            const data = await usersApi.exportMyData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `cliq-data-${new Date().toISOString().slice(0, 10)}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Export failed:", error);
+        } finally {
+            setExporting(false);
         }
     };
 
@@ -161,9 +182,17 @@ export default function SettingsPage() {
                             iconColor="text-blue-400"
                             title="Edit Expertise"
                             subtitle="Manage your professional skills & templates"
-                            noBorder
                         />
                     </Link>
+                    <SettingRow
+                        onClick={handleExportData}
+                        icon={<Download size={20} strokeWidth={2.5} />}
+                        iconBg="bg-emerald-500/15"
+                        iconColor="text-emerald-400"
+                        title={exporting ? "Preparing Download..." : "Download My Data"}
+                        subtitle="Your profile, posts, comments, messages and more as a JSON file"
+                        noBorder
+                    />
                 </div>
             </div>
 
@@ -195,6 +224,14 @@ export default function SettingsPage() {
             <div className="mt-12 flex flex-col items-center gap-1">
                 <div className="text-[10px] font-black text-white/10 uppercase tracking-[0.3em]">CLIQ v1.0</div>
                 <div className="text-[10px] text-white/10">Made with ♥ for connection</div>
+                <div className="mt-2 flex gap-4 text-[11px] text-white/30">
+                    <Link to="/privacy" className="hover:text-white/60">
+                        Privacy Policy
+                    </Link>
+                    <Link to="/terms" className="hover:text-white/60">
+                        Terms
+                    </Link>
+                </div>
             </div>
 
             {/* Logout Confirmation */}

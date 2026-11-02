@@ -1,5 +1,5 @@
 /** Chat page AI requests: generate reply suggestions and stream Ask-AI answers into the assistant state. */
-import { apiBaseUrl } from "../api/axiosClient";
+import { apiBaseUrl, fetchWithSession } from "../api/axiosClient";
 import * as chatApi from "../api/chat";
 import { nextAiMessageId } from "../utils/chatPageHelpers";
 
@@ -96,10 +96,9 @@ export const useChatAssistantRequests = ({ assistant, targetuserId, newMessage }
         scheduleThinkingStep();
 
         try {
-            const response = await fetch(`${apiBaseUrl}/message-ai/conversation/stream/${targetuserId}`, {
+            const response = await fetchWithSession(`${apiBaseUrl}/message-ai/conversation/stream/${targetuserId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                credentials: "include",
                 body: JSON.stringify({
                     mode: "ask",
                     question: userQuery,

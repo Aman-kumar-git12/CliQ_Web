@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * Notifications: paged list, marking as read and deleting.
  * Every function returns the response body; errors propagate unchanged.

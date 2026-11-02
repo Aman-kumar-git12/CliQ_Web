@@ -6,6 +6,10 @@ import * as connectionsApi from "../../api/connections";
 import * as searchApi from "../../api/search";
 import * as usersApi from "../../api/users";
 import { avatarUrl } from "../../utils/avatar";
+import { cachedRequest, invalidateCachedRequests } from "../../utils/requestCache";
+
+// Reused for a minute: coming back to Home (or switching to Search) doesn't reload them
+const SIDEBAR_MAX_AGE_MS = 60000;
 
 const SPARKLINE_COLORS = ["#6600FF", "#FF3399", "#00E0FF", "#7928CA", "#22C55E"];
 
@@ -38,24 +42,29 @@ const HomeSidebar = () => {
     const [requested, setRequested] = useState(() => new Set());
 
     useEffect(() => {
-        usersApi
-            .getSuggestedUsers()
-            .then((data) => setSuggestedUsers(data.slice(0, 3)))
+        let cancelled = false;
+        cachedRequest("suggested-users", () => usersApi.getSuggestedUsers(), SIDEBAR_MAX_AGE_MS)
+            .then((data) => !cancelled && setSuggestedUsers(Array.isArray(data) ? data.slice(0, 3) : []))
             .catch((err) => console.error("Failed to fetch suggestions:", err))
-            .finally(() => setLoading(false));
+            .finally(() => !cancelled && setLoading(false));
 
         // Most-used hashtags of the last 30 days
-        searchApi
-            .getTrendingHashtags()
-            .then((data) => setHashtags(data.hashtags || []))
+        cachedRequest("trending-hashtags", () => searchApi.getTrendingHashtags(), SIDEBAR_MAX_AGE_MS)
+            .then((data) => !cancelled && setHashtags(data.hashtags || []))
             .catch((err) => console.error("Failed to fetch trending hashtags:", err))
-            .finally(() => setHashtagsLoading(false));
+            .finally(() => !cancelled && setHashtagsLoading(false));
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const handleConnect = async (userId) => {
         try {
             await connectionsApi.sendConnectionRequest(userId);
             setRequested((current) => new Set(current).add(userId));
+            // Requested people drop out of suggestions on the server; don't show them again from the cache
+            invalidateCachedRequests("suggested-users");
+            invalidateCachedRequests(`hover-card:${userId}`);
         } catch (err) {
             // The API client already showed the reason
             console.error("Connect failed:", err);
@@ -139,6 +148,8 @@ const HomeSidebar = () => {
                                       className="flex items-center gap-3 min-w-0 no-underline"
                                   >
                                       <img
+                                          loading="lazy"
+                                          decoding="async"
                                           src={avatarUrl(user.imageUrl)}
                                           className="w-10 h-10 rounded-full object-cover border border-white/10 p-0.5 shrink-0"
                                           alt={`${user.firstname} ${user.lastname}`}
@@ -166,6 +177,20 @@ const HomeSidebar = () => {
 
             {/* FOOTER */}
             <div className="px-2 pb-8 mt-4">
+                <nav aria-label="Legal" className="flex items-center gap-4 mb-3">
+                    <Link
+                        to="/privacy"
+                        className="text-[11px] font-bold text-white/40 hover:text-brand-light transition-colors no-underline"
+                    >
+                        Privacy
+                    </Link>
+                    <Link
+                        to="/terms"
+                        className="text-[11px] font-bold text-white/40 hover:text-brand-light transition-colors no-underline"
+                    >
+                        Terms
+                    </Link>
+                </nav>
                 <p className="text-[11px] text-white/20 font-black tracking-widest uppercase">
                     © {new Date().getFullYear()} CLIQ
                 </p>

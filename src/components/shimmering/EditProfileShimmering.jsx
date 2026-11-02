@@ -3,14 +3,19 @@ import { Zap } from "lucide-react";
 const ShimmerBar = ({ className, baseColor = "bg-white/5", shimmerColor = "via-white/10" }) => (
     <div className={`relative overflow-hidden ${baseColor} ${className}`}>
         <div
-            className={`absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent ${shimmerColor} to-transparent`}
+            className={`absolute inset-0 -translate-x-full motion-safe:animate-[shimmer_2s_infinite] motion-reduce:hidden bg-gradient-to-r from-transparent ${shimmerColor} to-transparent`}
         />
     </div>
 );
 
 export default function EditProfileShimmering() {
     return (
-        <div className="min-h-screen bg-transparent relative overflow-x-hidden pt-24 md:pt-12 pb-24 md:pb-20 no-scrollbar">
+        <div
+            role="status"
+            aria-label="Loading profile editor"
+            aria-busy="true"
+            className="min-h-screen bg-transparent relative overflow-x-hidden pt-24 md:pt-12 pb-24 md:pb-20 no-scrollbar"
+        >
             <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; }` }} />
 
             <div className="px-3 md:px-0 max-w-full md:max-w-2xl mx-auto w-full relative z-10">
@@ -94,7 +99,7 @@ export default function EditProfileShimmering() {
                         {/* BUTTON SHIMMER - Exact visual weight matching */}
                         <div className="pt-6">
                             <div className="w-full bg-white/10 h-[52px] md:h-[64px] rounded-2xl overflow-hidden relative">
-                                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                                <div className="absolute inset-0 -translate-x-full motion-safe:animate-[shimmer_1.5s_infinite] motion-reduce:hidden bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                             </div>
                         </div>
                     </div>

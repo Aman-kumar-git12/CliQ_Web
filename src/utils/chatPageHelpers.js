@@ -1,3 +1,4 @@
+// @ts-check
 /** Constants and small helpers for the one-to-one chat page (stickers, Ask-AI message ids, downloads, timers). */
 
 export const EMPTY_CHAT_STICKERS = [
@@ -12,9 +13,15 @@ export const EMPTY_CHAT_STICKERS = [
 // Ask-AI messages get a client-side id once, so the overlay can key its list on it
 let aiMessageSeq = 0;
 export const nextAiMessageId = () => `ai-msg-${Date.now()}-${++aiMessageSeq}`;
+/**
+ * @template {{ id?: string }} T
+ * @param {T[]} list
+ * @returns {T[]}
+ */
 export const withAiMessageIds = (list) => list.map((m) => (m.id ? m : { ...m, id: nextAiMessageId() }));
 
 // Recording clock shown in the composer while a voice message is recorded (mm:ss)
+/** @param {number} seconds */
 export const formatRecordingTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -22,6 +29,10 @@ export const formatRecordingTime = (seconds) => {
 };
 
 // Every distinct reply text the message assistant produced for a snapshot (saved with the reply history)
+/**
+ * @param {Record<string, any> | null | undefined} snapshot message-assistant response
+ * @returns {string[]}
+ */
 export const buildAssistantGeneratedReplies = (snapshot) => {
     if (!snapshot) return [];
 
@@ -45,6 +56,11 @@ export const buildAssistantGeneratedReplies = (snapshot) => {
     ].filter((item, index, arr) => item && arr.indexOf(item) === index);
 };
 
+/**
+ * Downloads a (cross-origin) file under a given name, or opens it in a new tab if that fails.
+ * @param {string} url
+ * @param {string} [filename]
+ */
 export const downloadFile = async (url, filename) => {
     try {
         const response = await fetch(url);

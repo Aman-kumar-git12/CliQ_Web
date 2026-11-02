@@ -23,6 +23,7 @@ import { usePostDetailComments } from "../hooks/usePostDetailComments";
 import { usePostDetailReport } from "../hooks/usePostDetailReport";
 
 import IndividualPostShimmering from "../components/shimmering/IndividualPostShimmering";
+import { likesCountAfterToggle } from "../utils/postLikes";
 import { showErrorToast } from "../utils/toast";
 
 export default function PostPage() {
@@ -37,6 +38,7 @@ export default function PostPage() {
     const [loading, setLoading] = useState(true);
     const [liked, setLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(0);
+    const likingRef = useRef(false);
     const {
         comments,
         setComments,
@@ -132,10 +134,14 @@ export default function PostPage() {
 
         const controller = new AbortController(); // responses for a previous postId are dropped
         const { signal } = controller;
+        // Opening another post from this page (an embedded/quoted post): show the skeleton, not the old post
+        if (post && post.id !== postId) setLoading(true);
 
         const fetchPostAndComments = async () => {
             try {
-                // Fetch Post
+                // The post and its comments load in parallel (the comments used to wait for the post)
+                const commentsRequest = postsApi.getPostComments(postId, { signal });
+                commentsRequest.catch(() => {}); // handled below; never an unhandled rejection on the repost redirect
                 const fetched = await postsApi.getPost(postId, { signal });
                 const postData = Array.isArray(fetched) ? fetched[0] : fetched;
                 // A plain repost has nothing of its own to show; open the original.
@@ -152,9 +158,15 @@ export default function PostPage() {
                     setEditContent(postData.content || "");
                 }
 
-                // Fetch Comments
-                const postComments = await postsApi.getPostComments(postId, { signal });
-                setComments(postComments || []);
+                try {
+                    const postComments = await commentsRequest;
+                    setComments(postComments || []);
+                } catch (error) {
+                    if (signal.aborted) return;
+                    // The post itself loaded: show it without comments rather than "post not found"
+                    console.error("Error fetching comments:", error);
+                    setComments([]);
+                }
             } catch (error) {
                 if (signal.aborted) return;
                 console.error("Error fetching post data:", error);
@@ -188,6 +200,11 @@ export default function PostPage() {
     };
 
     const handleSaveEdit = async () => {
+        // The server requires text on an edited post (even one with a photo or video)
+        if (!editContent.trim()) {
+            showErrorToast("Write something before saving.");
+            return;
+        }
         setIsSavingEdit(true);
         try {
             const data = await postsApi.updatePost(
@@ -214,6 +231,9 @@ export default function PostPage() {
     };
 
     const toggleLike = async () => {
+        // A second click while the first toggle is in flight would race it (responses can arrive out of order)
+        if (likingRef.current) return;
+        likingRef.current = true;
         const previousLiked = liked;
         const previousCount = likesCount;
 
@@ -223,22 +243,18 @@ export default function PostPage() {
 
         try {
             const like = await postsApi.togglePostLike(postId);
-            // Sync with server response
+            // Sync with the server's answer; the count follows from it (no second request)
+            const nextCount = likesCountAfterToggle(previousLiked, previousCount, like.isLiked);
             setLiked(like.isLiked);
-            // Re-fetch count to be accurate
-            const count = await postsApi.getPostLikesCount(postId);
-            setLikesCount(count.likesCount);
-
-            // Sync with global feed (Toggle)
-            updateFeedPost(postId, {
-                isLiked: like.isLiked,
-                likes: count.likesCount,
-            });
+            setLikesCount(nextCount);
+            updateFeedPost(postId, { isLiked: like.isLiked, likes: nextCount });
         } catch (error) {
             console.error("Error toggling like:", error);
             // Rollback on error
             setLiked(previousLiked);
             setLikesCount(previousCount);
+        } finally {
+            likingRef.current = false;
         }
     };
 

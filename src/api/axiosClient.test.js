@@ -93,4 +93,62 @@ describe("axiosClient error handling", () => {
         await axiosClient.get("/notifications").catch(() => {});
         expect(toasts).toEqual(["Something went wrong on our side. Please try again."]);
     });
+
+    it("renews an expired session once and resends the request", async () => {
+        const urls = [];
+        let renewed = false;
+        answer = (config) => {
+            urls.push(config.url);
+            if (config.url === "/auth/refresh") {
+                renewed = true;
+                return { data: {}, status: 200, statusText: "OK", headers: {}, config };
+            }
+            if (!renewed) return httpError(401, { code: "TOKEN_EXPIRED" })(config);
+            return { data: { ok: true }, status: 200, statusText: "OK", headers: {}, config };
+        };
+        const res = await axiosClient.get("/profile");
+        expect(res.data).toEqual({ ok: true });
+        expect(urls).toEqual(["/profile", "/auth/refresh", "/profile"]);
+        expect(sessionExpired).toBe(0);
+    });
+
+    it("shares one renewal between requests that expire together", async () => {
+        let refreshes = 0;
+        let renewed = false;
+        answer = async (config) => {
+            if (config.url === "/auth/refresh") {
+                refreshes++;
+                await Promise.resolve();
+                renewed = true;
+                return { data: {}, status: 200, statusText: "OK", headers: {}, config };
+            }
+            if (!renewed) return httpError(401, { code: "TOKEN_EXPIRED" })(config);
+            return { data: config.url, status: 200, statusText: "OK", headers: {}, config };
+        };
+        const results = await Promise.all([axiosClient.get("/a"), axiosClient.get("/b"), axiosClient.get("/c")]);
+        expect(results.map((r) => r.data)).toEqual(["/a", "/b", "/c"]);
+        expect(refreshes).toBe(1);
+    });
+
+    it("logs out when the session can't be renewed", async () => {
+        answer = (config) =>
+            config.url === "/auth/refresh"
+                ? httpError(401, { code: "SESSION_ENDED" })(config)
+                : httpError(401, { code: "TOKEN_EXPIRED" })(config);
+        await axiosClient.get("/profile").catch(() => {});
+        expect(sessionExpired).toBe(1);
+        expect(toasts).toHaveLength(0);
+    });
+
+    it("keeps the user logged in when the server can't be reached to renew the session", async () => {
+        answer = (config) =>
+            config.url === "/auth/refresh"
+                ? Promise.reject(networkError(config))
+                : httpError(401, { code: "TOKEN_EXPIRED" })(config);
+        const request = axiosClient.get("/profile").catch((e) => e);
+        await vi.runAllTimersAsync();
+        await request;
+        expect(sessionExpired).toBe(0);
+        expect(toasts).toEqual(["Can't reach CliQ right now. Check your connection and try again."]);
+    });
 });

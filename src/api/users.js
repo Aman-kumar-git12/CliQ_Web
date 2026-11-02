@@ -28,7 +28,7 @@ export const updateProfile = async (form, config) => (await axiosClient.put("/pr
  * Uploads a new profile picture (multipart, field "image").
  * @param {FormData} formData
  * @param {RequestConfig} [config]
- * @returns {Promise<{ imageUrl?: string, user?: object }>}
+ * @returns {Promise<{ message?: string, imageUrl: string }>}
  */
 export const updateProfileImage = async (formData, config) =>
     (
@@ -55,6 +55,31 @@ export const updateExpertise = async (expertise, config) =>
  */
 export const generateAiExpertise = async (answers, config) =>
     (await axiosClient.post("/generate-ai-expertise", { answers }, config)).data;
+
+/**
+ * Starts an email change: the server emails a 6-digit code to the new address. Nothing changes yet.
+ * @param {{ newEmail: string, currentPassword: string }} payload
+ * @param {RequestConfig} [config]
+ * @returns {Promise<{ message: string }>}
+ */
+export const requestEmailChange = async (payload, config) =>
+    (await axiosClient.post("/profile/email/change", payload, config)).data;
+
+/**
+ * Confirms an email change with the code sent to the new address; other browsers are signed out.
+ * @param {string} otp
+ * @param {RequestConfig} [config]
+ * @returns {Promise<{ message: string, user: object }>}
+ */
+export const confirmEmailChange = async (otp, config) =>
+    (await axiosClient.post("/profile/email/confirm", { otp }, config)).data;
+
+/**
+ * Downloads everything the account holds as one JSON object.
+ * @param {RequestConfig} [config]
+ * @returns {Promise<object>}
+ */
+export const exportMyData = async (config) => (await axiosClient.get("/profile/export", config)).data;
 
 /**
  * Permanently deletes the logged-in user's account.

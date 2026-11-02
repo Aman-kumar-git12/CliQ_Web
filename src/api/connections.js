@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * Connections: connection lists and status, sending and reviewing requests,
  * and the smart-users recommendations (Get Connections) with their history, saves, preferences and analytics.
@@ -6,6 +7,10 @@
 import axiosClient from "./axiosClient";
 
 /** @typedef {import("./axiosClient").RequestConfig} RequestConfig */
+/**
+ * A recommended profile from the smart matcher (match score, reasons, expertise… vary by engine version).
+ * @typedef {{ id: string, [field: string]: any }} SmartCandidate
+ */
 
 /**
  * Returns the logged-in user's connections.
@@ -73,7 +78,7 @@ export const sendConnectionRequest = async (userId, status = "interested", body,
  * Returns a batch of recommended users.
  * @param {string} [search] query string including the leading "?" (e.g. "?refresh=true"), or ""
  * @param {RequestConfig} [config]
- * @returns {Promise<object[]>}
+ * @returns {Promise<SmartCandidate[]>}
  */
 export const getSmartUsers = async (search = "", config) =>
     (await axiosClient.get(`/request/smart-users${search}`, config)).data;

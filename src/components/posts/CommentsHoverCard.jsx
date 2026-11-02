@@ -109,6 +109,8 @@ const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMous
                                             <div className="absolute -inset-0.5 bg-gradient-to-tr from-blue-500/20 to-purple-500/20 rounded-full blur opacity-0 group-hover/comment:opacity-100 transition duration-300"></div>
                                             {comment.avatar ? (
                                                 <img
+                                                    loading="lazy"
+                                                    decoding="async"
                                                     src={comment.avatar}
                                                     alt={comment.username}
                                                     onError={(e) => {

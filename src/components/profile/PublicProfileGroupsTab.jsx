@@ -12,11 +12,16 @@ export default function PublicProfileGroupsTab({ groups, loadingGroups }) {
                 </h2>
             </div>
             {loadingGroups ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div
+                    role="status"
+                    aria-label="Loading groups"
+                    aria-busy="true"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                >
                     {[1, 2].map((i) => (
                         <div
                             key={i}
-                            className="h-24 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl animate-pulse"
+                            className="h-24 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl motion-safe:animate-pulse"
                         />
                     ))}
                 </div>
@@ -33,7 +38,13 @@ export default function PublicProfileGroupsTab({ groups, loadingGroups }) {
                         >
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-[10px] md:rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 flex items-center justify-center text-white font-bold text-[15px] md:text-lg shadow-lg shrink-0 overflow-hidden">
                                 {group.image ? (
-                                    <img src={group.image} alt={group.name} className="w-full h-full object-cover" />
+                                    <img
+                                        loading="lazy"
+                                        decoding="async"
+                                        src={group.image}
+                                        alt={group.name}
+                                        className="w-full h-full object-cover"
+                                    />
                                 ) : (
                                     group.name?.charAt(0) || "G"
                                 )}

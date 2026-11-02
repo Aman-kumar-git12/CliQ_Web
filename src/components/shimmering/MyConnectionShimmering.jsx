@@ -1,6 +1,11 @@
 export default function MyConnectionShimmering({ count = 8 }) {
     return (
-        <div className="w-full h-full flex flex-col bg-transparent animate-pulse overflow-hidden select-none">
+        <div
+            role="status"
+            aria-label="Loading conversations"
+            aria-busy="true"
+            className="w-full h-full flex flex-col bg-transparent motion-safe:animate-pulse overflow-hidden select-none"
+        >
             {/* Header Shimmer Refinement */}
             <div className="pt-8 px-6 pb-6 border-b border-white/5 bg-gradient-to-b from-black/20 to-transparent">
                 <div className="h-8 w-40 bg-brand-light/10 rounded-xl mb-6 shadow-sm border border-brand-light/5"></div>

@@ -59,8 +59,11 @@ describe("service layer", () => {
     });
 
     it("passes query parameters", async () => {
-        await postsApi.getFollowingFeed(3);
-        expect(sent()).toMatchObject({ method: "get", url: "/post/feed/following", params: { page: 3 } });
+        await postsApi.getFollowingFeed("abc123");
+        expect(sent()).toMatchObject({ method: "get", url: "/post/feed/following", params: { cursor: "abc123" } });
+
+        await postsApi.getTrendingFeed(2);
+        expect(sent()).toMatchObject({ method: "get", url: "/post/feed/trending", params: { page: 2 } });
 
         await searchApi.searchAll("react", "people");
         expect(sent()).toMatchObject({ url: "/search", params: { q: "react", type: "people" } });
@@ -70,7 +73,7 @@ describe("service layer", () => {
         await postsApi.deletePost("p1", { silent: true });
         expect(lastRequest.silent).toBe(true);
 
-        await postsApi.getFollowingFeed(1, { silent: true });
+        await postsApi.getTrendingFeed(1, { silent: true });
         expect(lastRequest.silent).toBe(true);
         expect(lastRequest.params).toEqual({ page: 1 });
     });

@@ -15,34 +15,51 @@ import SidebarComponent from "./components/layout/Sidebar";
 import MobileNav from "./components/layout/MobileNav.jsx";
 import GlobalToaster from "./components/common/GlobalToaster";
 import ErrorBoundary from "./components/common/ErrorBoundary";
-import PageLoader from "./components/common/PageLoader";
+import RouteShimmering from "./components/shimmering/RouteShimmering";
 import { pageTitle } from "./utils/pageTitles";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 
 // Pages load on first visit, so the first screen doesn't download the whole app
 // The help chatbot (and its Markdown renderer) loads after the page, it isn't needed for first paint
 const Chatbot = lazy(() => import("./components/chatbot/Chatbot"));
-const HomePage = lazy(() => import("./pages/HomePage"));
+const loadHomePage = () => import("./pages/HomePage");
+const loadProfilePage = () => import("./pages/ProfilePage");
+const loadPostPage = () => import("./pages/PostPage");
+const loadChatPage = () => import("./pages/ChatPage");
+const HomePage = lazy(loadHomePage);
 const SignupPage = lazy(() => import("./pages/auth/SignupPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const VerifyEmailPage = lazy(() => import("./pages/auth/VerifyEmailPage"));
 const VerifyOtpPage = lazy(() => import("./pages/auth/VerifyOtpPage"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const ProfilePage = lazy(loadProfilePage);
 const EditProfilePage = lazy(() => import("./pages/EditProfilePage"));
 const ExplorePage = lazy(() => import("./pages/ExplorePage"));
 const RequestsPage = lazy(() => import("./pages/RequestsPage"));
 const GetConnectionsPage = lazy(() => import("./pages/GetConnectionsPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
-const PostPage = lazy(() => import("./pages/PostPage"));
+const PostPage = lazy(loadPostPage);
 const CreatePostPage = lazy(() => import("./pages/CreatePostPage"));
 const ExpertiseStudioPage = lazy(() => import("./pages/ExpertiseStudioPage"));
 const PublicProfilePage = lazy(() => import("./pages/PublicProfilePage"));
-const ChatPage = lazy(() => import("./pages/ChatPage"));
+const ChatPage = lazy(loadChatPage);
 const BlockedAccountPage = lazy(() => import("./pages/auth/BlockedAccountPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const SavedPostsPage = lazy(() => import("./pages/SavedPostsPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+
+// The page a visit starts on is downloaded while the session check (/auth/me) is still running, instead
+// of after it: protected pages only render once the user is known, which used to start the download late.
+// Login and signup lead to Home, so Home is fetched there too.
+const preloadFirstPage = (pathname) => {
+    if (pathname === "/" || pathname === "/login" || pathname === "/home") return loadHomePage();
+    if (pathname.startsWith("/profile")) return loadProfilePage();
+    if (pathname.startsWith("/post/")) return loadPostPage();
+    if (pathname.startsWith("/messages/")) return loadChatPage();
+    return null;
+};
 
 // Global layout to keep Sidebar persistent and animating smoothly
 const AuthenticatedLayout = () => {
@@ -151,6 +168,12 @@ function App() {
     const { loading } = useUserContext();
     const { pathname } = useLocation();
 
+    useEffect(() => {
+        preloadFirstPage(pathname)?.catch(() => {}); // a failed preload is retried by lazy() on render
+        // Only the page the visit starts on
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     // Each page gets its own browser-tab title, e.g. "Messages · CliQ"
     useEffect(() => {
         document.title = pageTitle(pathname);
@@ -173,12 +196,16 @@ function App() {
             <GlobalToaster />
             {/* Last resort: layouts have their own boundaries that keep the sidebar usable */}
             <ErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
+                {/* Auth and legal pages; signed-in pages have their own boundary in MainLayout / ChatLayout */}
+                <Suspense fallback={<RouteShimmering pathname={pathname} />}>
                     <FeedProvider>
                         <Routes>
                             <Route path="/blocked-account" element={<BlockedAccountPage />} />
                             <Route path="/verify-email" element={<VerifyEmailPage />} />
                             <Route path="/verify-otp" element={<VerifyOtpPage />} />
+                            {/* Legal pages: readable whether or not you're logged in */}
+                            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                            <Route path="/terms" element={<TermsPage />} />
 
                             {/* Public Routes (Redirect to Home if logged in) */}
                             <Route element={<PublicRoute />}>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as usersApi from "../api/users";
 import { useNavigate } from "react-router-dom";
 import ConfirmDialog from "../components/common/ConfirmDialog";
@@ -6,22 +6,30 @@ import { Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 import EditProfileShimmering from "../components/shimmering/EditProfileShimmering";
+import ChangeEmailPanel from "../components/profile/ChangeEmailPanel";
+import { useUserContext } from "../context/UserContext";
+import { buildProfileUpdate } from "../utils/profileUpdate";
 
 export default function EditProfilePage() {
     const navigate = useNavigate();
+    const { setUser: setGlobalUser } = useUserContext();
 
     const [form, setForm] = useState({
         firstname: "",
         lastname: "",
-        email: "",
         password: "",
+        currentPassword: "",
         age: "",
         imageUrl: "",
     });
+    const [email, setEmail] = useState("");
+    const [authProvider, setAuthProvider] = useState("local");
 
     const [errorMsg, setErrorMsg] = useState("");
     const [loading, setLoading] = useState(true);
     const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+    // The profile as loaded, so only the fields the user changed are sent
+    const originalRef = useRef({});
 
     // Fetch existing profile
     useEffect(() => {
@@ -30,14 +38,16 @@ export default function EditProfilePage() {
             try {
                 const { user } = await usersApi.getMyProfile({ signal: controller.signal });
 
-                setForm({
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                    email: user.email,
-                    password: "",
-                    age: user.age,
+                const loaded = {
+                    firstname: user.firstname ?? "",
+                    lastname: user.lastname ?? "",
+                    age: user.age ?? "",
                     imageUrl: user.imageUrl || "",
-                });
+                };
+                originalRef.current = loaded;
+                setForm({ ...loaded, password: "", currentPassword: "" });
+                setEmail(user.email);
+                setAuthProvider(user.authProvider || "local");
             } catch (error) {
                 if (controller.signal.aborted) return;
                 console.error("Error fetching profile:", error);
@@ -61,7 +71,12 @@ export default function EditProfilePage() {
 
     const handleConfirmSave = async () => {
         try {
-            await usersApi.updateProfile(form, { silent: true });
+            const update = buildProfileUpdate(form, originalRef.current);
+            if (Object.keys(update).length > 0) {
+                const data = await usersApi.updateProfile(update, { silent: true });
+                // The sidebar, composer and chat read the name and photo from UserContext
+                if (data?.user) setGlobalUser((prev) => (prev ? { ...prev, ...data.user } : prev));
+            }
 
             navigate("/profile");
         } catch (error) {
@@ -166,24 +181,14 @@ export default function EditProfilePage() {
                             </div>
                         </div>
 
-                        <div>
-                            <label
-                                htmlFor="edit-email"
-                                className="block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1"
-                            >
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                id="edit-email"
-                                name="email"
-                                value={form.email}
-                                onChange={handleChange}
-                                placeholder="Email"
-                                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold"
-                                required
-                            />
-                        </div>
+                        <ChangeEmailPanel
+                            email={email}
+                            canChange={authProvider === "local"}
+                            onChanged={(user) => {
+                                setEmail(user.email);
+                                setGlobalUser((prev) => (prev ? { ...prev, email: user.email } : prev));
+                            }}
+                        />
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
@@ -209,7 +214,7 @@ export default function EditProfilePage() {
                                     htmlFor="edit-password"
                                     className="block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1"
                                 >
-                                    Password (Optional)
+                                    New Password (Optional)
                                 </label>
                                 <input
                                     type="password"
@@ -217,11 +222,33 @@ export default function EditProfilePage() {
                                     name="password"
                                     value={form.password}
                                     onChange={handleChange}
+                                    autoComplete="new-password"
                                     className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-4 md:px-5 md:py-[17px] focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold text-[13px] md:text-base"
                                     placeholder="••••••••"
                                 />
                             </div>
                         </div>
+
+                        {form.password && authProvider !== "google" && (
+                            <div>
+                                <label
+                                    htmlFor="edit-current-password"
+                                    className="block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1"
+                                >
+                                    Current Password (needed to set a new one)
+                                </label>
+                                <input
+                                    type="password"
+                                    id="edit-current-password"
+                                    name="currentPassword"
+                                    value={form.currentPassword}
+                                    onChange={handleChange}
+                                    autoComplete="current-password"
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold"
+                                    required
+                                />
+                            </div>
+                        )}
 
                         <div>
                             <label

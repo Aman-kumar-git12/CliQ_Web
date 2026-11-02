@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { LayoutGrid, List, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as connectionsApi from "../../api/connections";
 import FindPeopleShimmering from "../shimmering/FindPeopleShimmering";
 import { useUserContext } from "../../context/UserContext";
@@ -8,6 +8,7 @@ import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import ProfileHoverCard from "../profile/ProfileHoverCard";
 import { createPortal } from "react-dom";
 import { avatarUrl } from "../../utils/avatar";
+import { invalidateCachedRequests } from "../../utils/requestCache";
 
 const layoutTransition = { type: "spring", stiffness: 350, damping: 38, mass: 0.8 };
 const getPublicHandle = (user) => {
@@ -23,8 +24,11 @@ const isAiMatch = (user) => user.matchType && user.matchType !== "keyword";
 
 // People as cards with a Connect button, in list or grid view. Used by Search for the
 // "Suggested Network" (no query) and for people results (showMatchReasons).
-export default function PeopleCards({ title, users, loading = false, showMatchReasons = false }) {
+// `checkStatuses={false}` skips the per-person status requests when the list can't contain anyone
+// you already have a connection record with (the server leaves them out of suggestions).
+export default function PeopleCards({ title, users, loading = false, showMatchReasons = false, checkStatuses = true }) {
     const { user: currentUser } = useUserContext();
+    const navigate = useNavigate();
     const [snack, setSnack] = useState("");
     const [viewMode, setViewMode] = useState("list"); // "list" | "grid"
     const [connectionStatuses, setConnectionStatuses] = useState({});
@@ -67,6 +71,7 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
     };
 
     useEffect(() => {
+        if (!checkStatuses) return undefined;
         const others = users.filter((user) => user.id !== currentUser?.id);
         if (others.length === 0) return undefined;
         // When the people list changes, statuses still loading for the old list are dropped
@@ -79,7 +84,11 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                     try {
                         const data = await connectionsApi.getConnectionStatus(user.id, { signal: controller.signal });
                         const status = data.status || data.connection?.status;
-                        statuses[user.id] = { status: status === "accepted" ? "connected" : status || "none" };
+                        // A request this person sent me is "incoming" (answer it), not "Requested"
+                        const incoming = status === "interested" && data.connection?.fromUserId !== currentUser?.id;
+                        statuses[user.id] = {
+                            status: status === "accepted" ? "connected" : incoming ? "incoming" : status || "none",
+                        };
                     } catch {
                         statuses[user.id] = { status: "none" };
                     }
@@ -90,14 +99,20 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
         };
         fetchStatuses();
         return () => controller.abort();
-    }, [users, currentUser?.id]);
+    }, [users, currentUser?.id, checkStatuses]);
 
     const handleConnect = async (userId) => {
         const status = connectionStatuses[userId]?.status;
+        if (status === "incoming") {
+            navigate("/requests");
+            return;
+        }
         if (status === "connected" || status === "interested") return;
         try {
             await connectionsApi.sendConnectionRequest(userId, "interested", undefined, { silent: true });
             setConnectionStatuses((prev) => ({ ...prev, [userId]: { status: "interested" } }));
+            invalidateCachedRequests("suggested-users");
+            invalidateCachedRequests(`hover-card:${userId}`);
             showSnack("Request sent");
         } catch (error) {
             console.error("Connect failed:", error);
@@ -109,6 +124,7 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
         const status = connectionStatuses[userId]?.status;
         if (status === "connected") return "Connected";
         if (status === "interested") return "Requested";
+        if (status === "incoming") return "Respond";
         return "Connect";
     };
 
@@ -197,6 +213,8 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                             >
                                                 <div className="w-[48px] h-[48px] md:w-[60px] md:h-[60px] rounded-full overflow-hidden border-2 border-surface-700 group-hover:border-brand/50 transition-colors duration-500 p-0.5 shadow-2xl bg-gradient-to-br from-brand/20 to-brand-pink/20">
                                                     <img
+                                                        loading="lazy"
+                                                        decoding="async"
                                                         src={avatarUrl(user.imageUrl)}
                                                         alt={
                                                             `${user.firstname || ""} ${user.lastname || ""}`.trim() ||
@@ -257,6 +275,8 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                             >
                                                 <div className="w-[48px] h-[48px] md:w-[64px] md:h-[64px] rounded-[14px] md:rounded-[18px] overflow-hidden border border-surface-700 group-hover/card:border-brand/50 transition-all duration-500 shadow-2xl p-[2px] bg-gradient-to-br from-brand/20 to-brand-pink/20">
                                                     <img
+                                                        loading="lazy"
+                                                        decoding="async"
                                                         src={avatarUrl(user.imageUrl)}
                                                         alt={
                                                             `${user.firstname || ""} ${user.lastname || ""}`.trim() ||

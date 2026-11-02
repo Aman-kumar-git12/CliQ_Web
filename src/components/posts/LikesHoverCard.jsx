@@ -101,6 +101,8 @@ const LikesHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMouseLe
                                     <div key={user.id} className="flex items-center gap-2.5 group/user">
                                         {user.avatar ? (
                                             <img
+                                                loading="lazy"
+                                                decoding="async"
                                                 src={user.avatar}
                                                 alt={user.username}
                                                 onError={(e) => {

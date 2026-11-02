@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * Direct messages: conversations, history, file uploads, editing and deleting messages, public groups,
  * and the message assistant (/message-ai): reply suggestions plus reply and Ask AI history.

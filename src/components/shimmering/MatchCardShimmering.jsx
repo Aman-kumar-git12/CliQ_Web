@@ -1,8 +1,14 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
-export default function MatchCardShimmering() {
+// `nested`: part of a bigger skeleton that already announces the loading state
+export default function MatchCardShimmering({ nested = false }) {
+    const reduceMotion = useReducedMotion();
+    const status = nested ? {} : { role: "status", "aria-label": "Loading matches", "aria-busy": true };
     return (
-        <div className="relative w-full max-w-full sm:max-w-md md:max-w-md min-h-[480px] md:min-h-[600px] bg-[#0a0510]/60 backdrop-blur-3xl border border-white/10 rounded-[28px] md:rounded-[40px] p-8 flex flex-col items-center overflow-hidden animate-pulse">
+        <div
+            {...status}
+            className="relative w-full max-w-full sm:max-w-md md:max-w-md min-h-[480px] md:min-h-[600px] bg-[#0a0510]/60 backdrop-blur-3xl border border-white/10 rounded-[28px] md:rounded-[40px] p-8 flex flex-col items-center overflow-hidden motion-safe:animate-pulse"
+        >
             {/* Mesh Gradient Placeholder: Purple Theme */}
             <div className="absolute top-0 left-0 w-full h-44 bg-gradient-to-b from-brand/10 to-transparent"></div>
 
@@ -39,13 +45,15 @@ export default function MatchCardShimmering() {
                 </div>
             </div>
 
-            {/* Sweep Effect: Purple Tint */}
-            <motion.div
-                initial={{ x: "-100%" }}
-                animate={{ x: "100%" }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-y-0 w-full bg-gradient-to-r from-transparent via-purple-500/5 to-transparent skew-x-12"
-            />
+            {/* Sweep Effect: Purple Tint (left out when the system asks for reduced motion) */}
+            {!reduceMotion && (
+                <motion.div
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "100%" }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="absolute inset-y-0 w-full bg-gradient-to-r from-transparent via-purple-500/5 to-transparent skew-x-12"
+                />
+            )}
         </div>
     );
 }

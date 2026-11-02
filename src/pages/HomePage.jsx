@@ -6,14 +6,27 @@ import useTabFeed from "../hooks/useTabFeed";
 import PostInput from "../components/posts/PostInput";
 import { useFeedContext } from "../context/FeedContext";
 import HomeShimmering from "../components/shimmering/HomeShimmering";
+import PostCardShimmering from "../components/shimmering/PostCardShimmering";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+
+// Following is cursor-paginated; Trending is ranked by likes, so it pages by number.
+// Wrapped so useTabFeed's second argument (the cursor) never lands in the axios config slot.
+const fetchFollowingPage = (page, cursor) => postsApi.getFollowingFeed(cursor);
+const fetchTrendingPage = (page) => postsApi.getTrendingFeed(page);
+// The server accepts at most 500 ids to exclude; the most recent ones are the ones a new batch could repeat
+const MAX_EXCLUDE_IDS = 500;
 
 export default function HomePage() {
-    const { feedPosts, setFeedPosts, feedPage, setFeedPage, feedHasMore, setFeedHasMore, feedScrollY, setFeedScrollY } =
+    const { feedPosts, setFeedPosts, feedPage, setFeedPage, feedHasMore, setFeedHasMore, feedScrollYRef } =
         useFeedContext();
+    // The right column is only shown on wide screens; don't fetch its data where it's hidden
+    const showSidebar = useMediaQuery("(min-width: 1280px)");
 
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState(null);
+    // One For You request at a time: the observer and "post created" can both ask for a page
+    const fetchingRef = useRef(false);
 
     const observer = useRef();
     const lastPostElementRef = useCallback(
@@ -58,12 +71,14 @@ export default function HomePage() {
 
     // Fetch posts feed (Randomized)
     const fetchFeed = async (pageNum) => {
+        if (fetchingRef.current && pageNum !== 1) return;
+        fetchingRef.current = true;
         try {
             if (pageNum === 1) setLoading(true);
             else setLoadingMore(true);
 
             // Collect IDs to exclude (only if loading more)
-            const excludeIds = pageNum === 1 ? [] : feedPosts.map((p) => p.id);
+            const excludeIds = pageNum === 1 ? [] : feedPosts.slice(-MAX_EXCLUDE_IDS).map((p) => p.id);
 
             const data = await postsApi.getRandomFeed(excludeIds, { silent: true });
 
@@ -78,6 +93,7 @@ export default function HomePage() {
             }
 
             setFeedHasMore(apiHasMore);
+            setError(null);
 
             // Pre-process posts (backend already provides format, but ensuring consistency)
             const processedPosts = rawPosts.map((post) => ({
@@ -102,7 +118,10 @@ export default function HomePage() {
         } catch (err) {
             setError("Failed to load feed");
             console.error("Feed fetch failed:", err);
+            // Stop the infinite scroll: otherwise the observer re-fires right away and repeats the failing request
+            if (pageNum !== 1) setFeedHasMore(false);
         } finally {
+            fetchingRef.current = false;
             setLoading(false);
             setLoadingMore(false);
         }
@@ -122,7 +141,7 @@ export default function HomePage() {
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 0) {
-                setFeedScrollY(window.scrollY);
+                feedScrollYRef.current = window.scrollY;
             }
         };
 
@@ -142,15 +161,16 @@ export default function HomePage() {
             window.removeEventListener("scroll", throttledScroll);
             if (timeoutId) clearTimeout(timeoutId);
         };
-    }, [setFeedScrollY]);
+    }, [feedScrollYRef]);
 
     // Restore scroll position instantly on mount if we have data
     useEffect(() => {
-        if (feedPosts.length > 0 && feedScrollY > 0) {
+        const savedY = feedScrollYRef.current;
+        if (feedPosts.length > 0 && savedY > 0) {
             // Restore saved scroll position
             requestAnimationFrame(() => {
                 window.scrollTo({
-                    top: feedScrollY,
+                    top: savedY,
                     behavior: "instant",
                 });
             });
@@ -169,25 +189,30 @@ export default function HomePage() {
     }, [feedPage]);
 
     const [activeTab, setActiveTab] = useState("For You");
-    const followingFeed = useTabFeed(postsApi.getFollowingFeed, activeTab === "Following");
-    const trendingFeed = useTabFeed(postsApi.getTrendingFeed, activeTab === "Trending");
+    const followingFeed = useTabFeed(fetchFollowingPage, activeTab === "Following");
+    const trendingFeed = useTabFeed(fetchTrendingPage, activeTab === "Trending");
     const tabFeed = activeTab === "Following" ? followingFeed : activeTab === "Trending" ? trendingFeed : null;
 
-    // Infinite scroll for the Following/Trending tabs (For You has its own observer above)
+    // Infinite scroll for the Following/Trending tabs (For You has its own observer above).
+    // Depends on the values it reads, not on tabFeed itself (a new object every render), so the
+    // observer isn't torn down and re-created on every render.
     const tabObserver = useRef();
+    const tabLoading = tabFeed?.loading;
+    const tabHasMore = tabFeed?.hasMore;
+    const tabLoadMore = tabFeed?.loadMore;
     const tabSentinelRef = useCallback(
         (node) => {
             if (tabObserver.current) tabObserver.current.disconnect();
-            if (!node || !tabFeed || tabFeed.loading || !tabFeed.hasMore) return;
+            if (!node || !tabLoadMore || tabLoading || !tabHasMore) return;
             tabObserver.current = new IntersectionObserver(
                 (entries) => {
-                    if (entries[0].isIntersecting) tabFeed.loadMore();
+                    if (entries[0].isIntersecting) tabLoadMore();
                 },
                 { rootMargin: "1000px" },
             );
             tabObserver.current.observe(node);
         },
-        [tabFeed],
+        [tabLoading, tabHasMore, tabLoadMore],
     );
 
     if (loading && feedPage === 1 && feedPosts.length === 0) {
@@ -195,7 +220,22 @@ export default function HomePage() {
     }
 
     if (error && feedPosts.length === 0) {
-        return <p className="text-center py-10 text-red-500">{error}</p>;
+        return (
+            <div className="flex flex-col items-center gap-4 py-10 pt-[100px] md:pt-10">
+                <p className="text-center text-red-500">{error}</p>
+                <button
+                    type="button"
+                    onClick={() => {
+                        setError(null);
+                        setFeedHasMore(true);
+                        fetchFeed(1);
+                    }}
+                    className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-[11px] font-black uppercase tracking-[0.15em] text-white"
+                >
+                    Try again
+                </button>
+            </div>
+        );
     }
 
     return (
@@ -230,11 +270,22 @@ export default function HomePage() {
                         ))}
                         <div ref={tabSentinelRef} />
 
-                        {tabFeed.loading && (
-                            <div className="flex justify-center py-6">
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--cliq-pink)]"></div>
-                            </div>
-                        )}
+                        {/* Opening the tab: a few post cards; loading more: one below the list */}
+                        {tabFeed.loading &&
+                            (tabFeed.posts.length ? (
+                                <PostCardShimmering label="Loading more posts" />
+                            ) : (
+                                <div
+                                    role="status"
+                                    aria-label="Loading posts"
+                                    aria-busy="true"
+                                    className="space-y-4 motion-safe:animate-pulse"
+                                >
+                                    {[1, 2, 3].map((i) => (
+                                        <PostCardShimmering key={i} nested />
+                                    ))}
+                                </div>
+                            ))}
 
                         {tabFeed.isEmpty && (
                             <div className="p-8 text-center cliq-feed-panel rounded-[1.5rem] border-dashed mt-4 max-w-[560px] w-full self-center">
@@ -260,11 +311,7 @@ export default function HomePage() {
                             }
                         })}
 
-                        {loadingMore && (
-                            <div className="flex justify-center py-6">
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--cliq-pink)]"></div>
-                            </div>
-                        )}
+                        {loadingMore && <PostCardShimmering label="Loading more posts" />}
 
                         {!feedHasMore && feedPosts.length > 0 && (
                             <div className="p-8 text-center cliq-feed-panel rounded-[1.5rem] border-dashed mt-4 max-w-[560px] w-full self-center">
@@ -278,9 +325,11 @@ export default function HomePage() {
             </div>
 
             {/* RIGHT SIDEBAR COLUMN - Scrolls with feed */}
-            <div className="relative hidden xl:block w-[320px] shrink-0 pt-2 px-1">
-                <HomeSidebar />
-            </div>
+            {showSidebar && (
+                <div className="relative hidden xl:block w-[320px] shrink-0 pt-2 px-1">
+                    <HomeSidebar />
+                </div>
+            )}
         </div>
     );
 }

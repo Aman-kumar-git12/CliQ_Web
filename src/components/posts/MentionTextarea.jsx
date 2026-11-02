@@ -155,6 +155,8 @@ const MentionTextarea = forwardRef(function MentionTextarea(
                                 className={`w-full flex items-center gap-2.5 px-3 py-2 text-left ${i === activeIndex ? "bg-violet-500/15" : "hover:bg-white/5"}`}
                             >
                                 <img
+                                    loading="lazy"
+                                    decoding="async"
                                     src={user.imageUrl || DEFAULT_AVATAR}
                                     alt=""
                                     className="w-7 h-7 rounded-full object-cover"

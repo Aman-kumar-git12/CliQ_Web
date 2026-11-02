@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * CliQ AI help chatbot: sessions, history and answer feedback.
  * Answers themselves stream over SSE with fetch in Chatbot.jsx, not through these functions.

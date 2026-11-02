@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { configDefaults } from "vitest/config";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -9,6 +10,8 @@ export default defineConfig({
         setupFiles: ["./src/test/setup.js"],
         // Tests talk to mocked modules only; nothing reaches a real backend
         restoreMocks: true,
+        // e2e/ holds Playwright browser tests (npm run test:e2e), not Vitest suites
+        exclude: [...configDefaults.exclude, "e2e/**"],
     },
     build: {
         chunkSizeWarningLimit: 1200,

@@ -1,13 +1,20 @@
+import PostTileGridShimmering from "./PostTileGridShimmering";
+
 const ProfileShimmering = () => {
     return (
-        <div className="w-full min-h-screen relative overflow-x-hidden pt-24 md:pt-6 bg-transparent text-white transition-all duration-500">
+        <div
+            role="status"
+            aria-label="Loading profile"
+            aria-busy="true"
+            className="w-full min-h-screen relative overflow-x-hidden pt-24 md:pt-6 bg-transparent text-white transition-all duration-500"
+        >
             {/* Cinematic Background Glows */}
-            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-brand/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse transition-opacity duration-[3000ms]" />
+            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-brand/10 rounded-full blur-[140px] pointer-events-none -z-10 motion-safe:animate-pulse transition-opacity duration-[3000ms]" />
             <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-pink/5 rounded-full blur-[140px] pointer-events-none -z-10" />
 
             <div className="w-full max-w-2xl mx-auto px-4 pb-20 relative z-10">
                 {/* PREMIUM GLASS PROFILE CARD SKELETON */}
-                <div className="relative bg-white/[0.03] backdrop-blur-2xl border border-white/20 shadow-2xl rounded-[36px] overflow-hidden animate-pulse">
+                <div className="relative bg-white/[0.03] backdrop-blur-2xl border border-white/20 shadow-2xl rounded-[36px] overflow-hidden motion-safe:animate-pulse">
                     {/* Header Banner Skeleton */}
                     <div className="h-[100px] md:h-[140px] bg-white/[0.05] transition-all duration-500"></div>
 
@@ -59,16 +66,7 @@ const ProfileShimmering = () => {
                         <div className="h-6 w-28 bg-white/20 rounded-lg"></div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-1 md:gap-4 transition-all duration-500">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-                            <div
-                                key={i}
-                                className="aspect-square bg-white/[0.02] border border-white/10 rounded-[16px] md:rounded-[28px] overflow-hidden relative shadow-lg"
-                            >
-                                <div className="w-full h-full bg-white/5"></div>
-                            </div>
-                        ))}
-                    </div>
+                    <PostTileGridShimmering nested />
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
 import { useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 
 export default function ConfirmDialog({
     isOpen,
@@ -25,16 +26,7 @@ export default function ConfirmDialog({
         document.addEventListener("keydown", handleKeyDown);
         return () => document.removeEventListener("keydown", handleKeyDown);
     }, [isOpen, isLoading, onClose]);
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "unset";
-        }
-        return () => {
-            document.body.style.overflow = "unset";
-        };
-    }, [isOpen]);
+    useBodyScrollLock(isOpen);
 
     return createPortal(
         <AnimatePresence>

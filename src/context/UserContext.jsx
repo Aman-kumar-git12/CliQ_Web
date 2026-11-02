@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import * as authApi from "../api/auth";
 import { SESSION_EXPIRED_EVENT } from "../api/axiosClient";
 import { warmSmartConnectionsCache } from "../utils/smartConnectionCache";
+import { clearRequestCache } from "../utils/requestCache";
 
 const UserContext = createContext();
 
@@ -82,6 +83,8 @@ export const UserContextProvider = ({ children }) => {
     }, [navigate]);
 
     useEffect(() => {
+        // Cached reads (suggestions, hover cards…) belong to the account that loaded them
+        clearRequestCache();
         if (!user?.id) return;
         warmSmartConnectionsCache({ userId: user.id });
     }, [user?.id]);

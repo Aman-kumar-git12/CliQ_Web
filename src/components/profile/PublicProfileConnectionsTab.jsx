@@ -14,11 +14,11 @@ export default function PublicProfileConnectionsTab({ connections, loadingConnec
                 </h2>
             </div>
             {loadingConnections ? (
-                <div className="space-y-3">
+                <div role="status" aria-label="Loading connections" aria-busy="true" className="space-y-3">
                     {[1, 2, 3].map((i) => (
                         <div
                             key={i}
-                            className="h-20 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl animate-pulse"
+                            className="h-20 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl motion-safe:animate-pulse"
                         />
                     ))}
                 </div>
@@ -36,6 +36,8 @@ export default function PublicProfileConnectionsTab({ connections, loadingConnec
                         >
                             <div className="flex items-center gap-3 md:gap-4">
                                 <img
+                                    loading="lazy"
+                                    decoding="async"
                                     src={conn.imageUrl || DEFAULT_AVATAR}
                                     alt={[conn.firstname, conn.lastname].filter(Boolean).join(" ")}
                                     className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-white/10 shadow-lg"

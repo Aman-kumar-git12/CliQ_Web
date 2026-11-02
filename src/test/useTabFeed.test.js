@@ -16,12 +16,22 @@ describe("useTabFeed", () => {
         const { result } = renderHook(() => useTabFeed(fetchPage, true));
 
         await waitFor(() => expect(result.current.posts).toHaveLength(2));
-        expect(fetchPage).toHaveBeenCalledWith(1);
+        expect(fetchPage).toHaveBeenCalledWith(1, null);
 
         act(() => result.current.loadMore());
         await waitFor(() => expect(result.current.posts).toHaveLength(4));
-        expect(fetchPage).toHaveBeenLastCalledWith(2);
+        expect(fetchPage).toHaveBeenLastCalledWith(2, null);
         expect(result.current.hasMore).toBe(false);
+    });
+
+    it("passes the previous page's nextCursor to cursor-paginated feeds", async () => {
+        const fetchPage = vi.fn((n) => Promise.resolve({ ...page(n, n < 2), nextCursor: n < 2 ? `after-${n}` : null }));
+        const { result } = renderHook(() => useTabFeed(fetchPage, true));
+        await waitFor(() => expect(result.current.posts).toHaveLength(2));
+
+        act(() => result.current.loadMore());
+        await waitFor(() => expect(result.current.posts).toHaveLength(4));
+        expect(fetchPage).toHaveBeenLastCalledWith(2, "after-1");
     });
 
     it("reports an empty feed so the tab can explain why", async () => {

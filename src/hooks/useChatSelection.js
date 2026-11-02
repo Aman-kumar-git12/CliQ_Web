@@ -2,6 +2,9 @@
 import { useMemo, useState } from "react";
 import * as chatApi from "../api/chat";
 
+const OBJECT_ID = /^[0-9a-f]{24}$/i;
+const BULK_DELETE_LIMIT = 200;
+
 export const useChatSelection = ({ messages, setMessages, setToast, targetuserId }) => {
     // Multi-Select State
     const [isSelectMode, setIsSelectMode] = useState(false);
@@ -29,9 +32,16 @@ export const useChatSelection = ({ messages, setMessages, setToast, targetuserId
         try {
             setIsBulkDeleting(true);
             setBulkDeleteConfirmOpen(false);
-            const result = await chatApi.deleteChatMessages(Array.from(selectedMessages), type, { silent: true });
+            // Only saved messages have a server id (a message still being sent has a temporary one), and the
+            // server takes at most 200 ids per request
+            const ids = Array.from(selectedMessages).filter((id) => OBJECT_ID.test(String(id)));
+            const batches = [];
+            for (let i = 0; i < ids.length; i += BULK_DELETE_LIMIT) batches.push(ids.slice(i, i + BULK_DELETE_LIMIT));
+            const results = await Promise.all(
+                batches.map((batch) => chatApi.deleteChatMessages(batch, type, { silent: true })),
+            );
 
-            if (result.success) {
+            if (results.every((result) => result.success)) {
                 // Update local state based on delete type
                 if (type === "everyone") {
                     // Soft delete: Keep in list but mark as deleted

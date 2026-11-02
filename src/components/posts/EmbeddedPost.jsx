@@ -39,7 +39,13 @@ export default function EmbeddedPost({ post, currentUserId, clickable = true }) 
             className={`rounded-xl border border-white/10 bg-white/[0.02] p-3 mb-2 ${clickable ? "cursor-pointer hover:bg-white/[0.04] transition-colors" : ""}`}
         >
             <div className="flex items-center gap-2 mb-1.5">
-                <img src={post.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
+                <img
+                    loading="lazy"
+                    decoding="async"
+                    src={post.avatar}
+                    alt=""
+                    className="w-5 h-5 rounded-full object-cover"
+                />
                 <span className="text-[12px] font-black text-white truncate">{post.username}</span>
                 <span className="text-[11px] text-ink-350 truncate">@{post.handle}</span>
                 <span className="text-[11px] text-ink-350 shrink-0">· {timeAgo(post.createdAt)}</span>
@@ -52,13 +58,15 @@ export default function EmbeddedPost({ post, currentUserId, clickable = true }) 
             />
             {post.image && (
                 <img
+                    loading="lazy"
+                    decoding="async"
                     src={post.image}
                     alt={`Post by ${post.username || "user"}`}
                     className="mt-2 w-full max-h-[200px] object-cover rounded-lg"
                 />
             )}
             {!post.image && post.video && (
-                <video src={post.video} className="mt-2 w-full max-h-[200px] rounded-lg" muted />
+                <video src={post.video} className="mt-2 w-full max-h-[200px] rounded-lg" muted preload="metadata" />
             )}
         </div>
     );

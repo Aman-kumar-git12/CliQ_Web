@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Stable React keys for a list of plain strings that may repeat (e.g. user-typed skills).
  * The key is the text plus how many times that text appeared before it ("React", "React#2"),

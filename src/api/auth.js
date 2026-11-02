@@ -30,12 +30,12 @@ export const login = async (credentials, config) => (await axiosClient.post("/lo
 export const signup = async (details, config) => (await axiosClient.post("/signup", details, config)).data;
 
 /**
- * Ends the session and clears the auth cookie.
+ * Ends the session (server side too) and clears the auth cookies.
  * @param {object} [body] request body (some callers send `{}`, some nothing)
  * @param {RequestConfig} [config]
  * @returns {Promise<object>}
  */
-export const logout = async (body, config) => (await axiosClient.post("/logout", body, config)).data;
+export const logout = async (body, config) => (await axiosClient.post("/auth/logout", body, config)).data;
 
 /**
  * Verifies an email address from the link sent by email.

@@ -2,7 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import ChatInbox from "../components/chat/ChatInbox";
 import { Suspense } from "react";
 import ErrorBoundary from "../components/common/ErrorBoundary";
-import PageLoader from "../components/common/PageLoader";
+import LoadingChat from "../components/chat/LoadingChat";
 
 export default function ChatLayout() {
     const location = useLocation();
@@ -23,7 +23,7 @@ export default function ChatLayout() {
                     className={`flex-1 h-full min-w-0 bg-transparent relative ${isChatSelected ? "block" : "hidden md:block"}`}
                 >
                     <ErrorBoundary key={location.pathname}>
-                        <Suspense fallback={<PageLoader />}>
+                        <Suspense fallback={<LoadingChat />}>
                             <Outlet />
                         </Suspense>
                     </ErrorBoundary>

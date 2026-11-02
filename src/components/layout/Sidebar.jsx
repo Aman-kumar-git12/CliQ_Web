@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
     Home,
     Compass,
@@ -16,7 +15,6 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { useUserContext } from "../../context/UserContext";
 import { motion, AnimatePresence } from "framer-motion";
-import * as connectionsApi from "../../api/connections";
 import { useNotifications } from "../../context/NotificationContext";
 
 const NavItem = ({ to, icon: Icon, label, badge, active, isChatView }) => (
@@ -84,32 +82,8 @@ export default function Sidebar() {
     const location = useLocation();
 
     const isChatView = location.pathname.startsWith("/messages") || location.pathname.startsWith("/chat");
-    const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-    const { unreadCount } = useNotifications();
-
-    useEffect(() => {
-        // A count from a previous run (an older unreadCount) must not overwrite a newer one
-        const controller = new AbortController();
-        const fetchRequestsCount = async () => {
-            try {
-                const data = await connectionsApi.getConnectionRequests({ signal: controller.signal });
-                if (data?.connectionRequests) {
-                    setPendingRequestsCount(data.connectionRequests.length);
-                }
-            } catch (err) {
-                if (controller.signal.aborted) return;
-                console.error("Error fetching requests count:", err);
-            }
-        };
-
-        fetchRequestsCount();
-        // Refresh count every 60 seconds (simple polling)
-        const interval = setInterval(fetchRequestsCount, 60000);
-        return () => {
-            clearInterval(interval);
-            controller.abort();
-        };
-    }, [unreadCount]); // a new notification may be a new connection request
+    // Loaded and kept fresh by NotificationContext (also refreshed when a connection request arrives)
+    const { unreadCount, pendingRequestsCount } = useNotifications();
 
     const isActive = (path) => {
         if (path === "/profile") return location.pathname.startsWith("/profile");

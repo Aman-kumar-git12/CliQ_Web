@@ -1,3 +1,5 @@
+// @ts-check
+/** @type {Array<[label: string, seconds: number]>} */
 const UNITS = [
     ["y", 365 * 24 * 60 * 60],
     ["mo", 30 * 24 * 60 * 60],
@@ -7,6 +9,11 @@ const UNITS = [
     ["m", 60],
 ];
 
+/**
+ * Short relative time, e.g. "5m ago".
+ * @param {string | number | Date} date
+ * @returns {string}
+ */
 export const timeAgo = (date) => {
     const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
     if (!Number.isFinite(seconds) || seconds < 60) return "just now";

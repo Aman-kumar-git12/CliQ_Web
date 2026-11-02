@@ -1,3 +1,4 @@
+// @ts-check
 // Browser-tab titles per route, checked in order; the first matching prefix wins
 const PAGE_TITLES = [
     ["/home", "Feed"],
@@ -19,8 +20,14 @@ const PAGE_TITLES = [
     ["/verify-email", "Verify email"],
     ["/verify-otp", "Verify code"],
     ["/blocked-account", "Account blocked"],
+    ["/privacy", "Privacy Policy"],
+    ["/terms", "Terms of Service"],
 ];
 
+/**
+ * @param {string} pathname
+ * @returns {string}
+ */
 export const pageTitle = (pathname) => {
     if (pathname === "/") return "Sign up · CliQ";
     // "/find" matches "/find" and "/find/…"; prefixes ending in "/" ("/post/") only match their sub-paths

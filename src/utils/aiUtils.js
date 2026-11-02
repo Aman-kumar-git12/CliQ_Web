@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Shared utilities for AI-powered components (Chatbot, MessageAssistant, etc.)
  */
@@ -18,12 +19,18 @@ export const INTERNAL_LINK_ALLOWLIST = new Set([
     "/profile",
 ]);
 
+/** @param {unknown} href */
 const toAllowedPath = (href) => {
     if (typeof href !== "string" || !href.startsWith("/") || href.startsWith("//")) return null;
     const path = href.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
     return INTERNAL_LINK_ALLOWLIST.has(path) ? path : null;
 };
 
+/**
+ * First balanced `{...}` block in a model reply, or null.
+ * @param {string | null | undefined} text
+ * @returns {string | null}
+ */
 export const extractJsonBlock = (text) => {
     if (!text) return null;
     const start = text.indexOf("{");
@@ -41,12 +48,18 @@ export const extractJsonBlock = (text) => {
     return null;
 };
 
+/** @param {string} key e.g. "next_steps" or "nextSteps" → "Next Steps" */
 export const humanizeKey = (key) =>
     key
         .replace(/_/g, " ")
         .replace(/([a-z])([A-Z])/g, "$1 $2")
         .replace(/\b\w/g, (char) => char.toUpperCase());
 
+/**
+ * Steps the assistant returned as JSON, or null when the reply isn't a steps list.
+ * @param {string | null | undefined} text
+ * @returns {{ title: string, steps: string[] } | null}
+ */
 export const parseStructuredSteps = (text) => {
     if (!text) return null;
 
@@ -88,6 +101,12 @@ export const parseStructuredSteps = (text) => {
     }
 };
 
+/**
+ * Props react-markdown passes to the renderers below.
+ * @typedef {{ children?: import("react").ReactNode, href?: string, inline?: boolean }} MarkdownProps
+ */
+
+/** @type {Record<string, (props: MarkdownProps) => import("react").ReactElement>} */
 export const markdownComponents = {
     h2: ({ children }) =>
         createElement("h2", { className: "text-white font-semibold text-[15px] mb-3 mt-4 first:mt-0" }, children),

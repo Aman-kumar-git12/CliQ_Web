@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import createSocketConnection from "../api/socket";
-import { SESSION_EXPIRED_EVENT } from "../api/axiosClient";
+import { SESSION_EXPIRED_EVENT, refreshSession } from "../api/axiosClient";
 import { useUserContext } from "./UserContext";
 
 const SocketContext = createContext(null);
@@ -14,14 +14,24 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
         if (!user?.id) return;
         const connection = createSocketConnection();
-        // The server refuses the socket once the session has ended (see socket.js on the backend)
-        connection.on("connect_error", (err) => {
-            if (/session ended|authentication required|user not found/i.test(err?.message || "")) {
+        // The server refuses the socket when the access token has run out (renew it and reconnect)
+        // or the session has ended (log out); see socket.js on the backend
+        let closed = false;
+        connection.on("connect_error", async (err) => {
+            const message = err?.message || "";
+            if (message === "TOKEN_EXPIRED") {
+                const result = await refreshSession();
+                if (closed) return;
+                if (result === "ended") window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+                // Renewed: connect now. Server unreachable: try again shortly (it may be restarting)
+                else setTimeout(() => !closed && connection.connect(), result === "renewed" ? 0 : 5000);
+            } else if (/session ended|authentication required|user not found/i.test(message)) {
                 window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
             }
         });
         setSocket(connection);
         return () => {
+            closed = true;
             connection.disconnect();
             setSocket(null);
         };

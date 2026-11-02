@@ -1,5 +1,9 @@
+// @ts-check
 /** Pure helpers that derive the AI assistant's reply-card lists from the reply generator response. */
 
+/**
+ * @param {Record<string, any> | null | undefined} replyData reply-generator response (fields vary by mode)
+ */
 export function deriveAIAssistantReplies(replyData) {
     const rewrites = replyData?.rewrites
         ? [

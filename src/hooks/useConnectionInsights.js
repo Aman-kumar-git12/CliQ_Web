@@ -13,8 +13,10 @@ import {
  * @param {{ current: string|null }} args.ownerIdRef signed-in user the loaders are working for
  * @param {(ownerId: string|null) => boolean} args.isStaleFor true when a response belongs to a previous account
  * @param {(value: boolean) => void} args.setPanelLoading panel spinner setter
+ * @param {boolean} [args.isAdmin] platform-wide analytics are admin-only on the server (403 for everyone else)
+ * @param {{ current: string|null }} [args.activePanelRef] the open insight panel ("dashboard" | "history" | "saved"), if any
  */
-export const useConnectionInsights = ({ ownerIdRef, isStaleFor, setPanelLoading }) => {
+export const useConnectionInsights = ({ ownerIdRef, isStaleFor, setPanelLoading, isAdmin = false, activePanelRef }) => {
     const [historyData, setHistoryData] = useState(createEmptyHistoryData);
     const [preferencesData, setPreferencesData] = useState(createEmptyPreferencesData);
     const [savedProfiles, setSavedProfiles] = useState([]);
@@ -114,12 +116,18 @@ export const useConnectionInsights = ({ ownerIdRef, isStaleFor, setPanelLoading 
         }
     };
 
+    // After a card or list action. Saved profiles and preferences drive the card badges, so they always
+    // reload; history and analytics are only shown in their panels, which load them when opened, so they
+    // reload only while that panel is open (this used to send six requests on every swipe)
     const refreshInsights = () => {
-        fetchHistory({ silent: true });
+        const panel = activePanelRef?.current;
         fetchSavedProfiles({ silent: true });
-        fetchAnalytics({ silent: true });
-        fetchAdminAnalytics({ silent: true });
         fetchPreferences({ silent: true });
+        if (panel === "history") fetchHistory({ silent: true });
+        if (panel === "dashboard") {
+            fetchAnalytics({ silent: true });
+            if (isAdmin) fetchAdminAnalytics({ silent: true });
+        }
     };
 
     return {

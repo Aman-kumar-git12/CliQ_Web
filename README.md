@@ -278,6 +278,8 @@ Conventions:
 
 Before every commit run `npm run check` (ESLint + Prettier + Vitest tests); `npm run format` fixes formatting and `npm run test:watch` re-runs tests as you edit. CI runs the same checks plus a build on every push. Components never call axios directly: they call a service function from `src/api/` (`auth`, `users`, `posts`, `connections`, `chat`, `aiChat`, `notifications`, `search`), which returns the response body. Services go through `src/api/axiosClient.js`, which retries failed reads, logs the user out when the session ends and shows an error toast; pass `{ silent: true }` as the last argument of a service call when a screen shows its own error message.
 
+Sessions: the backend's access cookie lasts 15 minutes. When a request gets `401 { code: "TOKEN_EXPIRED" }`, `axiosClient` calls `POST /auth/refresh` once (shared by every request waiting on it) and resends the request; the socket does the same on connect. Streaming calls use `fetchWithSession` from `axiosClient.js` instead of `fetch` to get the same behaviour. Error monitoring (Sentry) turns on when `VITE_SENTRY_DSN` is set at build time; `ErrorBoundary` reports page crashes. `Dockerfile` + `nginx.conf` build and serve the site in a container (`docker build --build-arg VITE_BACKEND_URL=... .`).
+
 ### # Backend
 
 ```

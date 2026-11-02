@@ -1,6 +1,11 @@
 const RequestsShimmering = () => {
     return (
-        <div className="w-full min-h-screen relative overflow-x-hidden pt-24 md:pt-12 bg-transparent animate-pulse">
+        <div
+            role="status"
+            aria-label="Loading connection requests"
+            aria-busy="true"
+            className="w-full min-h-screen relative overflow-x-hidden pt-24 md:pt-12 bg-transparent motion-safe:animate-pulse"
+        >
             <div className="px-4 md:px-0 max-w-full md:max-w-2xl mx-auto w-full pb-32">
                 {/* Header Skeleton Matching Precise Real UI */}
                 <div className="flex flex-col items-start justify-start relative z-10 mb-12">

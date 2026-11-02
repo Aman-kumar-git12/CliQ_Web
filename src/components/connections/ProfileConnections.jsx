@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
 import { useUserContext } from "../../context/UserContext";
 import { avatarUrl } from "../../utils/avatar";
+import ConnectionListShimmering from "../shimmering/ConnectionListShimmering";
 
 export default function ProfileConnections() {
     const navigate = useNavigate();
@@ -26,13 +27,7 @@ export default function ProfileConnections() {
         fetchConnections();
     }, []);
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center py-20">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-            </div>
-        );
-    }
+    if (loading) return <ConnectionListShimmering />;
 
     if (connections.length === 0) {
         return (
@@ -56,6 +51,8 @@ export default function ProfileConnections() {
                     >
                         <div className="w-14 h-14 rounded-full overflow-hidden bg-neutral-800 border-[2px] border-neutral-800 group-hover:border-neutral-700 transition-colors shrink-0">
                             <img
+                                loading="lazy"
+                                decoding="async"
                                 src={avatarUrl(user?.imageUrl)}
                                 alt={`${user.firstname} ${user.lastname}`}
                                 className="w-full h-full object-cover"

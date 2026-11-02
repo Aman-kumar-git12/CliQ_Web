@@ -27,10 +27,11 @@ export default function SplashScreen({ onFinish, isAppReady }) {
     );
 
     useEffect(() => {
-        // Minimum display time of 3.5 seconds to show off the cool animations
+        // Shown at least long enough for the logo animation, but no longer: it hides the app once the
+        // session check is done (it used to hold every first visit for 3.5 seconds)
         const timer = setTimeout(() => {
             setMinTimeElapsed(true);
-        }, 3500);
+        }, 1200);
 
         return () => clearTimeout(timer);
     }, []);

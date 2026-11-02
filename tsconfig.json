@@ -1,0 +1,25 @@
+{
+  "//": [
+    "Gradual TypeScript. New files may be .ts/.tsx and are always type-checked. Existing .js/.jsx files are",
+    "checked only when they start with // @ts-check (all of src/api and src/utils except the three files",
+    "below). `npm run typecheck` runs tsc; Vite still builds without it. Also drives editor IntelliSense.",
+    "Not yet opted in (owned by another change): src/api/axiosClient.js, src/api/auth.js, src/api/users.js."
+  ],
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": false,
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["vite/client", "vitest/globals"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

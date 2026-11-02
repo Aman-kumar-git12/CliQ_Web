@@ -204,6 +204,8 @@ export default function ChatInbox() {
                                         <div className="w-full h-full rounded-full overflow-hidden bg-black">
                                             {user?.imageUrl ? (
                                                 <img
+                                                    loading="lazy"
+                                                    decoding="async"
                                                     src={avatarUrl(user?.imageUrl)}
                                                     alt="" // the name is shown right next to it in the same button
                                                     className="w-full h-full object-cover"

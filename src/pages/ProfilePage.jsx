@@ -15,6 +15,7 @@ import ProfileStats from "../components/profile/ProfileStats";
 import ProfileTabs from "../components/profile/ProfileTabs";
 import { showErrorToast } from "../utils/toast";
 import { useEscapeKey } from "../hooks/useEscapeKey";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { useProfileHoverCard } from "../hooks/useProfileHoverCard";
 import OwnProfilePostsTab from "../components/profile/OwnProfilePostsTab";
 import ProfilePhotoViewer from "../components/profile/ProfilePhotoViewer";
@@ -25,7 +26,7 @@ const TABS = ["posts", "connections", "groups", "expertise"];
 export default function ProfilePage() {
     const { customTab } = useParams();
     const fileInputRef = useRef(null);
-    const { logout } = useUserContext();
+    const { logout, user: currentUser, setUser: setGlobalUser } = useUserContext();
     const containerRef = useRef(null);
 
     const [user, setUser] = useState(null);
@@ -133,7 +134,8 @@ export default function ProfilePage() {
         fetchProfile();
     }, []);
 
-    const profileUserId = user?.id;
+    // The logged-in user's id is already known, so the posts load alongside the profile instead of after it
+    const profileUserId = currentUser?.id;
 
     useEffect(() => {
         if (!profileUserId) return undefined;
@@ -175,7 +177,11 @@ export default function ProfilePage() {
 
         try {
             const data = await usersApi.updateProfileImage(formData, { silent: true });
-            setUser((prev) => ({ ...prev, imageUrl: data.imageUrl || data.user.imageUrl }));
+            // The server answers { message, imageUrl }; the sidebar and composer read the photo from UserContext
+            if (data?.imageUrl) {
+                setUser((prev) => ({ ...prev, imageUrl: data.imageUrl }));
+                setGlobalUser((prev) => (prev ? { ...prev, imageUrl: data.imageUrl } : prev));
+            }
             setShowUploadConfirm(false);
             setSelectedFile(null);
         } catch (error) {
@@ -209,10 +215,10 @@ export default function ProfilePage() {
     useEscapeKey(showImageViewer, () => setShowImageViewer(false));
     useEscapeKey(showExpertiseModal, () => setShowExpertiseModal(false));
 
-    useEffect(() => {
-        const isModalOpen = showExpertiseModal || showImageViewer || showLogoutPopup || showUploadConfirm;
-        document.body.style.overflow = isModalOpen ? "hidden" : "unset";
+    const isModalOpen = showExpertiseModal || showImageViewer || showLogoutPopup || showUploadConfirm;
+    useBodyScrollLock(isModalOpen);
 
+    useEffect(() => {
         // GLOBAL BLUR SYNC
         const rootElement = document.getElementById("root");
         if (rootElement) {
@@ -224,10 +230,9 @@ export default function ProfilePage() {
         }
 
         return () => {
-            document.body.style.overflow = "unset";
             if (rootElement) rootElement.classList.remove("global-modal-blur");
         };
-    }, [showExpertiseModal, showImageViewer, showLogoutPopup, showUploadConfirm]);
+    }, [isModalOpen]);
 
     if (loading) return <ProfileShimmering />;
     if (!user) return <div className="text-center text-white mt-10 font-bold">No user found</div>;

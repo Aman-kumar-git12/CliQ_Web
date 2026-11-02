@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X, AlertCircle, Loader2 } from "lucide-react";
 import { useEscapeKey } from "../../hooks/useEscapeKey";
+import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 
 const reportReasons = [
     "Spam",
@@ -18,16 +19,7 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
     const [selectedReason, setSelectedReason] = useState("");
     const [otherReason, setOtherReason] = useState("");
 
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "unset";
-        }
-        return () => {
-            document.body.style.overflow = "unset";
-        };
-    }, [isOpen]);
+    useBodyScrollLock(isOpen);
 
     useEscapeKey(isOpen, onClose);
 
@@ -110,6 +102,7 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
                         <textarea
                             value={otherReason}
                             onChange={(e) => setOtherReason(e.target.value)}
+                            maxLength={500}
                             placeholder="Please explain the issue..."
                             aria-label="Describe the issue"
                             className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/50 transition-colors resize-none h-24"

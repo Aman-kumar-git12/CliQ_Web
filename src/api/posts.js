@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * Posts: creating, editing and deleting posts, comments, likes, reposts, saves, reports,
  * the Home feeds and link previews.
@@ -178,13 +179,18 @@ export const getRandomFeed = async (excludeIds, config) =>
     (await axiosClient.post("/post/feed/random", { excludeIds }, config)).data;
 
 /**
- * Returns a page of the Following feed.
- * @param {number} page 1-based page number
+ * Returns a page of the Following feed, newest first.
+ * @param {string | null} [cursor] nextCursor from the previous page; omit for the first page
  * @param {RequestConfig} [config]
  * @returns {Promise<{ posts: object[], hasMore: boolean }>}
  */
-export const getFollowingFeed = async (page, config) =>
-    (await axiosClient.get("/post/feed/following", { ...config, params: { page } })).data;
+export const getFollowingFeed = async (cursor, config) =>
+    (
+        await axiosClient.get(
+            "/post/feed/following",
+            /** @type {RequestConfig} */ ({ ...config, params: cursor ? { cursor } : {} }),
+        )
+    ).data;
 
 /**
  * Returns a page of the Trending feed.
@@ -193,7 +199,7 @@ export const getFollowingFeed = async (page, config) =>
  * @returns {Promise<{ posts: object[], hasMore: boolean }>}
  */
 export const getTrendingFeed = async (page, config) =>
-    (await axiosClient.get("/post/feed/trending", { ...config, params: { page } })).data;
+    (await axiosClient.get("/post/feed/trending", /** @type {RequestConfig} */ ({ ...config, params: { page } }))).data;
 
 /**
  * Returns the preview card (title, image…) for a URL.
@@ -202,4 +208,4 @@ export const getTrendingFeed = async (page, config) =>
  * @returns {Promise<{ preview?: object | null }>}
  */
 export const getLinkPreview = async (url, config) =>
-    (await axiosClient.get("/link-preview", { ...config, params: { url } })).data;
+    (await axiosClient.get("/link-preview", /** @type {RequestConfig} */ ({ ...config, params: { url } }))).data;

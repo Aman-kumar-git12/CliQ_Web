@@ -24,3 +24,11 @@ dist-ssr
 *.sln
 *.sw?
 
+
+# Playwright and Lighthouse CI output
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/.lighthouseci/
+/dist-e2e/

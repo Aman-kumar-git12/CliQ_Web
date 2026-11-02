@@ -1,10 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import * as connectionsApi from "../api/connections";
 import * as notificationsApi from "../api/notifications";
 import { useSocket } from "./SocketContext";
 import { useUserContext } from "./UserContext";
 
 const NotificationContext = createContext(null);
 const PAGE_SIZE = 20;
+const REQUESTS_POLL_MS = 60000;
 
 export const NotificationProvider = ({ children }) => {
     const { user } = useUserContext();
@@ -12,6 +14,10 @@ export const NotificationProvider = ({ children }) => {
     const [unreadCount, setUnreadCount] = useState(0);
     const [nextCursor, setNextCursor] = useState(null);
     const [loading, setLoading] = useState(false);
+    // Connection requests waiting for an answer (the Requests badge in the sidebar and the mobile nav).
+    // Loaded here once for the whole app instead of by each nav, which polled it separately.
+    const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+    const requestsGenerationRef = useRef(0);
     const socket = useSocket();
     // Bumped by every refresh and on user change: a response from an older generation (a slower
     // refresh, or the previous account after a logout) is ignored instead of overwriting newer data.
@@ -64,6 +70,29 @@ export const NotificationProvider = ({ children }) => {
         }
     }, [fetchPage, nextCursor, loading]);
 
+    const refreshPendingRequests = useCallback(async () => {
+        const generation = ++requestsGenerationRef.current;
+        try {
+            const data = await connectionsApi.getConnectionRequests({ silent: true });
+            if (generation !== requestsGenerationRef.current) return; // a newer refresh (or a logout) won
+            setPendingRequestsCount(data?.connectionRequests?.length ?? 0);
+        } catch (err) {
+            if (generation !== requestsGenerationRef.current) return;
+            console.error("Failed to load connection requests:", err);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!user?.id) {
+            requestsGenerationRef.current += 1;
+            setPendingRequestsCount(0);
+            return undefined;
+        }
+        refreshPendingRequests();
+        const interval = setInterval(refreshPendingRequests, REQUESTS_POLL_MS);
+        return () => clearInterval(interval);
+    }, [user?.id, refreshPendingRequests]);
+
     // Initial load + live socket while logged in.
     useEffect(() => {
         if (!user?.id) {
@@ -84,6 +113,7 @@ export const NotificationProvider = ({ children }) => {
             // Re-liking a post refreshes an existing notification, so move it to the top.
             setNotifications((prev) => [notification, ...prev.filter((n) => n.id !== notification.id)]);
             if (typeof count === "number") setUnreadCount(count);
+            if (notification?.type === "connection_request") refreshPendingRequests();
         };
         const onCount = ({ unreadCount: count }) => {
             if (typeof count === "number") setUnreadCount(count);
@@ -91,13 +121,17 @@ export const NotificationProvider = ({ children }) => {
         socket.on("notification:new", onNew);
         socket.on("notification:count", onCount);
         // Notifications missed while disconnected are picked up on reconnect.
-        socket.io.on("reconnect", refresh);
+        const onReconnect = () => {
+            refresh();
+            refreshPendingRequests();
+        };
+        socket.io.on("reconnect", onReconnect);
         return () => {
             socket.off("notification:new", onNew);
             socket.off("notification:count", onCount);
-            socket.io.off("reconnect", refresh);
+            socket.io.off("reconnect", onReconnect);
         };
-    }, [socket, refresh]);
+    }, [socket, refresh, refreshPendingRequests]);
 
     const markRead = useCallback(
         async (notificationId) => {
@@ -154,6 +188,8 @@ export const NotificationProvider = ({ children }) => {
                 markRead,
                 markAllRead,
                 removeNotification,
+                pendingRequestsCount,
+                refreshPendingRequests,
             }}
         >
             {children}

@@ -15,10 +15,11 @@ import ProfileTabs from "../components/profile/ProfileTabs";
 import PublicProfilePostsTab from "../components/profile/PublicProfilePostsTab";
 import PublicProfileConnectionsTab from "../components/profile/PublicProfileConnectionsTab";
 import PublicProfileGroupsTab from "../components/profile/PublicProfileGroupsTab";
+import { invalidateCachedRequests } from "../utils/requestCache";
 
 const TABS = ["posts", "connections", "groups", "expertise"];
 
-const PublicProfilePage = () => {
+const PublicProfileView = () => {
     const { userId: userIdFromUrl } = useParams();
     const navigate = useNavigate();
     const containerRef = useRef(null);
@@ -120,7 +121,9 @@ const PublicProfilePage = () => {
         return () => controller.abort();
     }, [userIdFromUrl]);
 
-    const profileUserId = user?.id;
+    // The URL already holds the user's id, so posts, connections and groups load alongside the profile
+    // instead of waiting for it
+    const profileUserId = userIdFromUrl;
 
     useEffect(() => {
         if (!profileUserId) return undefined;
@@ -205,6 +208,7 @@ const PublicProfilePage = () => {
         try {
             await connectionsApi.sendConnectionRequest(user.id, "interested", undefined, { silent: true });
             setConnectionStatus("requested");
+            invalidateCachedRequests(`hover-card:${user.id}`);
             showSnack("Request sent successfully");
         } catch (error) {
             console.error("Connect failed:", error);
@@ -337,6 +341,13 @@ const PublicProfilePage = () => {
             )}
         </div>
     );
+};
+
+// Keyed by the user id: opening another profile from this one (a connection, the hover card) starts from
+// a clean state instead of showing the previous person's posts and tab until the new ones arrive
+const PublicProfilePage = () => {
+    const { userId } = useParams();
+    return <PublicProfileView key={userId} />;
 };
 
 export default PublicProfilePage;

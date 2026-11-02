@@ -237,12 +237,15 @@ const PostCard = ({ post }) => {
                             <video
                                 src={target.video}
                                 controls
+                                preload="metadata"
                                 onClick={(e) => e.stopPropagation()}
                                 className="w-full max-h-[400px] object-contain"
                             />
                         ) : (
                             images.map((img) => (
                                 <img
+                                    loading="lazy"
+                                    decoding="async"
                                     key={img}
                                     src={img}
                                     className="w-full max-h-[400px] h-auto object-contain"

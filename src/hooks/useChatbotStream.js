@@ -1,7 +1,7 @@
 /** Chatbot answer streaming: sends a question (or regenerates) and streams the reply over SSE with smooth typing. */
 import { useEffect, useRef, useState } from "react";
 import * as aiChatApi from "../api/aiChat";
-import { apiBaseUrl } from "../api/axiosClient";
+import { apiBaseUrl, fetchWithSession } from "../api/axiosClient";
 import { httpErrorMessage, NETWORK_ERROR } from "../components/chatbot/constants";
 import { readSseEvents } from "../utils/readSseEvents";
 
@@ -92,10 +92,9 @@ export const useChatbotStream = ({
                 setSessions((prev) => [created.session, ...prev]);
             }
 
-            const response = await fetch(`${apiBaseUrl}/aichat/stream`, {
+            const response = await fetchWithSession(`${apiBaseUrl}/aichat/stream`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                credentials: "include",
                 signal: controller.signal,
                 body: JSON.stringify({
                     sessionId: targetSessionId,

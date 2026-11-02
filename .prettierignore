@@ -3,3 +3,7 @@ node_modules/
 package-lock.json
 package-lock 2.json
 public/
+playwright-report/
+test-results/
+.lighthouseci/
+dist-e2e/

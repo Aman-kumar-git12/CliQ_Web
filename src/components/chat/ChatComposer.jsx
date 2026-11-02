@@ -89,6 +89,7 @@ const ChatComposer = ({
                             <textarea
                                 ref={inputRef}
                                 rows="1"
+                                maxLength={5000}
                                 value={newMessage}
                                 onChange={(e) => {
                                     setNewMessage(e.target.value);

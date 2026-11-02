@@ -1,7 +1,12 @@
 const CreatePostShimmering = () => {
     return (
-        <div className="w-full min-h-screen relative overflow-x-hidden pt-[80px] md:pt-4 bg-transparent text-white transition-all duration-500">
-            <div className="px-4 md:px-0 max-w-full md:max-w-2xl mx-auto w-full pb-20 animate-pulse">
+        <div
+            role="status"
+            aria-label="Loading post editor"
+            aria-busy="true"
+            className="w-full min-h-screen relative overflow-x-hidden pt-[80px] md:pt-4 bg-transparent text-white transition-all duration-500"
+        >
+            <div className="px-4 md:px-0 max-w-full md:max-w-2xl mx-auto w-full pb-20 motion-safe:animate-pulse">
                 {/* Header Section Skeleton */}
                 <div className="flex flex-col items-start justify-start relative z-10 mb-4 px-2">
                     <div className="h-4 w-32 bg-white/10 rounded-full mb-3"></div>

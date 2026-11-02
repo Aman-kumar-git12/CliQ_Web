@@ -1,21 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-    Bell,
-    Heart,
-    MessageCircle,
-    UserPlus,
-    UserCheck,
-    CheckCheck,
-    X,
-    Loader2,
-    AtSign,
-    Reply,
-    Repeat2,
-} from "lucide-react";
+import { Bell, Heart, MessageCircle, UserPlus, UserCheck, CheckCheck, X, AtSign, Reply, Repeat2 } from "lucide-react";
 import { useNotifications } from "../context/NotificationContext";
 import { timeAgo } from "../utils/timeAgo";
 import { DEFAULT_AVATAR } from "../utils/avatar";
+import NotificationsShimmering from "../components/shimmering/NotificationsShimmering";
 
 const TYPE_META = {
     like: { icon: Heart, tint: "text-pink-400 bg-pink-500/15", text: () => "liked your post" },
@@ -120,6 +109,8 @@ export default function NotificationsPage() {
                             >
                                 <div className="relative shrink-0">
                                     <img
+                                        loading="lazy"
+                                        decoding="async"
                                         src={n.actor?.imageUrl || DEFAULT_AVATAR}
                                         alt={actorName}
                                         className="w-11 h-11 md:w-12 md:h-12 rounded-[14px] object-cover border border-white/10"
@@ -146,6 +137,8 @@ export default function NotificationsPage() {
 
                                 {n.post?.image && (
                                     <img
+                                        loading="lazy"
+                                        decoding="async"
                                         src={n.post.image}
                                         alt=""
                                         className="hidden sm:block w-12 h-12 rounded-xl object-cover border border-white/10 shrink-0"
@@ -187,10 +180,13 @@ export default function NotificationsPage() {
                     </div>
                 )}
 
+                {/* First load: a page of rows; loading more: a couple below the list */}
                 {loading && (
-                    <div className="flex justify-center py-6 text-brand">
-                        <Loader2 className="animate-spin" size={22} />
-                    </div>
+                    <NotificationsShimmering
+                        withHeader={false}
+                        rows={notifications.length ? 2 : 6}
+                        label={notifications.length ? "Loading more notifications" : "Loading notifications"}
+                    />
                 )}
 
                 {hasMore && !loading && (

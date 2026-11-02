@@ -1,3 +1,5 @@
+import AuthLegalLinks from "./AuthLegalLinks";
+
 export default function GoogleAuthButton({ label = "continue_with" }) {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const mode = label === "signup_with" ? "signup" : "signin";
@@ -23,6 +25,7 @@ export default function GoogleAuthButton({ label = "continue_with" }) {
                 <span>{buttonText}</span>
             </button>
             {!backendUrl ? <p className="text-sm text-red-500">Google sign-in is not configured.</p> : null}
+            <AuthLegalLinks />
         </div>
     );
 }

@@ -10,7 +10,9 @@ import ExpertiseSnackbar from "../components/expertise/ExpertiseSnackbar";
 import ExpertiseStudioForm from "../components/expertise/ExpertiseStudioForm";
 import ExpertiseStudioHeader from "../components/expertise/ExpertiseStudioHeader";
 import ExpertiseTemplatePicker from "../components/expertise/ExpertiseTemplatePicker";
+import ExpertiseStudioShimmering from "../components/shimmering/ExpertiseStudioShimmering";
 import { useEscapeKey } from "../hooks/useEscapeKey";
+import { useBodyScrollLock } from "../hooks/useBodyScrollLock";
 import { useExpertiseStudioFields } from "../hooks/useExpertiseStudioFields";
 
 const ExpertiseStudioPage = () => {
@@ -47,6 +49,9 @@ const ExpertiseStudioPage = () => {
     } = form;
 
     // UI State
+    // The saved expertise fills the form; until it arrives the page shows its skeleton (saving an
+    // empty form meanwhile would overwrite it)
+    const [loadingProfile, setLoadingProfile] = useState(true);
     const [snackbar, setSnackbar] = useState({ open: false, message: "", type: "success" });
     const [showConfirm, setShowConfirm] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -156,6 +161,7 @@ const ExpertiseStudioPage = () => {
                 if (controller.signal.aborted) return;
                 console.error("Failed to fetch expertise:", err);
             }
+            setLoadingProfile(false);
         };
         fetchExpertise();
         return () => controller.abort();
@@ -163,17 +169,7 @@ const ExpertiseStudioPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        const isModalOpen = isAIModalOpen || isSaving || showConfirm;
-        if (isModalOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "unset";
-        }
-        return () => {
-            document.body.style.overflow = "unset";
-        };
-    }, [isAIModalOpen, isSaving, showConfirm]);
+    useBodyScrollLock(isAIModalOpen || isSaving || showConfirm);
 
     const showSnackbar = (message, type = "success") => {
         setSnackbar({ open: true, message, type });
@@ -215,6 +211,8 @@ const ExpertiseStudioPage = () => {
             showSnackbar("Failed to update expertise", "error");
         }
     };
+
+    if (loadingProfile) return <ExpertiseStudioShimmering />;
 
     return (
         <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-indigo-200/60 relative overflow-hidden">

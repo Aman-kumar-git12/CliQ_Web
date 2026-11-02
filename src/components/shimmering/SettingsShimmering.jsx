@@ -1,6 +1,11 @@
 const SettingsShimmering = () => {
     return (
-        <div className="w-full min-h-screen bg-transparent text-white pt-10 px-5 pb-24 max-w-2xl mx-auto animate-pulse">
+        <div
+            role="status"
+            aria-label="Loading settings"
+            aria-busy="true"
+            className="w-full min-h-screen bg-transparent text-white pt-10 px-5 pb-24 max-w-2xl mx-auto motion-safe:animate-pulse"
+        >
             {/* Header Skeleton Matching Exact Real UI Typography */}
             <div className="mb-10">
                 {/* 32px height for h1 title */}

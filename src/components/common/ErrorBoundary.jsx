@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { reportError } from "../../utils/monitoring";
 
 // Catches a crash in any page below it and shows a recovery screen instead of blanking the whole app.
 // App gives it key={pathname}, so moving to another page starts fresh.
@@ -11,6 +12,7 @@ export default class ErrorBoundary extends Component {
 
     componentDidCatch(error, info) {
         console.error("Page crashed:", error, info.componentStack);
+        reportError(error, { componentStack: info.componentStack });
     }
 
     render() {

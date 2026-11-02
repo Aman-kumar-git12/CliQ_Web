@@ -1,3 +1,4 @@
+// @ts-check
 /*
  * Search: the search page results and trending hashtags.
  * Every function returns the response body; errors propagate unchanged.
@@ -14,7 +15,7 @@ import axiosClient from "./axiosClient";
  * @returns {Promise<object>} result lists keyed by type
  */
 export const searchAll = async (query, type, config) =>
-    (await axiosClient.get("/search", { ...config, params: { q: query, type } })).data;
+    (await axiosClient.get("/search", /** @type {RequestConfig} */ ({ ...config, params: { q: query, type } }))).data;
 
 /**
  * Returns the most-used hashtags of the last 30 days.

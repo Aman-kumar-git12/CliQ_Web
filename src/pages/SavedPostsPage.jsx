@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Bookmark, Loader2 } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import * as postsApi from "../api/posts";
 import PostCard from "../components/posts/PostCard";
+import SavedPostsShimmering from "../components/shimmering/SavedPostsShimmering";
 
 export default function SavedPostsPage() {
     const [posts, setPosts] = useState([]);
@@ -58,10 +59,13 @@ export default function SavedPostsPage() {
                 </div>
             )}
 
+            {/* First load: a few post cards; loading more: one below the list */}
             {loading && (
-                <div className="flex justify-center py-6 text-brand">
-                    <Loader2 className="animate-spin" size={22} />
-                </div>
+                <SavedPostsShimmering
+                    withHeader={false}
+                    count={posts.length ? 1 : 3}
+                    label={posts.length ? "Loading more saved posts" : "Loading saved posts"}
+                />
             )}
 
             {nextCursor && !loading && (

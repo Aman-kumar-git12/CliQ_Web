@@ -43,7 +43,7 @@ const ChatPage = () => {
     const assistant = useChatAssistant({ targetuserId, actionParam, navigate, user });
     const selection = useChatSelection({ messages, setMessages, setToast, targetuserId });
     const { setIsSelectMode, setSelectedMessages, toggleMessageSelection } = selection;
-    const { targetUser, canMessage, setCanMessage, loading } = useChatConversation({
+    const { targetUser, canMessage, setCanMessage, loading, reloadHistory } = useChatConversation({
         targetuserId,
         user,
         setMessages,
@@ -77,6 +77,7 @@ const ChatPage = () => {
         targetUser,
         setMessages,
         scrollToBottom,
+        onReconnect: reloadHistory,
     });
     const menu = useChatMessageMenu({ setMessages, targetuserId, setNewMessage, inputRef });
     const { handleAssistantGenerate, handleAISubmit } = useChatAssistantRequests({

@@ -1,3 +1,4 @@
+// @ts-check
 import io from "socket.io-client";
 
 const createSocketConnection = () => {

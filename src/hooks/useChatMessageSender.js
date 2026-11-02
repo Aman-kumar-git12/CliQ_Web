@@ -86,15 +86,32 @@ export const useChatMessageSender = ({
 
     const handleUpdateMessage = async () => {
         if (!updateMessage || !newMessage.trim()) return;
+        const currentMsgId = updateMessage;
+        const editedText = newMessage;
+        let previousText;
+        setMessages((prev) =>
+            prev.map((msg) => {
+                if (msg.id !== currentMsgId) return msg;
+                previousText = msg.text;
+                return { ...msg, text: editedText };
+            }),
+        );
+        setUpdateMessage(null);
+        setNewMessage("");
+        if (inputRef.current) inputRef.current.style.height = "auto";
         try {
-            setMessages((prev) => prev.map((msg) => (msg.id === updateMessage ? { ...msg, text: newMessage } : msg)));
-            const currentMsgId = updateMessage;
-            setUpdateMessage(null);
-            setNewMessage("");
-            if (inputRef.current) inputRef.current.style.height = "auto";
-            await chatApi.updateChatMessage(currentMsgId, { text: newMessage });
+            await chatApi.updateChatMessage(currentMsgId, { text: editedText }, { silent: true });
         } catch (error) {
             console.error("Error updating message:", error);
+            // The server kept the old text: show it again instead of an edit that didn't happen
+            if (previousText !== undefined) {
+                setMessages((prev) =>
+                    prev.map((msg) =>
+                        msg.id === currentMsgId && msg.text === editedText ? { ...msg, text: previousText } : msg,
+                    ),
+                );
+            }
+            setToast(error.response?.data?.message || "Message not edited. Please try again.");
         }
     };
 

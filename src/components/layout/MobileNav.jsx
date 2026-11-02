@@ -1,35 +1,13 @@
-import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Home, Compass, PlusSquare, User, Users } from "lucide-react";
-import * as connectionsApi from "../../api/connections";
+import { useNotifications } from "../../context/NotificationContext";
 
 const MobileNav = () => {
     const location = useLocation();
-    const [pendingCount, setPendingCount] = useState(0);
+    // Shared with the sidebar through NotificationContext (one request for both, not one per nav)
+    const { pendingRequestsCount: pendingCount } = useNotifications();
     const activePath = location.pathname;
-
-    useEffect(() => {
-        const controller = new AbortController(); // a poll still in flight is dropped on unmount
-        const fetchPendingCount = async () => {
-            try {
-                const data = await connectionsApi.getConnectionRequests({ signal: controller.signal });
-                if (data?.connectionRequests) {
-                    setPendingCount(data.connectionRequests.length);
-                }
-            } catch (err) {
-                if (controller.signal.aborted) return;
-                console.error("Error fetching mobile nav requests count:", err);
-            }
-        };
-
-        fetchPendingCount();
-        const interval = setInterval(fetchPendingCount, 60000); // Polling every minute
-        return () => {
-            clearInterval(interval);
-            controller.abort();
-        };
-    }, []);
 
     const navItems = [
         { path: "/home", icon: Home, label: "Feed" },

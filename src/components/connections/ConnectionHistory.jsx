@@ -130,6 +130,8 @@ const ConnectionHistory = ({
                                 <div className="flex items-center gap-3 md:gap-4 min-w-0">
                                     <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden bg-neutral-800 shrink-0 border border-white/5">
                                         <img
+                                            loading="lazy"
+                                            decoding="async"
                                             src={avatarUrl(candidate?.imageUrl)}
                                             alt={`${candidate?.firstname} ${candidate?.lastname}`}
                                             className="w-full h-full object-cover"
@@ -249,6 +251,8 @@ const ConnectionHistory = ({
                             <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-12 h-12 rounded-full overflow-hidden bg-neutral-800 shrink-0">
                                     <img
+                                        loading="lazy"
+                                        decoding="async"
                                         src={avatarUrl(event.candidate?.imageUrl)}
                                         alt={
                                             event.candidate

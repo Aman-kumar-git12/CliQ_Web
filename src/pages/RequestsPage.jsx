@@ -7,11 +7,13 @@ import Toastbar from "../components/chat/Toastbar";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, UserMinus, UserCheck, Inbox, Bell, Zap } from "lucide-react";
 import ProfileHoverCard from "../components/profile/ProfileHoverCard";
+import { useNotifications } from "../context/NotificationContext";
+import { invalidateCachedRequests } from "../utils/requestCache";
 
 export default function RequestsPage() {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [loadingReview, setLoadingReview] = useState(false);
+    const { refreshPendingRequests } = useNotifications();
     const [toast, setToast] = useState(null);
 
     const [confirmation, setConfirmation] = useState({
@@ -46,7 +48,7 @@ export default function RequestsPage() {
 
         fetchAllRequests();
         return () => controller.abort();
-    }, [loadingReview]);
+    }, []);
 
     const openConfirmation = (userId, status, requestId) => {
         setConfirmation({
@@ -63,8 +65,10 @@ export default function RequestsPage() {
 
         try {
             await connectionsApi.reviewConnectionRequest(type, requestId, { silent: true });
-            setLoadingReview(!loadingReview);
+            // The answered request just leaves the list (no reload of the whole list); the nav badge updates too
             setRequests((prev) => prev.filter((req) => req.fromUserId !== userId));
+            refreshPendingRequests();
+            invalidateCachedRequests(`hover-card:${userId}`);
             setToast(type === "accepted" ? "Connection Request Accepted" : "Connection Request Rejected");
         } catch (err) {
             console.error(err);
@@ -196,6 +200,8 @@ export default function RequestsPage() {
                                                 <div className="absolute -inset-1 bg-gradient-to-br from-brand to-brand-pink rounded-full opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-500" />
                                                 <div className="w-[48px] h-[48px] md:w-[56px] md:h-[56px] rounded-[14px] md:rounded-[18px] overflow-hidden border border-surface-700 group-hover:border-brand/50 transition-all duration-500 shadow-2xl p-[0.5px] bg-gradient-to-br from-brand/20 to-brand-pink/20">
                                                     <img
+                                                        loading="lazy"
+                                                        decoding="async"
                                                         src={req.fromUser?.imageUrl || "/default-avatar.png"}
                                                         className="w-full h-full object-cover rounded-[13px] md:rounded-[17px]"
                                                         alt={

@@ -26,6 +26,8 @@ const ConnectionSaved = ({ savedProfiles, handleRemoveSaved, handleSendFromSaved
                     <div className="flex items-center gap-4 min-w-0">
                         <div className="w-16 h-16 rounded-full overflow-hidden bg-neutral-800 shrink-0">
                             <img
+                                loading="lazy"
+                                decoding="async"
                                 src={avatarUrl(item.candidate?.imageUrl)}
                                 alt={`${item.candidate?.firstname} ${item.candidate?.lastname}`}
                                 className="w-full h-full object-cover"

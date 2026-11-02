@@ -1,6 +1,7 @@
 /** Post detail page: connection status with the post author and the Follow action. */
 import { useState, useEffect } from "react";
 import * as connectionsApi from "../api/connections";
+import { invalidateCachedRequests } from "../utils/requestCache";
 
 export function usePostDetailConnection({ post, currentUserId, setToastMessage, setShowToast }) {
     // Check connection status
@@ -30,6 +31,7 @@ export function usePostDetailConnection({ post, currentUserId, setToastMessage, 
         try {
             await connectionsApi.sendConnectionRequest(post.userId, "interested", {}, { silent: true });
             setConnectionStatus("interested");
+            invalidateCachedRequests(`hover-card:${post.userId}`);
             setToastMessage("Follow request sent 🚀");
             setShowToast(true);
         } catch (error) {

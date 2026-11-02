@@ -8,6 +8,7 @@ export default function AIAssistantComposer({ inputRef, inputValue, onInputChang
                 <textarea
                     ref={inputRef}
                     rows={1}
+                    maxLength={4000}
                     value={inputValue}
                     onChange={(e) => onInputChange?.(e.target.value)}
                     onKeyDown={(e) => {

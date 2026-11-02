@@ -28,6 +28,8 @@ const CommentRow = ({ comment, isReply, currentUser, onReply, onDelete, onReport
                 className="shrink-0"
             >
                 <img
+                    loading="lazy"
+                    decoding="async"
                     src={comment.avatar || DEFAULT_AVATAR}
                     alt={comment.username || "Anonymous"}
                     className={`${avatarSize} rounded-full object-cover`}
@@ -177,6 +179,8 @@ export default function CommentThread({
                     {replyTo && (
                         <form onSubmit={submit} className="flex items-start gap-2">
                             <img
+                                loading="lazy"
+                                decoding="async"
                                 src={currentUser?.imageUrl || DEFAULT_AVATAR}
                                 alt=""
                                 className="w-8 h-8 rounded-full object-cover shrink-0"

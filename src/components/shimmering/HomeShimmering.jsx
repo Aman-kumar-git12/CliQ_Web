@@ -1,85 +1,50 @@
+import PostCardShimmering from "./PostCardShimmering";
+
+// Mirrors HomePage: post composer, feed tabs and post cards in the feed column, plus the right sidebar on wide screens
 const HomeShimmering = () => {
     return (
-        <div className="flex justify-center gap-12 w-full pt-8 px-4 bg-transparent animate-pulse">
+        <div
+            role="status"
+            aria-label="Loading feed"
+            aria-busy="true"
+            className="relative flex justify-center gap-10 w-full pt-[85px] md:pt-4 pb-24 md:pb-8 min-h-screen px-4 xl:px-0 bg-transparent motion-safe:animate-pulse"
+        >
             {/* FEED COLUMN SKELETON */}
-            <div className="flex-grow max-w-[560px] w-full">
-                {[1, 2, 3].map((item) => (
-                    <div
-                        key={item}
-                        className="cliq-feed-panel rounded-2xl p-3.5 mb-3 relative flex flex-col w-full mx-auto"
-                    >
-                        {/* Header Section */}
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2.5">
-                                {/* Avatar Skeleton (9x9) */}
-                                <div className="w-9 h-9 rounded-full bg-brand-light/15 border-2 border-black/20 flex-shrink-0"></div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <div className="h-3.5 w-28 bg-brand-light/20 rounded-full"></div>
-                                    <div className="flex items-center gap-1.5">
-                                        <div className="h-2 w-14 bg-brand-light/10 rounded-full"></div>
-                                        <div className="w-1 h-1 rounded-full bg-brand-light/10"></div>
-                                        <div className="h-2 w-10 bg-blue-500/10 rounded-full"></div>
-                                    </div>
-                                </div>
+            <div className="relative flex-grow max-w-[640px] w-full flex flex-col items-center md:items-stretch">
+                {/* Post composer */}
+                <div className="cliq-feed-panel rounded-[1.5rem] p-4 mb-6 max-w-[560px] w-full self-center mx-auto">
+                    <div className="flex items-start gap-3.5">
+                        <div className="w-10 h-10 rounded-full bg-brand-light/15 shrink-0"></div>
+                        <div className="flex-1 flex flex-col gap-2.5">
+                            <div className="w-full min-h-[60px] rounded-xl bg-white/[0.02] border border-white/5 px-4 py-3">
+                                <div className="h-3 w-1/2 bg-brand-light/10 rounded-full"></div>
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-brand-light/5"></div>
-                        </div>
-
-                        {/* Content Area Skeleton */}
-                        <div className="px-0.5 mt-1">
-                            {/* Text lines */}
-                            <div className="space-y-2.5 mb-4">
-                                <div className="h-3 w-full bg-brand-light/15 rounded-full"></div>
-                                <div className="h-3 w-[92%] bg-brand-light/15 rounded-full"></div>
-                                <div className="h-3 w-[65%] bg-brand-light/15 rounded-full"></div>
-                            </div>
-
-                            {/* Media Area Skeleton (Realistic Match) */}
-                            <div className="w-full h-[320px] bg-black/40 rounded-lg mb-4 border border-white/5 relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                                {/* Caption placeholder */}
-                                <div className="absolute bottom-4 left-4 h-3 w-32 bg-white/10 rounded-full"></div>
-                            </div>
-
-                            {/* Hashtags placeholders */}
-                            <div className="flex gap-2 mb-4">
-                                <div className="h-4 w-16 bg-violet-500/10 border border-violet-300/10 rounded-full"></div>
-                                <div className="h-4 w-14 bg-violet-500/10 border border-violet-300/10 rounded-full"></div>
-                                <div className="h-4 w-18 bg-violet-500/10 border border-violet-300/10 rounded-full"></div>
-                            </div>
-                        </div>
-
-                        {/* Actions Section Skeleton */}
-                        <div className="flex items-center justify-between pt-3 border-t cliq-feed-divider px-0.5">
-                            <div className="flex items-center gap-5">
-                                {/* Like / Comment / Repeat */}
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-md bg-brand-light/10"></div>
-                                    <div className="h-2.5 w-6 bg-brand-light/10 rounded-full"></div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-md bg-brand-light/10"></div>
-                                    <div className="h-2.5 w-6 bg-brand-light/10 rounded-full"></div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-4 h-4 rounded-md bg-brand-light/10"></div>
-                                    <div className="h-2.5 w-6 bg-brand-light/10 rounded-full"></div>
-                                </div>
-                            </div>
-
-                            {/* Share button */}
-                            <div className="flex items-center gap-2">
-                                <div className="w-3.5 h-3.5 bg-brand-light/10 rounded-sm"></div>
-                                <div className="h-2.5 w-12 bg-brand-light/10 rounded-full"></div>
+                            <div className="flex items-center justify-between pt-3 border-t cliq-feed-divider">
+                                <div className="h-7 w-20 rounded-full bg-white/[0.04] border border-white/5"></div>
+                                <div className="h-7 w-24 rounded-full bg-brand-light/15"></div>
                             </div>
                         </div>
                     </div>
-                ))}
+                </div>
+
+                {/* Feed tabs */}
+                <div className="flex items-center gap-6 sm:gap-10 mb-6 border-b cliq-feed-divider px-4 max-w-[560px] w-full self-center">
+                    {["w-14", "w-[72px]", "w-16"].map((width) => (
+                        <div key={width} className="pb-3">
+                            <div className={`h-3 ${width} bg-brand-light/10 rounded-full`}></div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="space-y-4 pb-20 w-full">
+                    {[1, 2, 3].map((item) => (
+                        <PostCardShimmering key={item} nested />
+                    ))}
+                </div>
             </div>
 
             {/* RIGHT SIDEBAR COLUMN SKELETON (Aligned with Purple Theme) */}
-            <div className="hidden lg:block w-[320px] shrink-0 sticky top-8 h-fit">
+            <div className="relative hidden xl:block w-[320px] shrink-0 pt-2 px-1">
                 {/* User Card Skeleton */}
                 <div className="flex items-center justify-between p-4 bg-surface-850 border border-white/5 rounded-2xl mb-8 shadow-2xl">
                     <div className="flex items-center gap-3">

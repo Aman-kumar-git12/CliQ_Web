@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { Play, Repeat2 } from "lucide-react";
 import { toProfileTiles } from "../../utils/profilePostTiles";
+import PostTileGridShimmering from "../shimmering/PostTileGridShimmering";
 
 export default function OwnProfilePostsTab({ user, posts, loadingPosts }) {
     return (
@@ -14,6 +15,8 @@ export default function OwnProfilePostsTab({ user, posts, loadingPosts }) {
                     </span>
                 </h2>
             </div>
+
+            {loadingPosts && posts.length === 0 && <PostTileGridShimmering />}
 
             {!loadingPosts && posts.length === 0 && (
                 <div className="text-center py-20 bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-white/10 mx-2">
@@ -49,6 +52,8 @@ export default function OwnProfilePostsTab({ user, posts, loadingPosts }) {
                             </>
                         ) : post.image ? (
                             <img
+                                loading="lazy"
+                                decoding="async"
                                 src={post.image}
                                 alt={`Post by ${[user.firstname, user.lastname].filter(Boolean).join(" ")}`}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"

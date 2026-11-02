@@ -3,6 +3,7 @@ import * as postsApi from "../api/posts";
 import { useFeedContext } from "../context/FeedContext";
 import { useUserContext } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import { likesCountAfterToggle } from "../utils/postLikes";
 
 export const usePostcard = (post) => {
     const navigate = useNavigate();
@@ -178,13 +179,10 @@ export const usePostcard = (post) => {
 
         try {
             const like = await postsApi.togglePostLike(post.id);
+            const nextCount = likesCountAfterToggle(previousLiked, previousCount, like.isLiked);
             setLiked(like.isLiked);
-            const count = await postsApi.getPostLikesCount(post.id);
-            setLikesCount(count.likesCount);
-            updateFeedPost(post.id, {
-                isLiked: like.isLiked,
-                likes: count.likesCount,
-            });
+            setLikesCount(nextCount);
+            updateFeedPost(post.id, { isLiked: like.isLiked, likes: nextCount });
         } catch (error) {
             console.error("Error toggling like:", error);
             setLiked(previousLiked);
