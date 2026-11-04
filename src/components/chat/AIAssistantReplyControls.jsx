@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Wand2, MessageSquarePlus, Smile, ChevronDown } from "lucide-react";
 import { AI_ASSISTANT_TONES as tones } from "./aiAssistantConstants";
 import SectionLabel from "./AIAssistantSectionLabel";
+import { EASE_SOFT } from "../common/motionPresets";
 
 export default function AIAssistantReplyControls({
     selectedTone,
@@ -24,7 +25,7 @@ export default function AIAssistantReplyControls({
                 <div className="relative">
                     <button
                         onClick={() => setToneDropdownOpen(!toneDropdownOpen)}
-                        className="w-full flex items-center justify-between bg-surface-900 border border-white/5 rounded-xl px-4 py-2.5 transition-colors hover:border-white/10"
+                        className="w-full flex items-center justify-between bg-surface-900 border border-line-soft rounded-xl px-4 py-2.5 transition-colors duration-150 ease-soft hover:border-line-strong focus-ring"
                     >
                         <div className="flex items-center gap-3">
                             <span className="text-[16px]">
@@ -36,17 +37,18 @@ export default function AIAssistantReplyControls({
                         </div>
                         <ChevronDown
                             size={16}
-                            className={`text-neutral-400 transition-transform duration-300 ${toneDropdownOpen ? "rotate-180" : ""}`}
+                            className={`text-neutral-400 transition-transform duration-200 ease-soft ${toneDropdownOpen ? "rotate-180" : ""}`}
                         />
                     </button>
 
                     <AnimatePresence>
                         {toneDropdownOpen && (
                             <motion.div
-                                initial={{ opacity: 0, y: -10 }}
+                                initial={{ opacity: 0, y: -6 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="absolute top-full left-0 right-0 mt-2 bg-[#121217] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50 p-1 grid grid-cols-2 gap-1 max-h-[180px] overflow-y-auto scrollbar-hide"
+                                exit={{ opacity: 0, y: -6 }}
+                                transition={{ duration: 0.18, ease: EASE_SOFT }}
+                                className="absolute top-full left-0 right-0 mt-2 cliq-popover rounded-xl overflow-hidden z-50 p-1 grid grid-cols-2 gap-1 max-h-[180px] overflow-y-auto scrollbar-hide"
                             >
                                 {tones.map(({ key, emoji }) => (
                                     <button
@@ -55,9 +57,9 @@ export default function AIAssistantReplyControls({
                                             onToneChange?.(key);
                                             setToneDropdownOpen(false);
                                         }}
-                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-150 ease-soft focus-ring ${
                                             selectedTone === key
-                                                ? "bg-violet-600/20 text-violet-200"
+                                                ? "bg-brand/20 text-violet-200"
                                                 : "hover:bg-white/5 text-neutral-400 hover:text-white"
                                         }`}
                                     >
@@ -75,9 +77,9 @@ export default function AIAssistantReplyControls({
                 <SectionLabel icon={Smile} className="!mb-0">
                     Emoji Preference
                 </SectionLabel>
-                <div className="flex bg-surface-900 rounded-xl p-1 border border-white/5 relative isolate overflow-hidden">
+                <div className="flex bg-surface-900 rounded-xl p-1 border border-line-soft relative isolate overflow-hidden">
                     <motion.div
-                        className="absolute inset-y-1 rounded-lg bg-violet-600/30 border border-violet-500/30 -z-10"
+                        className="absolute inset-y-1 rounded-lg bg-brand/30 border border-brand/30 -z-10"
                         initial={false}
                         animate={{
                             left:
@@ -88,7 +90,7 @@ export default function AIAssistantReplyControls({
                                       : "66.66%",
                             width: "calc(33.33% - 0.25rem)",
                         }}
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
                     />
                     {[
                         { key: "both", label: "Balanced", icon: null },
@@ -102,10 +104,8 @@ export default function AIAssistantReplyControls({
                         <button
                             key={opt.key}
                             onClick={() => onEmojiPreferenceChange?.(opt.key)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2 text-[11px] font-bold uppercase tracking-[0.15em] transition-colors duration-300 ${
-                                emojiPreference === opt.key
-                                    ? "text-violet-200"
-                                    : "text-neutral-500 hover:text-neutral-300"
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.15em] transition-colors duration-200 ease-soft focus-ring ${
+                                emojiPreference === opt.key ? "text-violet-200" : "text-ink-300 hover:text-neutral-300"
                             }`}
                         >
                             {opt.icon}
@@ -119,9 +119,9 @@ export default function AIAssistantReplyControls({
                 <button
                     onClick={() => onGenerateReplies?.()}
                     disabled={replyLoading}
-                    className="relative w-full overflow-hidden rounded-2xl group transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
+                    className="relative w-full overflow-hidden rounded-2xl group shadow-lg shadow-brand/20 transition duration-150 ease-soft active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100 focus-ring"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-violet-600 to-violet-600 opacity-90 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-brand to-brand-pink/80 opacity-90 group-hover:opacity-100 transition-opacity duration-150" />
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:10px_10px] opacity-[0.05]" />
                     <div className="relative px-6 py-3 flex items-center justify-center gap-3">
                         {replyLoading ? (

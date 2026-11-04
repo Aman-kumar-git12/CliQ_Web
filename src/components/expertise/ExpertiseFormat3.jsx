@@ -19,7 +19,7 @@ export default function ExpertiseFormat3({ expertise = {} }) {
 
     return (
         <div className="bg-[#FAF9F6] p-1 selection:bg-amber-100">
-            <div className="w-full bg-white rounded-[2rem] shadow-[0_15px_60px_rgba(184,134,11,0.05)] border border-amber-100 font-sans p-6 md:p-8 space-y-10 relative overflow-hidden">
+            <div className="w-full bg-white rounded-[2rem] shadow-xl shadow-amber-700/5 border border-amber-100 font-sans p-6 md:p-8 space-y-10 relative overflow-hidden">
                 {/* SOPHISTICATED MESH GLOWS */}
                 <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-amber-50/50 rounded-full blur-[100px] pointer-events-none"></div>
                 <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-neutral-100/50 rounded-full blur-[80px] pointer-events-none"></div>

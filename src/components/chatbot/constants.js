@@ -45,4 +45,4 @@ export const STARTER_PROMPTS = [
 ];
 
 export const actionButtonClass =
-    "p-1.5 rounded-md text-neutral-500 hover:text-neutral-200 hover:bg-white/5 transition-colors";
+    "p-1.5 rounded-md text-ink-300 hover:text-neutral-200 hover:bg-white/[0.06] transition-colors duration-150 ease-soft focus-ring";

@@ -4,7 +4,7 @@ import ExpertiseView from "./ExpertiseView";
 import { EXPERTISE_TEMPLATES } from "./constants";
 
 const ExpertiseTemplatePicker = ({ selectedFormat, onSelectFormat, expertiseDraft }) => (
-    <div className="rounded-[28px] border border-slate-200 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+    <div className="rounded-[28px] border border-slate-200 bg-white/90 p-5 shadow-xl shadow-slate-900/[0.04] backdrop-blur-xl">
         <div className="flex items-center justify-between">
             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Blueprint Gallery</h3>
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500">
@@ -28,21 +28,23 @@ const ExpertiseTemplatePicker = ({ selectedFormat, onSelectFormat, expertiseDraf
             <div className="grid grid-cols-2 gap-3">
                 {EXPERTISE_TEMPLATES.map((tpl) => (
                     <button
+                        type="button"
                         key={tpl.id}
                         onClick={() => onSelectFormat(tpl.id)}
-                        className={`relative group flex flex-col overflow-hidden rounded-[22px] border transition-all duration-300 ${
+                        aria-pressed={selectedFormat === tpl.id}
+                        className={`relative group flex flex-col overflow-hidden rounded-[22px] border transition duration-200 ease-out active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                             selectedFormat === tpl.id
-                                ? "border-slate-900 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]"
-                                : "border-slate-200 bg-white hover:border-slate-300"
+                                ? "border-slate-900 bg-white shadow-xl shadow-slate-900/10"
+                                : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-md hover:shadow-slate-900/5"
                         }`}
                     >
                         <div className="relative aspect-[4/3] overflow-hidden border-b border-slate-200 bg-white">
-                            <div className="absolute inset-0 origin-top-left scale-[0.17] h-[588%] w-[588%] pointer-events-none opacity-70 transition-opacity duration-500 group-hover:opacity-100">
+                            <div className="absolute inset-0 origin-top-left scale-[0.17] h-[588%] w-[588%] pointer-events-none opacity-70 transition-opacity duration-200 ease-out group-hover:opacity-100">
                                 <ExpertiseView expertise={{ ...expertiseDraft, format: tpl.id }} />
                             </div>
                             {selectedFormat === tpl.id && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-slate-900/10 backdrop-blur-[1px]">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-900 shadow-xl animate-scaleUp">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-900 shadow-xl animate-fadeIn">
                                         <Check size={20} className="stroke-[3]" />
                                     </div>
                                 </div>

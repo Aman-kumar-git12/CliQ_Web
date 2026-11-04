@@ -7,17 +7,48 @@
         --cliq-pink: #ff007a;
         --cliq-purple: #8b5cf6;
         --cliq-lilac: #a78bfa;
-        --cliq-bg: #000000;
+        --cliq-bg: #050505; /* surface-950: near-black, softer than pure #000 under white text */
         --cliq-sidebar: #050505;
         --cliq-card: #0a0a0f;
         --cliq-border: #151515;
         --cliq-accent-gradient: linear-gradient(135deg, var(--cliq-pink) 0%, var(--cliq-purple) 100%);
+
+        /* Motion: one easing and three durations for the whole app (also in tailwind.config.js:
+           ease-soft, duration-150 / duration-200 / duration-250) */
+        --cliq-ease: cubic-bezier(0.22, 1, 0.36, 1);
+        --cliq-dur-fast: 150ms; /* hover, press, colour changes */
+        --cliq-dur-panel: 220ms; /* menus, popovers, dialogs, panels */
+        --cliq-dur-page: 250ms; /* page / large surface enter */
+
+        /* Native form controls, autofill and scrollbars render dark */
+        color-scheme: dark;
+    }
+
+    html {
+        /* Keeps the page from shifting sideways when a dialog locks scrolling or a page gets taller */
+        scrollbar-gutter: stable;
+        -webkit-tap-highlight-color: transparent;
     }
 
     body {
-        @apply antialiased text-white bg-[var(--cliq-bg)];
+        @apply antialiased text-ink-100 bg-[var(--cliq-bg)];
         font-feature-settings: "cv02", "cv03", "cv04", "cv11";
         font-family: "Inter", sans-serif;
+        text-rendering: optimizeLegibility;
+    }
+
+    /* Soft, clearly visible keyboard focus everywhere (mouse clicks don't show it). Elements that draw their
+       own focus style with focus:outline-none / focus-visible:ring-* keep theirs. */
+    :focus-visible {
+        outline: 2px solid rgb(167 139 250 / 0.7); /* brand-light */
+        outline-offset: 2px;
+    }
+
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible,
+    [contenteditable]:focus-visible {
+        outline-offset: 0;
     }
 
     /* Override browser autofill background in dark mode */
@@ -25,8 +56,9 @@
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
     input:-webkit-autofill:active {
-        -webkit-box-shadow: 0 0 0 30px #000000 inset !important;
-        -webkit-text-fill-color: white !important;
+        -webkit-box-shadow: 0 0 0 30px theme("colors.surface.950") inset !important;
+        -webkit-text-fill-color: theme("colors.ink.100") !important;
+        caret-color: theme("colors.ink.100");
         transition: background-color 5000s ease-in-out 0s;
     }
 }
@@ -42,21 +74,46 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    @apply bg-neutral-300 dark:bg-neutral-700 rounded-full;
+    background-color: rgb(255 255 255 / 0.1);
+    border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    @apply bg-neutral-400 dark:bg-neutral-600;
+    background-color: rgb(255 255 255 / 0.2);
+}
+
+/* Firefox only (in Chromium, scrollbar-color would switch off the 6px ::-webkit-scrollbar above) */
+@supports (-moz-appearance: none) {
+    html {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(255 255 255 / 0.12) transparent;
+    }
 }
 
 /* Selection Color */
 ::selection {
-    @apply bg-blue-500/20 text-blue-600 dark:bg-blue-500/30 dark:text-blue-400;
+    background-color: rgb(139 92 246 / 0.35); /* brand */
+    color: theme("colors.ink.100");
 }
 
-/* Smooth Scrolling */
-html {
-    scroll-behavior: smooth;
+/* Smooth Scrolling (only for people who haven't asked for less motion) */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Reduced motion: animations and transitions finish at once (spinners keep turning so loading stays visible).
+   Framer-motion components check useReducedMotion() themselves. */
+@media (prefers-reduced-motion: reduce) {
+    *:not(.animate-spin),
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 @layer utilities {
@@ -83,11 +140,79 @@ html {
     }
 
     .animate-fadeIn {
-        animation: fadeIn 0.3s ease-out forwards;
+        animation: fadeIn 0.25s var(--cliq-ease) forwards;
     }
 
     .animate-slideDown {
-        animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: slideDown 0.3s var(--cliq-ease) forwards;
+    }
+
+    /* Enter animations: animate-in + fade-in / zoom-in(-95) / slide-in-from-{top,bottom}-{2,4,8} (+ duration-*).
+       Same class names as the tailwindcss-animate plugin, which isn't installed, so these used to do nothing.
+       Composes with translate utilities (e.g. -translate-x-1/2 stays put while the element fades in). */
+    @keyframes cliq-enter {
+        from {
+            opacity: var(--tw-enter-opacity, 1);
+            transform: translate(var(--tw-translate-x, 0), var(--tw-translate-y, 0))
+                translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0)
+                scale(var(--tw-enter-scale, 1));
+        }
+    }
+
+    .animate-in {
+        animation: cliq-enter var(--cliq-dur-panel) var(--cliq-ease) backwards;
+    }
+
+    .animate-in.duration-150 {
+        animation-duration: 150ms;
+    }
+
+    .animate-in.duration-200 {
+        animation-duration: 200ms;
+    }
+
+    .animate-in.duration-300 {
+        animation-duration: 300ms;
+    }
+
+    .animate-in.duration-500 {
+        animation-duration: 500ms;
+    }
+
+    .animate-in.duration-700 {
+        animation-duration: 700ms;
+    }
+
+    .fade-in {
+        --tw-enter-opacity: 0;
+    }
+
+    .zoom-in {
+        --tw-enter-scale: 0.9;
+    }
+
+    .zoom-in-95 {
+        --tw-enter-scale: 0.95;
+    }
+
+    .slide-in-from-top-2 {
+        --tw-enter-translate-y: -0.5rem;
+    }
+
+    .slide-in-from-bottom-2 {
+        --tw-enter-translate-y: 0.5rem;
+    }
+
+    .slide-in-from-bottom-4 {
+        --tw-enter-translate-y: 1rem;
+    }
+
+    .slide-in-from-bottom-8 {
+        --tw-enter-translate-y: 2rem;
+    }
+
+    .slide-in-from-bottom {
+        --tw-enter-translate-y: 100%;
     }
 
     .custom-scrollbar::-webkit-scrollbar {
@@ -104,7 +229,7 @@ html {
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        @apply bg-neutral-400/30;
+        background: rgb(255 255 255 / 0.2);
     }
 
     @keyframes mesh {
@@ -164,11 +289,57 @@ html {
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+
+    /* Safe-area padding for fixed bars on notched phones (adds nothing on other screens) */
+    .pt-safe {
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
 }
 
 @layer utilities {
+    /* ---- Shared interaction helpers (see README "Conventions") ---- */
+
+    /* Hover/press colour, opacity, border, shadow and transform changes at the app-wide speed and easing.
+       cliq-press adds a small press-down on click/tap. */
+    .cliq-transition,
+    .cliq-press {
+        transition-property:
+            color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform,
+            filter;
+        transition-duration: var(--cliq-dur-fast);
+        transition-timing-function: var(--cliq-ease);
+    }
+
+    .cliq-press:active:not(:disabled) {
+        transform: scale(0.97);
+    }
+
+    /* Ring-style focus for elements that hide the outline (outline-none) or sit inside overflow-hidden */
+    .focus-ring {
+        @apply outline-none focus-visible:ring-2 focus-visible:ring-brand-light/60 focus-visible:ring-offset-0;
+    }
+
+    /* Scrollable strip without a visible scrollbar (tab bars, chip rows); still scrolls by touch, wheel and keys */
+    .no-scrollbar {
+        -ms-overflow-style: none; /* old Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Floating layer: dropdown menus, popovers, toasts */
+    .cliq-popover {
+        @apply bg-surface-raised/95 backdrop-blur-xl border border-line-strong shadow-pop;
+    }
+
     .glass-card {
-        @apply bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_0_rgba(0, 0, 0, 0.37)];
+        @apply bg-white/5 backdrop-blur-2xl border border-white/10 shadow-soft-lg;
     }
 
     .metallic-card {
@@ -222,25 +393,19 @@ html {
         background: rgba(15, 12, 25, 0.7);
         backdrop-filter: blur(40px);
         border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55);
     }
 
     .cliq-sidebar-item {
-        @apply flex items-center gap-4 px-5 py-3 rounded-2xl transition-all duration-300 text-neutral-500 font-bold;
+        @apply flex items-center gap-4 px-5 py-3 rounded-2xl cliq-transition text-ink-300 font-bold;
     }
 
     .cliq-sidebar-item:hover {
-        @apply bg-white/[0.03] text-neutral-300;
+        @apply bg-white/[0.04] text-ink-100;
     }
 
     .cliq-sidebar-item.active {
-        background-color: #1e1b2e;
-        color: white;
-        border: 1px solid rgba(139, 92, 246, 0.2);
-        box-shadow:
-            0 20px 25px -5px rgba(0, 0, 0, 0.1),
-            0 8px 10px -6px rgba(0, 0, 0, 0.1),
-            0 0 15px 0 rgba(139, 92, 246, 0.1);
+        @apply bg-surface-600 text-white border border-brand/20 shadow-soft;
     }
 
     .cliq-gradient-text {
@@ -260,10 +425,11 @@ html {
 
     .cliq-feed-panel {
         background: #181724;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow:
-            0 12px 32px rgba(0, 0, 0, 0.6),
-            inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            0 2px 8px -2px rgba(0, 0, 0, 0.35),
+            0 12px 32px -10px rgba(0, 0, 0, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }
 
     .cliq-feed-pill {
@@ -277,11 +443,11 @@ html {
     }
 
     .global-modal-blur {
-        filter: blur(14px) brightness(0.65) saturate(1.2) !important;
+        filter: blur(12px) brightness(0.65) saturate(1.2) !important;
         transform: scale(0.985) !important;
         transition:
-            filter 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-            transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            filter 0.3s var(--cliq-ease),
+            transform 0.3s var(--cliq-ease) !important;
         pointer-events: none !important;
         user-select: none !important;
     }

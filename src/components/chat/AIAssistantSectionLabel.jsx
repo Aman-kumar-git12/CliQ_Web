@@ -8,7 +8,7 @@ export default function AIAssistantSectionLabel({ children, icon: LabelIcon, cla
                     <LabelIcon size={11} className="text-neutral-400" />
                 </div>
             )}
-            <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 font-bold">{children}</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-ink-300 font-bold">{children}</p>
         </div>
     );
 }

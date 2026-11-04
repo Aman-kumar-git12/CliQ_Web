@@ -4,10 +4,11 @@ import * as usersApi from "../api/users";
 import { useParams } from "react-router-dom";
 import ConfirmDialog from "../components/common/ConfirmDialog";
 import ExpertiseView from "../components/expertise/ExpertiseView";
-import { Plus, Eye } from "lucide-react";
+import { Eye, Layers, UserX, Users } from "lucide-react";
 import { useUserContext } from "../context/UserContext";
 import ProfileShimmering from "../components/shimmering/ProfileShimmering";
 import { motion, AnimatePresence } from "framer-motion";
+import { EASE_SOFT } from "../components/common/motionPresets";
 import ProfileConnections from "../components/connections/ProfileConnections";
 import ProfileHoverCard from "../components/profile/ProfileHoverCard";
 import ProfileHeader from "../components/profile/ProfileHeader";
@@ -20,20 +21,21 @@ import { useProfileHoverCard } from "../hooks/useProfileHoverCard";
 import OwnProfilePostsTab from "../components/profile/OwnProfilePostsTab";
 import ProfilePhotoViewer from "../components/profile/ProfilePhotoViewer";
 import ProfileExpertiseModal from "../components/profile/ProfileExpertiseModal";
+import { ProfileEmptyAction, ProfileEmptyState, ProfileSectionHeading } from "../components/profile/ProfileSection";
 
 const TABS = ["posts", "connections", "groups", "expertise"];
 
 export default function ProfilePage() {
     const { customTab } = useParams();
     const fileInputRef = useRef(null);
-    const { logout, user: currentUser, setUser: setGlobalUser } = useUserContext();
+    const { user: currentUser, setUser: setGlobalUser } = useUserContext();
     const containerRef = useRef(null);
+    const tabContentRef = useRef(null);
 
     const [user, setUser] = useState(null);
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingPosts, setLoadingPosts] = useState(true);
-    const [showLogoutPopup, setShowLogoutPopup] = useState(false);
 
     // Upload & View States
     const [selectedFile, setSelectedFile] = useState(null);
@@ -102,20 +104,27 @@ export default function ProfilePage() {
         window.history.replaceState(null, "", newUrl);
     };
 
+    // A stat card opens its tab and brings the tab content into view (scroll-mt keeps it clear of the sticky tabs)
+    const handleStatClick = (id) => {
+        handleTabChange(id);
+        const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+        tabContentRef.current?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    };
+
     const tabVariants = {
         initial: (direction) => ({
-            x: direction > 0 ? 30 : -30,
+            x: direction > 0 ? 16 : -16,
             opacity: 0,
         }),
         animate: {
             x: 0,
             opacity: 1,
-            transition: { duration: 0.25, ease: "easeOut" },
+            transition: { duration: 0.24, ease: EASE_SOFT },
         },
         exit: (direction) => ({
-            x: direction > 0 ? -30 : 30,
+            x: direction > 0 ? -16 : 16,
             opacity: 0,
-            transition: { duration: 0.25, ease: "easeOut" },
+            transition: { duration: 0.15, ease: "easeOut" },
         }),
     };
 
@@ -154,11 +163,6 @@ export default function ProfilePage() {
         fetchPosts();
         return () => controller.abort();
     }, [profileUserId]);
-
-    const handleLogout = async () => {
-        await logout();
-        setUser(null);
-    };
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
@@ -215,7 +219,7 @@ export default function ProfilePage() {
     useEscapeKey(showImageViewer, () => setShowImageViewer(false));
     useEscapeKey(showExpertiseModal, () => setShowExpertiseModal(false));
 
-    const isModalOpen = showExpertiseModal || showImageViewer || showLogoutPopup || showUploadConfirm;
+    const isModalOpen = showExpertiseModal || showImageViewer || showUploadConfirm;
     useBodyScrollLock(isModalOpen);
 
     useEffect(() => {
@@ -235,19 +239,31 @@ export default function ProfilePage() {
     }, [isModalOpen]);
 
     if (loading) return <ProfileShimmering />;
-    if (!user) return <div className="text-center text-white mt-10 font-bold">No user found</div>;
+    if (!user) {
+        return (
+            <div className="w-full max-w-md mx-auto px-4 pt-28 md:pt-16">
+                <ProfileEmptyState
+                    icon={UserX}
+                    title="No user found"
+                    hint="We couldn't load your profile. Please try again in a moment."
+                    action={<ProfileEmptyAction to="/">Back home</ProfileEmptyAction>}
+                />
+            </div>
+        );
+    }
+
+    const hasExpertise = Boolean(user.expertise) && Object.keys(user.expertise).length > 0;
 
     return (
         <div
             ref={containerRef}
-            className="min-h-screen bg-transparent text-white relative overflow-x-hidden no-scrollbar transition-all duration-500"
+            className="min-h-screen bg-transparent text-white relative overflow-x-hidden no-scrollbar"
         >
-            <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; }` }} />
-            {/* Cinematic Background Glows */}
-            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-brand/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse transition-opacity duration-[3000ms]" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-pink/5 rounded-full blur-[140px] pointer-events-none -z-10" />
+            {/* Background glows, kept faint so the page reads calm */}
+            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-brand/[0.07] rounded-full blur-[140px] pointer-events-none -z-10" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-pink/[0.04] rounded-full blur-[140px] pointer-events-none -z-10" />
 
-            <div className="w-full max-w-2xl mx-auto pt-24 md:pt-6 px-4 pb-20 relative z-10 transition-all duration-500">
+            <div className="w-full max-w-2xl mx-auto pt-24 md:pt-6 pb-20 relative z-10">
                 <ProfileHeader
                     user={user}
                     isOwnProfile={true}
@@ -260,20 +276,25 @@ export default function ProfilePage() {
 
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileSelect} />
 
-                <div className="px-4 sm:px-10 mt-6 md:mt-8 transition-all duration-500">
+                {/* Same horizontal rhythm as PublicProfilePage: px-4 on mobile, flush with the header on desktop */}
+                <div className="px-4 md:px-0 mt-5 md:mt-6">
                     <ProfileStats
                         stats={{
                             posts: user.postsCount || posts.length,
                             connections: user.connectionsCount || "0",
                             groups: user.groupsCount || "0",
                         }}
+                        onStatClick={handleStatClick}
                     />
 
                     <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
                 </div>
 
                 {/* TAB CONTENT SECTION */}
-                <div className="mt-4 min-h-[600px] px-2 md:px-4">
+                <div
+                    ref={tabContentRef}
+                    className="relative mt-4 md:mt-6 min-h-[600px] px-4 md:px-0 scroll-mt-32 md:scroll-mt-24"
+                >
                     <AnimatePresence mode="popLayout" custom={direction} initial={false}>
                         <motion.div
                             key={activeTab}
@@ -282,65 +303,58 @@ export default function ProfilePage() {
                             initial="initial"
                             animate="animate"
                             exit="exit"
-                            layout
                         >
                             {activeTab === "posts" && (
                                 <OwnProfilePostsTab user={user} posts={posts} loadingPosts={loadingPosts} />
                             )}
 
-                            {activeTab === "connections" && (
-                                <>
-                                    <div className="flex items-center justify-between mb-6">
-                                        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                                            Connections
-                                        </h2>
-                                    </div>
-                                    <ProfileConnections />
-                                </>
-                            )}
+                            {activeTab === "connections" && <ProfileConnections />}
 
                             {activeTab === "groups" && (
-                                <>
-                                    <div className="flex items-center justify-between mb-4 px-2">
-                                        <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase italic tracking-wider">
-                                            Groups
-                                            <span className="text-[10px] font-black text-white/30 bg-white/5 px-2.5 py-1 rounded-full border border-white/10 not-italic tracking-widest">
-                                                0
-                                            </span>
-                                        </h2>
-                                    </div>
-                                    <div className="text-center py-20 bg-white/[0.03] backdrop-blur-xl rounded-[32px] border border-white/10 flex flex-col items-center justify-center gap-6 mx-2 group cursor-pointer hover:bg-white/[0.06] transition-all duration-500">
-                                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-white/20 group-hover:scale-110 group-hover:bg-white/10 transition-all border border-white/5">
-                                            <Plus size={32} />
-                                        </div>
-                                        <p className="text-white/30 font-black uppercase tracking-widest italic group-hover:text-white/50 transition-colors">
-                                            Start a Group
-                                        </p>
-                                    </div>
-                                </>
+                                <section>
+                                    <ProfileSectionHeading title="Groups" />
+                                    <ProfileEmptyState
+                                        icon={Users}
+                                        title="No groups yet"
+                                        hint="Groups are coming soon."
+                                    />
+                                </section>
                             )}
 
                             {activeTab === "expertise" && (
-                                <>
-                                    <div className="flex items-center justify-between mb-4 px-2">
-                                        <h2 className="text-xl font-black text-white uppercase italic tracking-wider">
-                                            My Expertise
-                                        </h2>
-                                        <button
-                                            type="button"
-                                            aria-label="View expertise in full screen"
-                                            onClick={() => setShowExpertiseModal(true)}
-                                            className="p-2.5 bg-white/5 hover:bg-white/10 rounded-full text-white/40 hover:text-white transition-all border border-white/20"
-                                        >
-                                            <Eye size={18} />
-                                        </button>
-                                    </div>
-                                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-[32px] p-8 border border-white/10 shadow-2xl overflow-hidden relative group transition-all duration-500">
-                                        {/* Subtle Glow */}
-                                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                                        <ExpertiseView expertise={user.expertise} />
-                                    </div>
-                                </>
+                                <section>
+                                    <ProfileSectionHeading
+                                        title="My Expertise"
+                                        action={
+                                            hasExpertise && (
+                                                <button
+                                                    type="button"
+                                                    aria-label="View expertise in full screen"
+                                                    onClick={() => setShowExpertiseModal(true)}
+                                                    className="p-2.5 rounded-full bg-white/[0.04] border border-line text-ink-300 hover:bg-white/[0.08] hover:border-line-strong hover:text-white cliq-press focus-ring"
+                                                >
+                                                    <Eye size={18} aria-hidden="true" />
+                                                </button>
+                                            )
+                                        }
+                                    />
+                                    {hasExpertise ? (
+                                        <div className="rounded-3xl p-5 md:p-8 bg-white/[0.03] border border-line shadow-soft overflow-hidden">
+                                            <ExpertiseView expertise={user.expertise} />
+                                        </div>
+                                    ) : (
+                                        <ProfileEmptyState
+                                            icon={Layers}
+                                            title="No expertise yet"
+                                            hint="Show people what you work on, your skills and your projects."
+                                            action={
+                                                <ProfileEmptyAction to="/my-experties">
+                                                    Build your expertise page
+                                                </ProfileEmptyAction>
+                                            }
+                                        />
+                                    )}
+                                </section>
                             )}
                         </motion.div>
                     </AnimatePresence>
@@ -349,20 +363,13 @@ export default function ProfilePage() {
 
             {/* MODALS */}
             <ConfirmDialog
-                isOpen={showLogoutPopup}
-                onClose={() => setShowLogoutPopup(false)}
-                onConfirm={handleLogout}
-                title="Are you sure you want to logout?"
-                confirmText="Yes, Logout"
-            />
-
-            <ConfirmDialog
                 isOpen={showUploadConfirm}
                 onClose={cancelUpload}
                 onConfirm={handleUploadImage}
                 title="Update Profile Photo"
                 message="Looks good! Want to set this as your new profile picture?"
                 confirmText={uploading ? "Uploading..." : "Update"}
+                isLoading={uploading}
             />
 
             <ProfilePhotoViewer isOpen={showImageViewer} user={user} onClose={() => setShowImageViewer(false)} />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Hash, Heart, MessageCircle, FileText } from "lucide-react";
+import { Search, SearchX, Hash, Heart, MessageCircle, FileText } from "lucide-react";
 import * as searchApi from "../api/search";
 import * as usersApi from "../api/users";
 import { timeAgo } from "../utils/timeAgo";
@@ -26,14 +26,17 @@ const SectionTitle = ({ icon: Icon, children }) => (
 );
 
 const PostResult = ({ post, onHashtag }) => (
-    <div className="p-4 rounded-[18px] border border-white/5 bg-surface-800 hover:bg-white/[0.03] transition-colors">
-        <Link to={`/public-profile/${post.user?.id}`} className="flex items-center gap-2.5 no-underline mb-2">
+    <div className="p-4 rounded-[18px] border border-white/5 bg-surface-800 hover:bg-white/[0.03] hover:border-line transition-colors duration-150 ease-soft">
+        <Link
+            to={`/public-profile/${post.user?.id}`}
+            className="flex items-center gap-2.5 no-underline mb-2 rounded-lg focus-ring"
+        >
             <img
                 loading="lazy"
                 decoding="async"
                 src={post.user?.imageUrl || DEFAULT_AVATAR}
                 alt=""
-                className="w-8 h-8 rounded-full object-cover border border-white/10"
+                className="w-8 h-8 rounded-full object-cover border border-line"
             />
             <span className="font-black text-[13px] text-white">
                 {post.user?.firstname} {post.user?.lastname}
@@ -42,7 +45,7 @@ const PostResult = ({ post, onHashtag }) => (
                 {timeAgo(post.createdAt)}
             </span>
         </Link>
-        <Link to={`/post/${post.id}`} className="block no-underline">
+        <Link to={`/post/${post.id}`} className="block no-underline rounded-lg focus-ring">
             <p className="text-[13px] text-white/85 leading-relaxed line-clamp-3 whitespace-pre-line">{post.content}</p>
             {post.image && (
                 <img
@@ -50,7 +53,7 @@ const PostResult = ({ post, onHashtag }) => (
                     decoding="async"
                     src={post.image}
                     alt={`Post by ${[post.user?.firstname, post.user?.lastname].filter(Boolean).join(" ") || "user"}`}
-                    className="mt-3 w-full max-h-64 object-cover rounded-xl border border-white/10"
+                    className="mt-3 w-full max-h-64 object-cover rounded-xl border border-line"
                 />
             )}
         </Link>
@@ -62,7 +65,11 @@ const PostResult = ({ post, onHashtag }) => (
                 <MessageCircle size={12} /> {post.commentsCount}
             </span>
             {post.hashtags?.slice(0, 4).map((tag) => (
-                <button key={tag} onClick={() => onHashtag(tag)} className="text-violet-300 hover:text-violet-200">
+                <button
+                    key={tag}
+                    onClick={() => onHashtag(tag)}
+                    className="rounded text-brand-light hover:text-purple-200 transition-colors duration-150 ease-soft focus-ring"
+                >
                     #{tag}
                 </button>
             ))}
@@ -153,7 +160,7 @@ export default function SearchPage() {
                 <Search
                     size={16}
                     strokeWidth={3}
-                    className="absolute left-5 top-1/2 -translate-y-1/2 text-ink-600 group-focus-within:text-brand transition-colors"
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-ink-600 group-focus-within:text-brand transition-colors duration-150 ease-soft"
                 />
                 <input
                     autoFocus
@@ -163,17 +170,17 @@ export default function SearchPage() {
                     onChange={(e) => setInput(e.target.value)}
                     placeholder='Try "React", "#ai" or "people who know React and ML"'
                     aria-label="Search posts, people and hashtags"
-                    className="w-full pl-12 pr-5 py-3.5 rounded-[16px] bg-surface-800 border border-white/5 text-[14px] text-white placeholder-ink-550 focus:outline-none focus:border-brand/40 transition-colors"
+                    className="w-full pl-12 pr-5 py-3.5 rounded-[16px] bg-surface-800 border border-white/5 text-[14px] text-white placeholder-ink-550 hover:border-line focus:outline-none focus:border-brand/40 focus:ring-2 focus:ring-brand/20 cliq-transition"
                 />
             </div>
 
-            <div className="flex gap-1.5 mb-6 overflow-x-auto">
+            <div className="flex gap-1.5 mb-6 overflow-x-auto hide-scrollbar p-0.5 -m-0.5">
                 {TABS.map((t) => (
                     <button
                         key={t.key}
                         onClick={() => updateParams({ type: t.key })}
-                        className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] border transition-colors shrink-0
-                            ${tab === t.key ? "bg-gradient-to-r from-violet-500/20 to-pink-500/15 border-violet-500/30 text-white" : "bg-white/[0.03] border-white/5 text-ink-300 hover:text-white"}`}
+                        className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] border cliq-press shrink-0 focus-ring
+                            ${tab === t.key ? "bg-gradient-to-r from-brand/20 to-brand-pink/15 border-brand/30 text-white shadow-md shadow-brand/10" : "bg-white/[0.03] border-white/5 text-ink-300 hover:text-white hover:bg-white/[0.06] hover:border-line"}`}
                     >
                         {t.label}
                     </button>
@@ -184,7 +191,7 @@ export default function SearchPage() {
                 <>
                     <p className="text-[13px] text-ink-450 mb-8">
                         Search people by name, skill or role, find posts, or look up a{" "}
-                        <span className="text-violet-300">#hashtag</span>. Describe who you're looking for and AI
+                        <span className="text-brand-light">#hashtag</span>. Describe who you're looking for and AI
                         matching finds similar profiles.
                     </p>
                     <PeopleCards
@@ -202,7 +209,14 @@ export default function SearchPage() {
                 </p>
             )}
 
-            {nothingFound && <p className="text-[13px] text-ink-450">No results for “{query}”.</p>}
+            {nothingFound && (
+                <div className="flex flex-col items-center gap-3 text-center py-14 rounded-[22px] border border-dashed border-line bg-surface-800 animate-fadeIn">
+                    <span className="w-12 h-12 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand-light">
+                        <SearchX size={20} />
+                    </span>
+                    <p className="text-[13px] text-ink-300">No results for “{query}”.</p>
+                </div>
+            )}
 
             {searching && <SearchResultsShimmering tab={tab} />}
 
@@ -215,9 +229,9 @@ export default function SearchPage() {
                                 <button
                                     key={tag}
                                     onClick={() => searchHashtag(tag)}
-                                    className="px-3.5 py-2 rounded-xl bg-surface-800 border border-white/5 hover:border-violet-500/30 text-[13px] font-bold"
+                                    className="px-3.5 py-2 rounded-xl bg-surface-800 border border-white/5 hover:border-brand/30 hover:bg-white/[0.03] cliq-press text-[13px] font-bold focus-ring"
                                 >
-                                    <span className="text-violet-300">#{tag}</span>
+                                    <span className="text-brand-light">#{tag}</span>
                                     <span className="text-ink-450 text-[11px] ml-2">
                                         {postsCount} {postsCount === 1 ? "post" : "posts"}
                                     </span>

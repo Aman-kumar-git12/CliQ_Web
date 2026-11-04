@@ -114,34 +114,34 @@ export default function ChatInbox() {
     }, [connections, searchQuery]);
 
     if (loading) return <MyConnectionShimmering />;
-    if (error) return <div className="text-center mt-10 text-red-500">{error}</div>;
+    if (error) return <div className="text-center mt-10 px-6 text-sm text-red-400">{error}</div>;
 
     const targetIdMatch = location.pathname.match(/\/messages\/([a-zA-Z0-9_-]+)/);
     const activeTargetId = targetIdMatch ? targetIdMatch[1] : null;
 
     return (
-        <div className="w-full h-full flex flex-col bg-surface-800/60 backdrop-blur-3xl text-white select-none relative z-10 border-r border-white/5">
+        <div className="w-full h-full flex flex-col bg-surface-800/60 backdrop-blur-2xl text-white select-none relative z-10 border-r border-line-soft">
             <div className="pt-8 px-6 pb-6 bg-gradient-to-b from-black/20 to-transparent relative overflow-hidden">
                 {/* Background Glow for Header */}
-                <div className="absolute top-0 left-0 w-32 h-32 bg-purple-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
+                <div className="absolute top-0 left-0 w-32 h-32 bg-brand/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
                 <div className="flex items-center gap-4 mb-6">
                     <button
                         type="button"
                         aria-label="Go back"
                         onClick={() => navigate(-1)}
-                        className="md:hidden w-11 h-11 flex items-center justify-center rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white/80 hover:text-white transition-all active:scale-95 shadow-lg group"
+                        className="md:hidden w-11 h-11 flex items-center justify-center rounded-2xl bg-white/[0.03] border border-line text-white/80 hover:text-white hover:bg-white/[0.06] transition duration-150 ease-soft active:scale-95 group focus-ring"
                     >
                         <ArrowLeft
                             size={20}
-                            strokeWidth={3}
-                            className="group-hover:-translate-x-0.5 transition-transform"
+                            strokeWidth={2.5}
+                            className="group-hover:-translate-x-0.5 transition-transform duration-150 ease-soft"
                         />
                     </button>
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2 mb-1">
                             <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-brand to-brand-pink shadow-[0_0_10px_rgba(139,92,246,0.5)] md:hidden" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 md:hidden">
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-ink-300 md:hidden">
                                 Messaging Module
                             </span>
                         </div>
@@ -152,12 +152,12 @@ export default function ChatInbox() {
                 </div>
 
                 <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40 group-focus-within:text-[#a855f7] transition-colors">
-                        <Search className="h-[18px] w-[18px]" strokeWidth={3} />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-ink-300 group-focus-within:text-brand-light transition-colors duration-150">
+                        <Search className="h-[18px] w-[18px]" strokeWidth={2.5} />
                     </div>
                     <input
                         type="text"
-                        className="block w-full pl-11 pr-4 py-3.5 border border-white/5 rounded-[22px] bg-white/[0.03] text-white placeholder-white/20 focus:outline-none focus:border-brand/40 focus:ring-4 focus:ring-brand/10 transition-all text-[14px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] font-medium"
+                        className="block w-full pl-11 pr-4 py-3.5 border border-line-soft rounded-[22px] bg-white/[0.03] text-white placeholder:text-ink-300 focus:outline-none focus:border-brand/40 focus:ring-4 focus:ring-brand/10 focus:bg-white/[0.05] transition-[border-color,box-shadow,background-color] duration-200 ease-soft text-[16px] md:text-[14px] shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] font-medium"
                         placeholder="Search CLIQ..."
                         aria-label="Search conversations"
                         value={searchQuery}
@@ -178,7 +178,7 @@ export default function ChatInbox() {
                                 key={user.id}
                                 onClick={() => navigate(`/messages/${targetId}`)}
                                 aria-current={isSelected ? "page" : undefined}
-                                className="w-full text-left relative cursor-pointer group h-[88px] flex items-center px-4 gap-4 transition-all rounded-[24px] overflow-hidden"
+                                className="w-full text-left relative cursor-pointer group h-[88px] flex items-center px-4 gap-4 transition-colors duration-150 ease-soft rounded-[24px] overflow-hidden hover:bg-white/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand/50"
                             >
                                 {/* Shared Active Background */}
                                 <AnimatePresence>
@@ -192,14 +192,14 @@ export default function ChatInbox() {
                                                 damping: 38,
                                                 mass: 1,
                                             }}
-                                            className="absolute inset-0 bg-gradient-to-r from-violet-500/15 to-pink-500/10 border border-violet-500/20 z-0 shadow-[inset_20px_0_20px_-20px_rgba(139,92,246,0.3),0_8px_16px_rgba(0,0,0,0.2)]"
+                                            className="absolute inset-0 rounded-[24px] bg-gradient-to-r from-brand/[0.14] to-brand-pink/[0.08] border border-brand/20 z-0 shadow-[inset_20px_0_20px_-20px_rgba(139,92,246,0.3),0_8px_16px_rgba(0,0,0,0.2)]"
                                         />
                                     )}
                                 </AnimatePresence>
 
                                 <div className="relative shrink-0 z-10">
                                     <div
-                                        className={`w-[56px] h-[56px] rounded-full overflow-hidden border transition-all duration-500 shadow-xl ${isSelected ? "border-white/20 p-[2px] bg-gradient-to-br from-brand to-brand-pink scale-105" : "border-white/10 p-[1px] bg-surface-700 group-hover:border-white/20 group-hover:scale-105"}`}
+                                        className={`w-[56px] h-[56px] rounded-full overflow-hidden border transition duration-200 ease-soft shadow-lg ${isSelected ? "border-line-strong p-[2px] bg-gradient-to-br from-brand to-brand-pink scale-105" : "border-line p-[1px] bg-surface-700 group-hover:border-line-strong group-hover:scale-105"}`}
                                     >
                                         <div className="w-full h-full rounded-full overflow-hidden bg-black">
                                             {user?.imageUrl ? (
@@ -232,14 +232,14 @@ export default function ChatInbox() {
                                             {user.name}
                                         </span>
                                         <span
-                                            className={`text-[10px] font-black tracking-widest uppercase transition-colors shrink-0 ${isSelected ? "text-[#c084fc]" : "text-white/30 group-hover:text-white/50"}`}
+                                            className={`text-[10px] font-black tracking-widest uppercase transition-colors shrink-0 ${isSelected ? "text-brand-light" : "text-ink-300 group-hover:text-ink-200"}`}
                                         >
                                             {formatConversationTime(user.lastMessageTime)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <p
-                                            className={`text-[13px] truncate font-bold leading-tight transition-colors ${isSelected ? "text-white" : "text-white/50 group-hover:text-white/80"} ${user.lastMessage === "Start a new chat" ? "text-pink-500 italic opacity-80" : ""}`}
+                                            className={`text-[13px] truncate font-semibold leading-tight transition-colors duration-150 ${isSelected ? "text-white/90" : "text-white/50 group-hover:text-white/75"} ${user.lastMessage === "Start a new chat" ? "text-brand-pink italic opacity-80" : ""}`}
                                         >
                                             {user.lastMessage}
                                         </p>

@@ -4,7 +4,7 @@ import { useState, useRef, useMemo } from "react";
 import LoadingChat from "../components/chat/LoadingChat";
 import Toastbar from "../components/chat/Toastbar";
 import { useUserContext } from "../context/UserContext";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import AIAssistantOverlay from "../components/chat/AIAssistantOverlay";
 import ChatHeader from "../components/chat/ChatHeader";
 import ChatMessageList from "../components/chat/ChatMessageList";
@@ -115,169 +115,186 @@ const ChatPage = () => {
     if (loading) return <LoadingChat />;
 
     return (
-        <div
-            className="h-full bg-[#040406] text-white flex flex-col relative overflow-hidden"
-            onClick={() => menu.setOpenMenuId(null)}
-        >
-            {/* Extremely Subtle Ambient Purple Light */}
-            <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.04),transparent_50%)]" />
+        // reducedMotion="user": with "reduce motion" on, the chat's framer animations keep only their fades
+        <MotionConfig reducedMotion="user">
+            <div
+                className="h-full bg-surface-950 text-white flex flex-col relative overflow-hidden"
+                onClick={() => menu.setOpenMenuId(null)}
+            >
+                {/* Extremely Subtle Ambient Purple Light */}
+                <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_top,rgba(139,92,246,0.06),transparent_55%)]" />
 
-            <AnimatePresence>
-                {assistant.showAIOverlay && (
-                    <AIAssistantOverlay
-                        isOpen={assistant.showAIOverlay}
-                        onClose={assistant.closeOverlay}
-                        messages={assistant.aiMessages}
-                        onNewAskChat={() => assistant.setAiMessages([])}
-                        isLoading={assistant.isAILoading}
-                        thinkingStep={assistant.aiThinkingStep}
-                        title="AI Assistant"
-                        subtitle="Messaging Co-pilot"
-                        emptyTitle="Ask anything about this chat"
-                        emptyDescription="Summaries, reply ideas, or context analysis."
-                        inputValue={assistant.aiInput}
-                        onInputChange={assistant.setAiInput}
-                        onSubmit={() => handleAISubmit(assistant.aiInput)}
-                        mode={assistant.aiOverlayMode}
-                        onModeChange={assistant.setAiOverlayMode}
-                        replyData={assistant.assistantData}
-                        replyLoading={assistant.assistantLoading}
-                        error={assistant.aiOverlayMode === "replies" ? assistant.assistantError : ""}
-                        selectedTone={assistant.assistantTone}
-                        onToneChange={assistant.setAssistantTone}
-                        emojiPreference={assistant.emojiPreference}
-                        onEmojiPreferenceChange={assistant.setEmojiPreference}
-                        onGenerateReplies={handleAssistantGenerate}
-                        onUseReply={applyAssistantText}
-                        onSendReply={sendAssistantReply}
-                        history={assistant.assistantHistory}
-                        askHistory={assistant.assistantAskHistory}
-                        onContinueAskHistory={assistant.handleContinueAskHistory}
-                        onClearAskHistory={assistant.handleClearAskHistory}
-                        onClearReplyHistory={assistant.handleClearReplyHistory}
-                        onDeleteAskHistoryItem={assistant.handleDeleteAskHistoryItem}
-                        onDeleteReplyHistoryItem={assistant.handleDeleteReplyHistoryItem}
+                <AnimatePresence>
+                    {assistant.showAIOverlay && (
+                        <AIAssistantOverlay
+                            isOpen={assistant.showAIOverlay}
+                            onClose={assistant.closeOverlay}
+                            messages={assistant.aiMessages}
+                            onNewAskChat={() => assistant.setAiMessages([])}
+                            isLoading={assistant.isAILoading}
+                            thinkingStep={assistant.aiThinkingStep}
+                            title="AI Assistant"
+                            subtitle="Messaging Co-pilot"
+                            emptyTitle="Ask anything about this chat"
+                            emptyDescription="Summaries, reply ideas, or context analysis."
+                            inputValue={assistant.aiInput}
+                            onInputChange={assistant.setAiInput}
+                            onSubmit={() => handleAISubmit(assistant.aiInput)}
+                            mode={assistant.aiOverlayMode}
+                            onModeChange={assistant.setAiOverlayMode}
+                            replyData={assistant.assistantData}
+                            replyLoading={assistant.assistantLoading}
+                            error={assistant.aiOverlayMode === "replies" ? assistant.assistantError : ""}
+                            selectedTone={assistant.assistantTone}
+                            onToneChange={assistant.setAssistantTone}
+                            emojiPreference={assistant.emojiPreference}
+                            onEmojiPreferenceChange={assistant.setEmojiPreference}
+                            onGenerateReplies={handleAssistantGenerate}
+                            onUseReply={applyAssistantText}
+                            onSendReply={sendAssistantReply}
+                            history={assistant.assistantHistory}
+                            askHistory={assistant.assistantAskHistory}
+                            onContinueAskHistory={assistant.handleContinueAskHistory}
+                            onClearAskHistory={assistant.handleClearAskHistory}
+                            onClearReplyHistory={assistant.handleClearReplyHistory}
+                            onDeleteAskHistoryItem={assistant.handleDeleteAskHistoryItem}
+                            onDeleteReplyHistoryItem={assistant.handleDeleteReplyHistoryItem}
+                        />
+                    )}
+                </AnimatePresence>
+
+                {/* Premium Glass Header */}
+                <ChatHeader
+                    targetUser={targetUser}
+                    isTargetOnline={isTargetOnline}
+                    onBack={() => navigate("/messages")}
+                />
+
+                {/* Chat Area */}
+                <ChatMessageList
+                    scrollContainerRef={scrollContainerRef}
+                    messagesEndRef={messagesEndRef}
+                    messages={messages}
+                    randomSticker={randomSticker}
+                    stickerMessage={stickerMessage}
+                    onSendSticker={() => sendDirectMessage(stickerMessage)}
+                    targetUser={targetUser}
+                    openMenuId={menu.openMenuId}
+                    toggleMenu={menu.toggleMenu}
+                    handleEditStart={menu.handleEditStart}
+                    handleDeleteStart={menu.handleDeleteStart}
+                    onReply={(m) => {
+                        setReplyTo({ id: m.id, text: m.text, firstname: m.firstname });
+                        scrollToBottom();
+                    }}
+                    menuDirection={menu.menuDirection}
+                    isSelectMode={selection.isSelectMode}
+                    selectedMessages={selection.selectedMessages}
+                    toggleMessageSelection={toggleMessageSelection}
+                    onEnterSelectMode={(id) => {
+                        setIsSelectMode(true);
+                        toggleMessageSelection(id);
+                    }}
+                    setToast={setToast}
+                    setOpenMenuId={menu.setOpenMenuId}
+                    setSelectedMessages={setSelectedMessages}
+                />
+
+                {canMessage === false && (
+                    <footer className="shrink-0 z-30 px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+24px)] bg-surface-900/80 backdrop-blur-2xl border-t border-line-soft text-center text-sm leading-relaxed text-white/60">
+                        You can message {targetUser?.firstname || "this user"} once you're connected.{" "}
+                        <button
+                            onClick={() => navigate(`/user/${targetuserId}`)}
+                            className="text-brand-light font-semibold rounded-md underline-offset-4 hover:underline hover:text-white transition-colors duration-150 focus-ring"
+                        >
+                            View profile
+                        </button>
+                    </footer>
+                )}
+
+                {/* Input Bar */}
+                {canMessage !== false && (
+                    <ChatComposer
+                        fileInputRef={upload.fileInputRef}
+                        onFileChange={upload.handleFileChange}
+                        isUploading={upload.isUploading}
+                        isRecording={voice.isRecording}
+                        recordingTime={voice.recordingTime}
+                        audioBlob={voice.audioBlob}
+                        startRecording={voice.startRecording}
+                        stopRecording={voice.stopRecording}
+                        cancelRecording={voice.cancelRecording}
+                        replyTo={replyTo}
+                        onCancelReply={() => setReplyTo(null)}
+                        showAIOverlay={assistant.showAIOverlay}
+                        onOpenAssistant={() => assistant.setShowAIOverlay(true)}
+                        inputRef={inputRef}
+                        newMessage={newMessage}
+                        setNewMessage={setNewMessage}
+                        updateMessage={menu.updateMessage}
+                        sendMessage={sendMessage}
+                        showEmojiPicker={emoji.showEmojiPicker}
+                        setShowEmojiPicker={emoji.setShowEmojiPicker}
+                        emojiPickerRef={emoji.emojiPickerRef}
+                        onEmojiClick={emoji.onEmojiClick}
                     />
                 )}
-            </AnimatePresence>
 
-            {/* Premium Glass Header */}
-            <ChatHeader targetUser={targetUser} isTargetOnline={isTargetOnline} onBack={() => navigate("/messages")} />
+                {/* Bottom Selection Bar */}
+                <AnimatePresence>
+                    {selection.isSelectMode && (
+                        <ChatSelectionBar
+                            selectedCount={selection.selectedMessages.size}
+                            isBulkDeleting={selection.isBulkDeleting}
+                            onExit={selection.exitSelectMode}
+                            onDelete={() => selection.setBulkDeleteConfirmOpen(true)}
+                        />
+                    )}
+                </AnimatePresence>
 
-            {/* Chat Area */}
-            <ChatMessageList
-                scrollContainerRef={scrollContainerRef}
-                messagesEndRef={messagesEndRef}
-                messages={messages}
-                randomSticker={randomSticker}
-                stickerMessage={stickerMessage}
-                onSendSticker={() => sendDirectMessage(stickerMessage)}
-                targetUser={targetUser}
-                openMenuId={menu.openMenuId}
-                toggleMenu={menu.toggleMenu}
-                handleEditStart={menu.handleEditStart}
-                handleDeleteStart={menu.handleDeleteStart}
-                onReply={(m) => {
-                    setReplyTo({ id: m.id, text: m.text, firstname: m.firstname });
-                    scrollToBottom();
-                }}
-                menuDirection={menu.menuDirection}
-                isSelectMode={selection.isSelectMode}
-                selectedMessages={selection.selectedMessages}
-                toggleMessageSelection={toggleMessageSelection}
-                onEnterSelectMode={(id) => {
-                    setIsSelectMode(true);
-                    toggleMessageSelection(id);
-                }}
-                setToast={setToast}
-                setOpenMenuId={menu.setOpenMenuId}
-                setSelectedMessages={setSelectedMessages}
-            />
+                <AnimatePresence>
+                    {selection.bulkDeleteConfirmOpen && (
+                        <ChatBulkDeleteDialog
+                            selectedCount={selection.selectedMessages.size}
+                            canDeleteForEveryone={selection.canDeleteForEveryone}
+                            onDelete={selection.handleBulkDelete}
+                            onCancel={() => selection.setBulkDeleteConfirmOpen(false)}
+                        />
+                    )}
+                </AnimatePresence>
 
-            {canMessage === false && (
-                <footer className="shrink-0 z-30 px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+24px)] bg-white/[0.03] backdrop-blur-3xl border-t border-white/10 text-center text-sm text-white/70">
-                    You can message {targetUser?.firstname || "this user"} once you're connected.{" "}
-                    <button
-                        onClick={() => navigate(`/user/${targetuserId}`)}
-                        className="text-purple-300 font-semibold hover:underline"
-                    >
-                        View profile
-                    </button>
-                </footer>
-            )}
+                <AnimatePresence>
+                    {menu.deleteConfirmation.isOpen && (
+                        <ChatDeleteMessageDialog
+                            canDeleteForEveryone={menu.deleteConfirmation.isMe}
+                            onDelete={menu.confirmDelete}
+                            onCancel={menu.closeDeleteConfirmation}
+                        />
+                    )}
+                </AnimatePresence>
 
-            {/* Input Bar */}
-            {canMessage !== false && (
-                <ChatComposer
-                    fileInputRef={upload.fileInputRef}
-                    onFileChange={upload.handleFileChange}
-                    isUploading={upload.isUploading}
-                    isRecording={voice.isRecording}
-                    recordingTime={voice.recordingTime}
-                    audioBlob={voice.audioBlob}
-                    startRecording={voice.startRecording}
-                    stopRecording={voice.stopRecording}
-                    cancelRecording={voice.cancelRecording}
-                    replyTo={replyTo}
-                    onCancelReply={() => setReplyTo(null)}
-                    showAIOverlay={assistant.showAIOverlay}
-                    onOpenAssistant={() => assistant.setShowAIOverlay(true)}
-                    inputRef={inputRef}
-                    newMessage={newMessage}
-                    setNewMessage={setNewMessage}
-                    updateMessage={menu.updateMessage}
-                    sendMessage={sendMessage}
-                    showEmojiPicker={emoji.showEmojiPicker}
-                    setShowEmojiPicker={emoji.setShowEmojiPicker}
-                    emojiPickerRef={emoji.emojiPickerRef}
-                    onEmojiClick={emoji.onEmojiClick}
-                />
-            )}
+                <AnimatePresence>
+                    {toast && <Toastbar message={toast} onClose={() => setToast(null)} />}
+                </AnimatePresence>
 
-            {/* Bottom Selection Bar */}
-            {selection.isSelectMode && (
-                <ChatSelectionBar
-                    selectedCount={selection.selectedMessages.size}
-                    isBulkDeleting={selection.isBulkDeleting}
-                    onExit={selection.exitSelectMode}
-                    onDelete={() => selection.setBulkDeleteConfirmOpen(true)}
-                />
-            )}
+                {/* WhatsApp-style Image/File Preview Overlay */}
+                <AnimatePresence>
+                    {upload.selectedFile && (
+                        <ChatFilePreview
+                            selectedFile={upload.selectedFile}
+                            filePreview={upload.filePreview}
+                            fileCaption={upload.fileCaption}
+                            setFileCaption={upload.setFileCaption}
+                            isUploading={upload.isUploading}
+                            onCancel={upload.handleCancelFile}
+                            onSend={upload.handleSendFile}
+                        />
+                    )}
+                </AnimatePresence>
 
-            {selection.bulkDeleteConfirmOpen && (
-                <ChatBulkDeleteDialog
-                    selectedCount={selection.selectedMessages.size}
-                    canDeleteForEveryone={selection.canDeleteForEveryone}
-                    onDelete={selection.handleBulkDelete}
-                    onCancel={() => selection.setBulkDeleteConfirmOpen(false)}
-                />
-            )}
-
-            {menu.deleteConfirmation.isOpen && (
-                <ChatDeleteMessageDialog
-                    canDeleteForEveryone={menu.deleteConfirmation.isMe}
-                    onDelete={menu.confirmDelete}
-                    onCancel={menu.closeDeleteConfirmation}
-                />
-            )}
-
-            {toast && <Toastbar message={toast} onClose={() => setToast(null)} />}
-
-            {/* WhatsApp-style Image/File Preview Overlay */}
-            {upload.selectedFile && (
-                <ChatFilePreview
-                    selectedFile={upload.selectedFile}
-                    filePreview={upload.filePreview}
-                    fileCaption={upload.fileCaption}
-                    setFileCaption={upload.setFileCaption}
-                    isUploading={upload.isUploading}
-                    onCancel={upload.handleCancelFile}
-                    onSend={upload.handleSendFile}
-                />
-            )}
-
-            <style>{`.scrollbar-hide::-webkit-scrollbar { display: none; }`}</style>
-        </div>
+                <style>{`.scrollbar-hide::-webkit-scrollbar { display: none; }`}</style>
+            </div>
+        </MotionConfig>
     );
 };
 

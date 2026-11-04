@@ -8,6 +8,7 @@ import { useFeedContext } from "../context/FeedContext";
 import HomeShimmering from "../components/shimmering/HomeShimmering";
 import PostCardShimmering from "../components/shimmering/PostCardShimmering";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { FOCUS_RING, PRESS, SOFT_TRANSITION } from "../components/posts/postUi";
 
 // Following is cursor-paginated; Trending is ranked by likes, so it pages by number.
 // Wrapped so useTabFeed's second argument (the cursor) never lands in the axios config slot.
@@ -222,7 +223,7 @@ export default function HomePage() {
     if (error && feedPosts.length === 0) {
         return (
             <div className="flex flex-col items-center gap-4 py-10 pt-[100px] md:pt-10">
-                <p className="text-center text-red-500">{error}</p>
+                <p className="text-center text-[14px] text-red-400">{error}</p>
                 <button
                     type="button"
                     onClick={() => {
@@ -230,7 +231,7 @@ export default function HomePage() {
                         setFeedHasMore(true);
                         fetchFeed(1);
                     }}
-                    className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-[11px] font-black uppercase tracking-[0.15em] text-white"
+                    className={`px-5 py-2 rounded-xl bg-white/5 border border-line hover:bg-white/10 hover:border-line-strong text-[11px] font-black uppercase tracking-[0.15em] text-white ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`}
                 >
                     Try again
                 </button>
@@ -251,13 +252,15 @@ export default function HomePage() {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`pb-3 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.12em] transition-all relative shrink-0
-                ${activeTab === tab ? "text-white" : "text-ink-400 hover:text-[#b2aed0]"}`}
+                            className={`pb-3 pt-1 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.12em] relative shrink-0 rounded-t-md ${SOFT_TRANSITION} ${FOCUS_RING}
+                ${activeTab === tab ? "text-white" : "text-ink-300 hover:text-ink-100"}`}
                         >
                             {tab}
-                            {activeTab === tab && (
-                                <div className="absolute bottom-0 left-0 w-full h-[1.5px] bg-[var(--cliq-lilac)] rounded-full shadow-[0_0_8px_rgba(167,139,250,0.4)]" />
-                            )}
+                            {/* Always rendered so switching tabs fades/grows the underline instead of popping it */}
+                            <span
+                                aria-hidden="true"
+                                className={`absolute bottom-0 left-0 w-full h-[1.5px] bg-brand-light rounded-full shadow-[0_0_8px_theme(colors.brand.light/40%)] transition duration-200 ease-soft ${activeTab === tab ? "opacity-100 scale-x-100" : "opacity-0 motion-safe:scale-x-50"}`}
+                            />
                         </button>
                     ))}
                 </div>
@@ -288,8 +291,8 @@ export default function HomePage() {
                             ))}
 
                         {tabFeed.isEmpty && (
-                            <div className="p-8 text-center cliq-feed-panel rounded-[1.5rem] border-dashed mt-4 max-w-[560px] w-full self-center">
-                                <p className="text-neutral-400 text-[13px]">
+                            <div className="p-8 text-center cliq-feed-panel rounded-2xl border-dashed mt-4 max-w-[560px] w-full mx-auto">
+                                <p className="text-ink-300 text-[13px] leading-relaxed">
                                     {activeTab === "Following"
                                         ? "No posts from your connections yet. Find people to connect with on Search or Explore."
                                         : "Nothing is trending yet. Posts with the most likes this month will show up here."}
@@ -314,8 +317,8 @@ export default function HomePage() {
                         {loadingMore && <PostCardShimmering label="Loading more posts" />}
 
                         {!feedHasMore && feedPosts.length > 0 && (
-                            <div className="p-8 text-center cliq-feed-panel rounded-[1.5rem] border-dashed mt-4 max-w-[560px] w-full self-center">
-                                <p className="text-neutral-600 text-[10px] font-bold uppercase tracking-[0.25em]">
+                            <div className="p-8 text-center cliq-feed-panel rounded-2xl border-dashed mt-4 max-w-[560px] w-full mx-auto">
+                                <p className="text-ink-400 text-[10px] font-bold uppercase tracking-[0.25em]">
                                     ✨ End of the universe ✨
                                 </p>
                             </div>

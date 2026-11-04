@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { MessageCircle, MoreHorizontal, Trash2, Flag, Loader2 } from "lucide-react";
 import RichText from "./RichText";
 import MentionTextarea from "./MentionTextarea";
 import { timeAgo } from "../../utils/timeAgo";
 import { DEFAULT_AVATAR } from "../../utils/avatar";
+import { DURATION, EASE_SOFT } from "../common/motionPresets";
+import { DROP_IN, FOCUS_RING, MENU, MENU_ITEM, PRESS, SOFT_TRANSITION } from "./postUi";
 
 const CommentRow = ({ comment, isReply, currentUser, onReply, onDelete, onReport, onProfileEnter, onProfileLeave }) => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -25,14 +28,14 @@ const CommentRow = ({ comment, isReply, currentUser, onReply, onDelete, onReport
                 to={profilePath}
                 onMouseEnter={(e) => onProfileEnter(e, comment.userId)}
                 onMouseLeave={onProfileLeave}
-                className="shrink-0"
+                className={`shrink-0 rounded-full self-start ${FOCUS_RING}`}
             >
                 <img
                     loading="lazy"
                     decoding="async"
                     src={comment.avatar || DEFAULT_AVATAR}
                     alt={comment.username || "Anonymous"}
-                    className={`${avatarSize} rounded-full object-cover`}
+                    className={`${avatarSize} rounded-full object-cover bg-surface-600`}
                 />
             </Link>
             <div className="flex-1 min-w-0 space-y-1">
@@ -42,14 +45,16 @@ const CommentRow = ({ comment, isReply, currentUser, onReply, onDelete, onReport
                             to={profilePath}
                             onMouseEnter={(e) => onProfileEnter(e, comment.userId)}
                             onMouseLeave={onProfileLeave}
-                            className="font-bold text-[14px] text-white hover:underline truncate"
+                            className={`font-bold text-[14px] text-white hover:text-brand-light rounded-sm truncate ${SOFT_TRANSITION} ${FOCUS_RING}`}
                         >
                             {comment.username || "Anonymous"}
                         </Link>
-                        <span className="text-ink-350 text-[13px] truncate">@{comment.handle}</span>
-                        <span className="text-ink-350 text-[13px]">·</span>
+                        <span className="text-ink-300 text-[13px] truncate">@{comment.handle}</span>
+                        <span className="text-ink-500 text-[13px]" aria-hidden="true">
+                            ·
+                        </span>
                         <span
-                            className="text-ink-350 text-[13px] shrink-0"
+                            className="text-ink-300 text-[13px] shrink-0"
                             title={new Date(comment.createdAt).toLocaleString()}
                         >
                             {timeAgo(comment.createdAt)}
@@ -59,21 +64,21 @@ const CommentRow = ({ comment, isReply, currentUser, onReply, onDelete, onReport
                         <button
                             onClick={() => setMenuOpen((o) => !o)}
                             aria-label="Comment options"
-                            className="text-ink-350 hover:text-brand p-1.5 hover:bg-brand/10 rounded-full transition-colors"
+                            className={`text-ink-300 hover:text-brand-light p-1.5 hover:bg-brand/10 rounded-full ${SOFT_TRANSITION} ${FOCUS_RING}`}
                         >
                             <MoreHorizontal size={16} />
                         </button>
                         {menuOpen && (
-                            <div className="absolute right-0 mt-1 w-48 bg-surface-850 border border-white/5 rounded-xl shadow-2xl z-20 overflow-hidden">
+                            <div className={`${MENU} absolute right-0 mt-1 w-48 origin-top-right ${DROP_IN}`}>
                                 {comment.userId === currentUser?.id ? (
                                     <button
                                         onClick={() => {
                                             setMenuOpen(false);
                                             onDelete(comment);
                                         }}
-                                        className="w-full px-4 py-3 text-left text-sm text-red-500 hover:bg-white/5 flex items-center space-x-3 font-bold"
+                                        className={`${MENU_ITEM} text-red-400 hover:bg-red-500/10`}
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={15} />
                                         <span>Delete {isReply ? "reply" : "comment"}</span>
                                     </button>
                                 ) : (
@@ -83,9 +88,9 @@ const CommentRow = ({ comment, isReply, currentUser, onReply, onDelete, onReport
                                             setMenuOpen(false);
                                             onReport(comment);
                                         }}
-                                        className={`w-full px-4 py-3 text-left text-sm flex items-center space-x-3 font-bold ${comment.isReported ? "text-gray-500 cursor-default" : "text-white hover:bg-white/5"}`}
+                                        className={`${MENU_ITEM} ${comment.isReported ? "text-ink-400 cursor-default" : "text-white hover:bg-white/[0.06]"}`}
                                     >
-                                        <Flag size={16} />
+                                        <Flag size={15} />
                                         <span>{comment.isReported ? "Reported" : "Report"}</span>
                                     </button>
                                 )}
@@ -97,11 +102,11 @@ const CommentRow = ({ comment, isReply, currentUser, onReply, onDelete, onReport
                     text={comment.comment}
                     mentions={comment.mentions}
                     currentUserId={currentUser?.id}
-                    className="text-ink-100 text-[14px] leading-relaxed"
+                    className="text-ink-100 text-[14px] leading-[1.65]"
                 />
                 <button
                     onClick={() => onReply(comment)}
-                    className="flex items-center gap-1.5 -ml-1.5 mt-1 px-1.5 py-1 rounded-full text-[12px] font-bold text-ink-350 hover:text-brand hover:bg-brand/10 transition-colors"
+                    className={`flex items-center gap-1.5 -ml-1.5 mt-1 px-2 py-1 rounded-full text-[12px] font-bold text-ink-300 hover:text-brand-light hover:bg-brand/10 ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`}
                 >
                     <MessageCircle size={14} /> Reply
                 </button>
@@ -130,7 +135,17 @@ export default function CommentThread({
     const [mentionIds, setMentionIds] = useState([]);
     const [submitting, setSubmitting] = useState(false);
     const inputRef = useRef(null);
+    const reduceMotion = useReducedMotion();
     const replies = comment.replies || [];
+    // Replies and the reply box open and close by height, so the rows below glide instead of jumping.
+    // Clipped only while moving ("clip", unlike "hidden", can't be scrolled by focusing the reply box), then
+    // visible again so the comment menus and the @mention list can overflow.
+    const collapse = {
+        initial: { height: 0, opacity: 0, overflow: "clip" },
+        animate: { height: "auto", opacity: 1, transitionEnd: { overflow: "visible" } },
+        exit: { height: 0, opacity: 0, overflow: "clip" },
+        transition: { duration: reduceMotion ? 0 : DURATION.panel, ease: EASE_SOFT },
+    };
 
     const startReply = (target) => {
         setReplyTo(target);
@@ -158,65 +173,79 @@ export default function CommentThread({
     const rowProps = { currentUser, onReply: startReply, onDelete, onReport, onProfileEnter, onProfileLeave };
 
     return (
-        <div className="p-4 hover:bg-white/[0.02] transition-colors">
+        <div className="px-4 py-4 hover:bg-white/[0.02] transition-colors duration-200 ease-soft">
             <CommentRow comment={comment} {...rowProps} />
 
             {(replies.length > 0 || replyTo) && (
-                <div className="ml-[52px] mt-2 space-y-3">
+                <div className="ml-[52px] mt-2">
                     {replies.length > 0 && (
                         <button
                             onClick={() => setExpanded((x) => !x)}
-                            className="text-[12px] font-bold text-brand-light hover:underline"
+                            aria-expanded={expanded}
+                            className={`text-[12px] font-bold text-brand-light hover:text-ink-100 rounded-sm ${SOFT_TRANSITION} ${FOCUS_RING}`}
                         >
                             {expanded
                                 ? "Hide replies"
                                 : `View ${replies.length} ${replies.length === 1 ? "reply" : "replies"}`}
                         </button>
                     )}
-                    {expanded &&
-                        replies.map((reply) => <CommentRow key={reply.id} comment={reply} isReply {...rowProps} />)}
-
-                    {replyTo && (
-                        <form onSubmit={submit} className="flex items-start gap-2">
-                            <img
-                                loading="lazy"
-                                decoding="async"
-                                src={currentUser?.imageUrl || DEFAULT_AVATAR}
-                                alt=""
-                                className="w-8 h-8 rounded-full object-cover shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                                <MentionTextarea
-                                    ref={inputRef}
-                                    multiline={false}
-                                    value={text}
-                                    onChange={setText}
-                                    onMentionIdsChange={setMentionIds}
-                                    maxLength={1000}
-                                    placeholder={`Reply to ${replyTo.username}`}
-                                    aria-label={`Reply to ${replyTo.username}`}
-                                    onKeyDown={(e) => e.key === "Escape" && setReplyTo(null)}
-                                    className="w-full bg-white/[0.04] border border-white/10 rounded-full px-4 py-2 text-[14px] text-white placeholder-ink-350 focus:outline-none focus:border-brand/50"
-                                />
-                                <div className="flex justify-end gap-2 mt-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setReplyTo(null)}
-                                        className="px-3 py-1 rounded-full text-[12px] font-bold text-ink-350 hover:text-white"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={!text.trim() || submitting}
-                                        className="flex items-center gap-1.5 px-4 py-1 bg-brand text-white rounded-full font-bold text-[12px] disabled:opacity-50"
-                                    >
-                                        {submitting && <Loader2 size={12} className="animate-spin" />} Reply
-                                    </button>
+                    <AnimatePresence initial={false}>
+                        {expanded && replies.length > 0 && (
+                            <motion.div key="replies" {...collapse}>
+                                <div className="space-y-3 pt-3">
+                                    {replies.map((reply) => (
+                                        <CommentRow key={reply.id} comment={reply} isReply {...rowProps} />
+                                    ))}
                                 </div>
-                            </div>
-                        </form>
-                    )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <AnimatePresence initial={false}>
+                        {replyTo && (
+                            <motion.div key="reply-form" {...collapse}>
+                                <form onSubmit={submit} className="flex items-start gap-2 pt-3">
+                                    <img
+                                        loading="lazy"
+                                        decoding="async"
+                                        src={currentUser?.imageUrl || DEFAULT_AVATAR}
+                                        alt=""
+                                        className="w-8 h-8 rounded-full object-cover shrink-0 bg-surface-600"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <MentionTextarea
+                                            ref={inputRef}
+                                            multiline={false}
+                                            value={text}
+                                            onChange={setText}
+                                            onMentionIdsChange={setMentionIds}
+                                            maxLength={1000}
+                                            placeholder={`Reply to ${replyTo.username}`}
+                                            aria-label={`Reply to ${replyTo.username}`}
+                                            onKeyDown={(e) => e.key === "Escape" && setReplyTo(null)}
+                                            className="w-full bg-white/[0.04] border border-line rounded-full px-4 py-2 text-[14px] text-white placeholder-ink-400 focus:outline-none focus:border-brand-light/40 focus:ring-2 focus:ring-brand-light/10 transition duration-200 ease-soft"
+                                        />
+                                        <div className="flex justify-end gap-2 mt-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setReplyTo(null)}
+                                                className={`px-3 py-1 rounded-full text-[12px] font-bold text-ink-300 hover:text-white hover:bg-white/[0.06] ${SOFT_TRANSITION} ${FOCUS_RING}`}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={!text.trim() || submitting}
+                                                className={`flex items-center gap-1.5 px-4 py-1 bg-brand hover:bg-brand/85 text-white rounded-full font-bold text-[12px] disabled:opacity-50 disabled:pointer-events-none ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`}
+                                            >
+                                                {submitting && <Loader2 size={12} className="animate-spin" />} Reply
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             )}
         </div>

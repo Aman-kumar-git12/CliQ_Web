@@ -54,12 +54,12 @@ const ConnectionDashboard = ({ analyticsData, adminAnalytics, isAdmin = false })
                     <TrendCard title="Your 14-Day Trend" trend={analyticsData.trend || []} />
                 </div>
                 {isAdmin && (
-                    <div className="rounded-3xl border border-white/5 bg-white/[0.03] p-5 space-y-4">
+                    <div className="rounded-3xl border border-line-soft bg-white/[0.03] p-5 space-y-4">
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-neutral-400">
+                            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-ink-300">
                                 Engine Snapshot
                             </p>
-                            <p className="text-sm text-neutral-300 mt-2">
+                            <p className="text-sm text-white/70 mt-2">
                                 {adminAnalytics.activeUsers || 0} active users out of {adminAnalytics.totalUsers || 0}{" "}
                                 total users
                             </p>

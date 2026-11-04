@@ -3,6 +3,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, RefreshCw, ArrowRight, CheckCircle } from "lucide-react";
 import * as authApi from "../../api/auth";
 import { useUserContext } from "../../context/UserContext";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
+import {
+    authAppear,
+    authCardClass,
+    authNoticeClass,
+    authPageClass,
+    authPrimaryButtonClass,
+    authSpinnerClass,
+} from "../../components/auth/authStyles";
+import { EASE_SOFT } from "../../components/common/motionPresets";
 
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN_SECS = 60; // 1 min initial UI cooldown; backend enforces 10 min real cooldown
@@ -204,144 +214,191 @@ export default function VerifyOtpPage() {
     };
 
     // ── Render ────────────────────────────────────────────────────────────────
+    const isIncomplete = digits.some((d) => !d);
+
     return (
-        <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
-            <div className="w-full max-w-md">
-                {/* Card */}
-                <div className="rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl overflow-hidden">
-                    {/* Top accent line */}
-                    <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <MotionConfig reducedMotion="user">
+            <div className={authPageClass}>
+                <div className="w-full max-w-md">
+                    {/* Card */}
+                    <div className={`${authCardClass} overflow-hidden`}>
+                        {/* Top accent line */}
+                        <div className="h-px w-full bg-gradient-to-r from-transparent via-brand-light/40 to-transparent" />
 
-                    <div className="px-8 py-10">
-                        {/* Icon */}
-                        <div className="flex justify-center mb-6">
-                            <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                                <Mail size={24} className="text-white/70" strokeWidth={1.5} />
-                            </div>
-                        </div>
-
-                        {/* Heading */}
-                        <div className="text-center mb-2">
-                            <h1 className="text-2xl font-semibold tracking-tight">
-                                {success
-                                    ? intent === "reset_password"
-                                        ? "Password Reset!"
-                                        : "Verified!"
-                                    : intent === "reset_password"
-                                      ? "Password Reset"
-                                      : "Check your email"}
-                            </h1>
-                        </div>
-                        <p className="text-center text-sm text-neutral-400 mb-8 leading-relaxed">
-                            {success ? (
-                                "Redirecting you to your feed…"
-                            ) : (
-                                <>
-                                    We sent a 6-digit code to <span className="text-white font-medium">{email}</span>
-                                </>
-                            )}
-                        </p>
-
-                        {/* Success state */}
-                        {success ? (
-                            <div className="flex justify-center">
-                                <CheckCircle size={48} className="text-green-400" strokeWidth={1.5} />
-                            </div>
-                        ) : (
-                            <>
-                                {/* OTP Digit Boxes */}
-                                <div className="flex justify-center gap-2.5 mb-6" onPaste={handlePaste}>
-                                    {digits.map((digit, i) => (
-                                        <input
-                                            key={i}
-                                            ref={(el) => (inputRefs.current[i] = el)}
-                                            id={`otp-digit-${i}`}
-                                            aria-label={`Digit ${i + 1} of ${OTP_LENGTH}`}
-                                            type="text"
-                                            inputMode="numeric"
-                                            maxLength={1}
-                                            value={digit}
-                                            onChange={(e) => handleDigitChange(i, e.target.value)}
-                                            onKeyDown={(e) => handleKeyDown(i, e)}
-                                            disabled={loading}
-                                            className={`
-                                                w-11 h-14 text-center text-xl font-semibold rounded-xl
-                                                bg-white/5 border transition-all duration-150 outline-none
-                                                ${digit ? "border-white/40 text-white" : "border-white/10 text-neutral-500"}
-                                                focus:border-white/60 focus:bg-white/8 focus:ring-0
-                                                disabled:opacity-50 disabled:cursor-not-allowed
-                                                caret-transparent
-                                            `}
-                                            autoComplete="one-time-code"
-                                        />
-                                    ))}
-                                </div>
-
-                                {/* Error */}
-                                {error && (
-                                    <p className="text-center text-sm text-red-400 mb-4 animate-pulse">{error}</p>
-                                )}
-
-                                {/* Resend success */}
-                                {resendMessage && (
-                                    <p className="text-center text-sm text-green-400 mb-4">{resendMessage}</p>
-                                )}
-
-                                {/* Verify Button */}
-                                <button
-                                    onClick={() => handleSubmit()}
-                                    disabled={loading || digits.some((d) => !d)}
-                                    className={`
-                                        w-full flex items-center justify-center gap-2
-                                        bg-white text-black font-semibold py-3 rounded-full
-                                        hover:opacity-90 transition-all
-                                        ${loading || digits.some((d) => !d) ? "opacity-50 cursor-not-allowed" : ""}
-                                    `}
+                        <div className="px-6 py-10 sm:px-8">
+                            {/* Icon */}
+                            <div className="flex justify-center mb-6">
+                                <div
+                                    className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-colors duration-300 ease-soft ${success ? "bg-emerald-500/10 border-emerald-500/20" : "bg-brand/10 border-brand/20"}`}
                                 >
-                                    {loading ? (
-                                        <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                                    ) : (
-                                        <>
-                                            Verify <ArrowRight size={16} />
-                                        </>
-                                    )}
-                                </button>
-
-                                {/* Resend section */}
-                                <div className="mt-6 text-center">
-                                    <p className="text-sm text-neutral-500 mb-2">Didn't receive the code?</p>
-                                    <button
-                                        onClick={handleResend}
-                                        disabled={cooldown > 0 || resendLoading}
-                                        className={`
-                                            inline-flex items-center gap-1.5 text-sm font-medium transition-colors
-                                            ${
-                                                cooldown > 0 || resendLoading
-                                                    ? "text-neutral-600 cursor-not-allowed"
-                                                    : "text-white hover:text-neutral-300"
-                                            }
-                                        `}
-                                    >
-                                        <RefreshCw size={13} className={resendLoading ? "animate-spin" : ""} />
-                                        {resendLoading
-                                            ? "Sending…"
-                                            : cooldown > 0
-                                              ? `Resend in ${formatCooldown(cooldown)}`
-                                              : "Resend code"}
-                                    </button>
+                                    <Mail
+                                        size={24}
+                                        className={`transition-colors duration-300 ${success ? "text-emerald-300" : "text-brand-light"}`}
+                                        strokeWidth={1.5}
+                                    />
                                 </div>
-                            </>
-                        )}
+                            </div>
+
+                            {/* Heading */}
+                            <div className="text-center mb-2">
+                                <h1 className="text-2xl font-semibold tracking-tight">
+                                    {success
+                                        ? intent === "reset_password"
+                                            ? "Password Reset!"
+                                            : "Verified!"
+                                        : intent === "reset_password"
+                                          ? "Password Reset"
+                                          : "Check your email"}
+                                </h1>
+                            </div>
+                            <p className="text-center text-sm text-ink-300 mb-8 leading-relaxed">
+                                {success ? (
+                                    "Redirecting you to your feed…"
+                                ) : (
+                                    <>
+                                        We sent a 6-digit code to{" "}
+                                        <span className="text-white font-medium break-all">{email}</span>
+                                    </>
+                                )}
+                            </p>
+
+                            <AnimatePresence mode="wait" initial={false}>
+                                {/* Success state */}
+                                {success ? (
+                                    <motion.div
+                                        key="success"
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 0.25, ease: EASE_SOFT }}
+                                        className="flex justify-center"
+                                    >
+                                        <CheckCircle size={48} className="text-emerald-400" strokeWidth={1.5} />
+                                    </motion.div>
+                                ) : (
+                                    <motion.div key="form" {...authAppear}>
+                                        {/* OTP Digit Boxes */}
+                                        <div
+                                            className="flex justify-center gap-2 sm:gap-2.5 mb-6"
+                                            onPaste={handlePaste}
+                                        >
+                                            {digits.map((digit, i) => (
+                                                <input
+                                                    key={i}
+                                                    ref={(el) => (inputRefs.current[i] = el)}
+                                                    id={`otp-digit-${i}`}
+                                                    aria-label={`Digit ${i + 1} of ${OTP_LENGTH}`}
+                                                    aria-invalid={error ? true : undefined}
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    maxLength={1}
+                                                    value={digit}
+                                                    onChange={(e) => handleDigitChange(i, e.target.value)}
+                                                    onKeyDown={(e) => handleKeyDown(i, e)}
+                                                    disabled={loading}
+                                                    className={`
+                                                        w-10 h-12 sm:w-11 sm:h-14 text-center text-xl font-semibold rounded-xl tabular-nums
+                                                        bg-white/[0.03] border outline-none caret-transparent
+                                                        transition-[border-color,box-shadow,background-color,transform] duration-150 ease-soft
+                                                        ${
+                                                            error
+                                                                ? "border-red-400/50 text-white"
+                                                                : digit
+                                                                  ? "border-white/30 text-white bg-white/[0.06]"
+                                                                  : "border-line text-ink-300 hover:border-line-strong"
+                                                        }
+                                                        focus:border-brand/60 focus:bg-white/[0.06] focus:ring-4 focus:ring-brand/15
+                                                        disabled:opacity-50 disabled:cursor-not-allowed
+                                                    `}
+                                                    autoComplete="one-time-code"
+                                                />
+                                            ))}
+                                        </div>
+
+                                        {/* Error */}
+                                        {error && (
+                                            <motion.p
+                                                {...authAppear}
+                                                role="alert"
+                                                className={`${authNoticeClass.error} text-center mb-4`}
+                                            >
+                                                {error}
+                                            </motion.p>
+                                        )}
+
+                                        {/* Resend success */}
+                                        {resendMessage && (
+                                            <motion.p
+                                                {...authAppear}
+                                                role="status"
+                                                className={`${authNoticeClass.success} text-center mb-4`}
+                                            >
+                                                {resendMessage}
+                                            </motion.p>
+                                        )}
+
+                                        {/* Verify Button */}
+                                        <button
+                                            onClick={() => handleSubmit()}
+                                            disabled={loading || isIncomplete}
+                                            className={authPrimaryButtonClass}
+                                        >
+                                            {loading ? (
+                                                <>
+                                                    <span className={authSpinnerClass} aria-hidden="true" />
+                                                    <span className="sr-only">Verifying</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Verify <ArrowRight size={16} aria-hidden="true" />
+                                                </>
+                                            )}
+                                        </button>
+
+                                        {/* Resend section */}
+                                        <div className="mt-6 text-center">
+                                            <p className="text-sm text-ink-300 mb-2">Didn't receive the code?</p>
+                                            <button
+                                                onClick={handleResend}
+                                                disabled={cooldown > 0 || resendLoading}
+                                                className={`
+                                                    inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium
+                                                    transition-colors duration-150 ease-soft
+                                                    focus-ring
+                                                    ${
+                                                        cooldown > 0 || resendLoading
+                                                            ? "text-ink-400 cursor-not-allowed"
+                                                            : "text-brand-light hover:text-white hover:bg-white/[0.05]"
+                                                    }
+                                                `}
+                                            >
+                                                <RefreshCw
+                                                    size={13}
+                                                    className={resendLoading ? "motion-safe:animate-spin" : ""}
+                                                    aria-hidden="true"
+                                                />
+                                                <span className="tabular-nums">
+                                                    {resendLoading
+                                                        ? "Sending…"
+                                                        : cooldown > 0
+                                                          ? `Resend in ${formatCooldown(cooldown)}`
+                                                          : "Resend code"}
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Bottom accent line */}
+                        <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                     </div>
 
-                    {/* Bottom accent line */}
-                    <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    <p className="text-center text-xs text-ink-400 mt-6 leading-relaxed">
+                        Code expires in 10 minutes · Check your spam folder if needed
+                    </p>
                 </div>
-
-                <p className="text-center text-xs text-neutral-600 mt-6">
-                    Code expires in 10 minutes · Check your spam folder if needed
-                </p>
             </div>
-        </div>
+        </MotionConfig>
     );
 }

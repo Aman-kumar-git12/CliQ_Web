@@ -34,7 +34,7 @@ export default function PostDetailContent({
                         onMentionIdsChange={onEditMentionIdsChange}
                         aria-label="Edit post content"
                         maxLength={500}
-                        className="custom-resize-handle w-full h-24 bg-[#111] border border-[#2f3336] rounded-xl p-4 text-white focus:outline-none focus:border-brand resize-y text-[15px] md:text-[17px] leading-relaxed"
+                        className="custom-resize-handle w-full h-24 bg-surface-700 border border-line rounded-xl p-4 text-white placeholder-ink-400 focus:outline-none focus:border-brand-light/50 focus:ring-2 focus:ring-brand-light/10 transition duration-200 ease-soft resize-y text-[15px] md:text-[17px] leading-relaxed"
                         placeholder="Edit your post content..."
                     />
                 </>
@@ -43,7 +43,7 @@ export default function PostDetailContent({
                     text={post.content}
                     mentions={post.mentions}
                     currentUserId={currentUserId}
-                    className="text-[15px] md:text-[17px] leading-relaxed text-ink-100 font-medium"
+                    className="text-[15px] md:text-[17px] leading-[1.65] text-ink-100 font-medium"
                 />
             )}
 
@@ -51,7 +51,7 @@ export default function PostDetailContent({
             {!post.image && !post.video && <LinkPreviewCard preview={post.linkPreview} />}
 
             {(post.image || post.video) && (
-                <div className="rounded-[32px] overflow-hidden shadow-2xl flex items-center justify-center w-full h-[500px] bg-white/[0.02] border border-white/[0.05] mb-2 group/media mt-2">
+                <div className="rounded-3xl overflow-hidden shadow-soft-lg flex items-center justify-center w-full h-[500px] bg-white/[0.02] border border-line-soft mb-2 mt-2">
                     {post.video ? (
                         <video src={post.video} controls className="w-full h-full object-contain" />
                     ) : (
@@ -63,7 +63,7 @@ export default function PostDetailContent({
                     )}
                 </div>
             )}
-            <div className="text-[15px] text-ink-350 my-3">
+            <div className="text-[14px] text-ink-300 tabular-nums my-3">
                 {new Date(post.createdAt).toLocaleString(undefined, {
                     hour: "numeric",
                     minute: "2-digit",

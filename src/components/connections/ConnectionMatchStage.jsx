@@ -58,29 +58,39 @@ export default function ConnectionMatchStage({ logic }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
                         className="w-full flex justify-center py-4 md:py-8"
                     >
                         <MatchCardShimmering />
                     </motion.div>
                 ) : !user ? (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex flex-col items-center justify-center py-20 text-neutral-500 text-center"
+                        key="empty"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
+                        className="flex flex-col items-center justify-center py-20 text-ink-300 text-center"
                     >
-                        <Sparkles size={48} className="mb-4 text-neutral-700" />
-                        <p className="text-xl font-black uppercase tracking-widest italic">
+                        <span className="mb-5 w-16 h-16 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand-light shadow-lg shadow-brand/20">
+                            <Sparkles size={28} />
+                        </span>
+                        <p className="text-lg md:text-xl font-black uppercase tracking-widest italic text-white/80">
                             No more smart matches right now.
                         </p>
+                        <p className="mt-2 text-sm text-ink-400">Check back soon, or refresh to look again.</p>
                         <button
                             onClick={refreshMatches}
-                            className="mt-6 px-10 py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl"
+                            className="mt-6 px-10 py-4 bg-white text-black text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-white/90 cliq-press shadow-soft-lg focus-ring"
                         >
                             Refresh Matches
                         </button>
                     </motion.div>
                 ) : (
-                    <div className="relative flex flex-col items-center w-full max-w-full sm:max-w-md md:max-w-md mx-auto md:mx-0">
+                    <div
+                        key="deck"
+                        className="relative flex flex-col items-center w-full max-w-full sm:max-w-md md:max-w-md mx-auto md:mx-0 [perspective:1200px]"
+                    >
                         <ConnectionCard
                             user={user}
                             isPreferred={isPreferred}
@@ -119,8 +129,9 @@ export default function ConnectionMatchStage({ logic }) {
                                     initial={{ opacity: 0, y: 15, x: "-50%" }}
                                     animate={{ opacity: 1, y: 0, x: "-50%" }}
                                     exit={{ opacity: 0, y: 15, x: "-50%" }}
-                                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                                    className="absolute left-1/2 bottom-[-40px] z-[100] px-10 py-5 bg-white text-black text-[10px] font-black uppercase italic tracking-[0.2em] rounded-2xl shadow-3xl pointer-events-none border border-white/20 whitespace-nowrap"
+                                    transition={{ duration: 0.22, ease: "easeOut" }}
+                                    role="status"
+                                    className="absolute left-1/2 bottom-[-40px] z-[100] px-8 py-4 bg-white text-black text-[10px] font-black uppercase italic tracking-[0.2em] rounded-2xl shadow-pop pointer-events-none whitespace-nowrap"
                                 >
                                     {snack}
                                 </motion.div>

@@ -8,6 +8,8 @@ import ExpertiseView from "../components/expertise/ExpertiseView";
 import ProfileHoverCard from "../components/profile/ProfileHoverCard";
 import { useUserContext } from "../context/UserContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { EASE_SOFT } from "../components/common/motionPresets";
+import { Layers, UserX } from "lucide-react";
 import ProfileShimmering from "../components/shimmering/ProfileShimmering";
 import ProfileHeader from "../components/profile/ProfileHeader";
 import ProfileStats from "../components/profile/ProfileStats";
@@ -15,6 +17,7 @@ import ProfileTabs from "../components/profile/ProfileTabs";
 import PublicProfilePostsTab from "../components/profile/PublicProfilePostsTab";
 import PublicProfileConnectionsTab from "../components/profile/PublicProfileConnectionsTab";
 import PublicProfileGroupsTab from "../components/profile/PublicProfileGroupsTab";
+import { ProfileEmptyAction, ProfileEmptyState, ProfileSectionHeading } from "../components/profile/ProfileSection";
 import { invalidateCachedRequests } from "../utils/requestCache";
 
 const TABS = ["posts", "connections", "groups", "expertise"];
@@ -23,6 +26,7 @@ const PublicProfileView = () => {
     const { userId: userIdFromUrl } = useParams();
     const navigate = useNavigate();
     const containerRef = useRef(null);
+    const tabContentRef = useRef(null);
     const { user: currentUser } = useUserContext();
 
     const [user, setUser] = useState(null);
@@ -183,20 +187,27 @@ const PublicProfileView = () => {
         setActiveTab(newTab);
     };
 
+    // A stat card opens its tab and brings the tab content into view (scroll-mt keeps it clear of the sticky tabs)
+    const handleStatClick = (id) => {
+        handleTabChange(id);
+        const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+        tabContentRef.current?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    };
+
     const tabVariants = {
         initial: (direction) => ({
-            x: direction > 0 ? 30 : -30,
+            x: direction > 0 ? 16 : -16,
             opacity: 0,
         }),
         animate: {
             x: 0,
             opacity: 1,
-            transition: { duration: 0.25, ease: "easeOut" },
+            transition: { duration: 0.24, ease: EASE_SOFT },
         },
         exit: (direction) => ({
-            x: direction > 0 ? -30 : 30,
+            x: direction > 0 ? -16 : 16,
             opacity: 0,
-            transition: { duration: 0.25, ease: "easeOut" },
+            transition: { duration: 0.15, ease: "easeOut" },
         }),
     };
 
@@ -231,19 +242,31 @@ const PublicProfileView = () => {
     };
 
     if (loading) return <ProfileShimmering />;
-    if (!user) return <div className="text-center text-white mt-10 font-bold">User not found</div>;
+    if (!user) {
+        return (
+            <div className="w-full max-w-md mx-auto px-4 pt-28 md:pt-16">
+                <ProfileEmptyState
+                    icon={UserX}
+                    title="User not found"
+                    hint="This profile may have been removed, or the link is wrong."
+                    action={<ProfileEmptyAction to="/">Back home</ProfileEmptyAction>}
+                />
+            </div>
+        );
+    }
+
+    const hasExpertise = Boolean(user.expertise) && Object.keys(user.expertise).length > 0;
 
     return (
         <div
             ref={containerRef}
-            className="min-h-screen bg-transparent text-white relative overflow-x-hidden no-scrollbar transition-all duration-500"
+            className="min-h-screen bg-transparent text-white relative overflow-x-hidden no-scrollbar"
         >
-            <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; }` }} />
-            {/* Cinematic Background Glows */}
-            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-brand/10 rounded-full blur-[140px] pointer-events-none -z-10 animate-pulse transition-opacity duration-[3000ms]" />
-            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-pink/5 rounded-full blur-[140px] pointer-events-none -z-10" />
+            {/* Background glows, kept faint so the page reads calm */}
+            <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-brand/[0.07] rounded-full blur-[140px] pointer-events-none -z-10" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-brand-pink/[0.04] rounded-full blur-[140px] pointer-events-none -z-10" />
 
-            <div className="w-full max-w-2xl mx-auto pt-[80px] md:pt-6 pb-[90px] relative z-10 transition-all duration-500">
+            <div className="w-full max-w-2xl mx-auto pt-[80px] md:pt-6 pb-[90px] relative z-10">
                 <ProfileHeader
                     user={user}
                     isOwnProfile={false}
@@ -255,20 +278,25 @@ const PublicProfileView = () => {
                     onAvatarMouseLeave={handleProfileMouseLeave}
                 />
 
-                <div className="mt-4 md:mt-6">
+                {/* Same horizontal rhythm as ProfilePage: px-4 on mobile, flush with the header on desktop */}
+                <div className="px-4 md:px-0 mt-5 md:mt-6">
                     <ProfileStats
                         stats={{
                             posts: user.postsCount || posts.length,
                             connections: user.connectionsCount || connections.length,
                             groups: user.groupsCount || groups.length,
                         }}
+                        onStatClick={handleStatClick}
                     />
 
                     <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
                 </div>
 
                 {/* TAB CONTENT SECTION */}
-                <div className="mt-4 md:mt-8 min-h-[400px] px-1 md:px-4">
+                <div
+                    ref={tabContentRef}
+                    className="relative mt-4 md:mt-6 min-h-[400px] px-4 md:px-0 scroll-mt-32 md:scroll-mt-24"
+                >
                     <AnimatePresence mode="popLayout" custom={direction} initial={false}>
                         <motion.div
                             key={activeTab}
@@ -277,7 +305,6 @@ const PublicProfileView = () => {
                             initial="initial"
                             animate="animate"
                             exit="exit"
-                            layout
                             className="w-full"
                         >
                             {activeTab === "posts" && (
@@ -297,22 +324,20 @@ const PublicProfileView = () => {
                             )}
 
                             {activeTab === "expertise" && (
-                                <div className="space-y-4 md:space-y-6 px-3 md:px-0">
-                                    <div className="flex items-center justify-between mb-3 md:mb-6 px-1 md:px-0">
-                                        <h2 className="text-lg md:text-2xl font-bold text-white">Professional Stack</h2>
-                                    </div>
-                                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-[32px] p-6 md:p-8 border border-white/10 shadow-2xl overflow-hidden relative group transition-all duration-500 mx-3 md:mx-0">
-                                        {user.expertise ? (
+                                <section>
+                                    <ProfileSectionHeading title="Professional Stack" />
+                                    {hasExpertise ? (
+                                        <div className="rounded-3xl p-5 md:p-8 bg-white/[0.03] border border-line shadow-soft overflow-hidden">
                                             <ExpertiseView expertise={user.expertise} />
-                                        ) : (
-                                            <div className="text-center py-12">
-                                                <p className="text-white/30 font-black uppercase tracking-widest italic">
-                                                    No expertise added
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
+                                        </div>
+                                    ) : (
+                                        <ProfileEmptyState
+                                            icon={Layers}
+                                            title="No expertise added"
+                                            hint="Their skills and projects will show up here once they add them."
+                                        />
+                                    )}
+                                </section>
                             )}
                         </motion.div>
                     </AnimatePresence>
@@ -327,18 +352,20 @@ const PublicProfileView = () => {
                 onMouseLeave={handleCardMouseLeave}
             />
 
-            {snack && (
-                <AnimatePresence>
+            <AnimatePresence>
+                {snack && (
                     <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-3 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-2xl pointer-events-none whitespace-nowrap"
+                        initial={{ opacity: 0, y: 16, x: "-50%" }}
+                        animate={{ opacity: 1, y: 0, x: "-50%" }}
+                        exit={{ opacity: 0, y: 12, x: "-50%" }}
+                        transition={{ duration: 0.22, ease: EASE_SOFT }}
+                        role="status"
+                        className="fixed bottom-24 md:bottom-10 left-1/2 z-toast px-5 py-2.5 rounded-full bg-surface-raised border border-line text-white text-sm font-medium shadow-pop pointer-events-none whitespace-nowrap"
                     >
                         {snack}
                     </motion.div>
-                </AnimatePresence>
-            )}
+                )}
+            </AnimatePresence>
         </div>
     );
 };

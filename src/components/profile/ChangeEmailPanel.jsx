@@ -2,10 +2,10 @@ import { useState } from "react";
 import * as usersApi from "../../api/users";
 
 const inputClass =
-    "w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-xl transition-all text-white placeholder-white/20 font-bold";
-const labelClass = "block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1";
+    "w-full bg-white/[0.03] border border-line rounded-2xl px-5 py-3 hover:border-line-strong focus:outline-none focus:border-brand/40 focus:ring-2 focus:ring-brand/30 cliq-transition text-white placeholder-white/20 font-bold";
+const labelClass = "block mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-ink-300 ml-1";
 const buttonClass =
-    "px-5 py-3 rounded-2xl text-[11px] font-black uppercase italic tracking-widest transition-all disabled:opacity-50";
+    "px-5 py-3 rounded-2xl text-[11px] font-black uppercase italic tracking-widest cliq-transition enabled:active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed focus-ring";
 
 const errorText = (error) => error.response?.data?.message || "Something went wrong. Try again.";
 
@@ -69,21 +69,21 @@ export default function ChangeEmailPanel({ email, canChange, onChanged }) {
                     <button
                         type="button"
                         onClick={() => setStep("request")}
-                        className={`${buttonClass} border border-white/10 text-white hover:bg-white/5`}
+                        className={`${buttonClass} border border-line text-white hover:bg-white/5`}
                     >
                         Change
                     </button>
                 )}
             </div>
             {!canChange && (
-                <p className="mt-2 ml-1 text-[12px] text-white/40">
+                <p className="mt-2 ml-1 text-[12px] text-ink-300">
                     This account signs in with Google and uses its email.
                 </p>
             )}
             {message && step === "view" && <p className="mt-2 ml-1 text-[12px] text-emerald-400">{message}</p>}
 
             {step !== "view" && (
-                <div className="mt-4 space-y-4 rounded-2xl border border-white/10 p-4">
+                <div className="mt-4 space-y-4 rounded-2xl border border-line bg-white/[0.02] p-4 animate-fadeIn">
                     {step === "request" ? (
                         <>
                             <div>
@@ -138,14 +138,14 @@ export default function ChangeEmailPanel({ email, canChange, onChanged }) {
                             type="button"
                             disabled={busy || (step === "request" ? !newEmail || !currentPassword : otp.length !== 6)}
                             onClick={step === "request" ? sendCode : confirm}
-                            className={`${buttonClass} bg-white text-black hover:scale-105`}
+                            className={`${buttonClass} bg-white text-black enabled:hover:bg-white/90`}
                         >
                             {step === "request" ? "Send code" : "Confirm"}
                         </button>
                         <button
                             type="button"
                             onClick={reset}
-                            className={`${buttonClass} border border-white/10 text-white hover:bg-white/5`}
+                            className={`${buttonClass} border border-line text-white hover:bg-white/5`}
                         >
                             Cancel
                         </button>

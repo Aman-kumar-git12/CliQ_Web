@@ -1,4 +1,5 @@
 import AuthLegalLinks from "./AuthLegalLinks";
+import { authSecondaryButtonClass } from "./authStyles";
 
 export default function GoogleAuthButton({ label = "continue_with" }) {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -19,12 +20,14 @@ export default function GoogleAuthButton({ label = "continue_with" }) {
                 type="button"
                 onClick={handleClick}
                 disabled={!backendUrl}
-                className="inline-flex w-full items-center justify-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                className={`${authSecondaryButtonClass} gap-3 px-5 text-sm font-semibold`}
             >
-                <span className="text-lg leading-none">G</span>
+                <span className="text-lg leading-none" aria-hidden="true">
+                    G
+                </span>
                 <span>{buttonText}</span>
             </button>
-            {!backendUrl ? <p className="text-sm text-red-500">Google sign-in is not configured.</p> : null}
+            {!backendUrl ? <p className="text-center text-sm text-red-300">Google sign-in is not configured.</p> : null}
             <AuthLegalLinks />
         </div>
     );

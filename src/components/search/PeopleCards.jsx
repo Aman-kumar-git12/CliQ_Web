@@ -130,9 +130,9 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
 
     const buttonClass = (userId) => {
         const status = connectionStatuses[userId]?.status;
-        if (status === "connected") return "bg-white/5 text-ink-300 border-white/10";
-        if (status === "interested") return "bg-surface-700 text-ink-500 border-surface-600";
-        return "bg-indigo-200 text-[#1e1b4b] border-transparent hover:bg-indigo-300 hover:shadow-[0_0_20px_rgba(199,210,254,0.4)] shadow-[0_0_15px_rgba(199,210,254,0.2)]";
+        if (status === "connected") return "bg-emerald-500/10 text-emerald-300 border-emerald-500/25 cursor-default";
+        if (status === "interested") return "bg-surface-700 text-ink-400 border-line cursor-default";
+        return "bg-ink-100 text-surface-night border-transparent hover:bg-white shadow-lg shadow-brand/10 hover:shadow-brand/25";
     };
 
     const isDisabled = (userId) => ["connected", "interested"].includes(connectionStatuses[userId]?.status);
@@ -151,7 +151,7 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                         onClick={() => setViewMode("list")}
                         aria-label="List view"
                         aria-pressed={viewMode === "list"}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${viewMode === "list" ? "bg-white/10 text-white shadow-lg" : "text-ink-600 hover:text-ink-300"}`}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-150 ease-soft focus-ring ${viewMode === "list" ? "bg-white/10 text-white shadow-lg" : "text-ink-600 hover:text-ink-300"}`}
                     >
                         <List size={14} strokeWidth={2.5} />
                     </button>
@@ -160,7 +160,7 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                         onClick={() => setViewMode("grid")}
                         aria-label="Grid view"
                         aria-pressed={viewMode === "grid"}
-                        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${viewMode === "grid" ? "bg-white/10 text-white shadow-lg" : "text-ink-600 hover:text-ink-300"}`}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors duration-150 ease-soft focus-ring ${viewMode === "grid" ? "bg-white/10 text-white shadow-lg" : "text-ink-600 hover:text-ink-300"}`}
                     >
                         <LayoutGrid size={14} strokeWidth={2.5} />
                     </button>
@@ -190,20 +190,20 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                     layout
                                     key={user.id}
                                     layoutId={`card-container-${user.id}`}
-                                    whileHover={{ y: -5 }}
+                                    whileHover={{ y: -3 }}
                                     transition={layoutTransition}
                                     className="group relative h-full"
                                 >
-                                    <motion.div
-                                        layoutId={`card-glow-${user.id}`}
-                                        className="absolute -inset-0.5 bg-gradient-to-br from-brand/20 to-brand-pink/20 rounded-[28px] blur-[15px] opacity-0 group-hover:opacity-100 transition duration-500"
+                                    <div
+                                        aria-hidden="true"
+                                        className="absolute -inset-0.5 bg-gradient-to-br from-brand/20 to-brand-pink/20 rounded-[28px] blur-[15px] opacity-0 group-hover:opacity-100 transition-opacity duration-250 ease-soft pointer-events-none"
                                     />
 
                                     {viewMode === "grid" ? (
                                         <motion.div
                                             layout
                                             layoutId={`card-inner-${user.id}`}
-                                            className="relative h-full flex flex-col items-center text-center p-3 md:p-4 rounded-[20px] border border-white/5 bg-surface-800 hover:bg-white/[0.02] hover:border-white/10 transition-all duration-300 shadow-xl overflow-hidden"
+                                            className="relative h-full flex flex-col items-center text-center p-3 md:p-4 rounded-[20px] border border-white/5 bg-surface-800 hover:bg-white/[0.02] hover:border-line transition-colors duration-200 ease-soft shadow-soft-lg overflow-hidden"
                                         >
                                             <motion.div
                                                 layoutId={`avatar-box-${user.id}`}
@@ -211,7 +211,7 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                                 onMouseLeave={handleProfileMouseLeave}
                                                 className="relative mb-3 md:mb-4 shrink-0"
                                             >
-                                                <div className="w-[48px] h-[48px] md:w-[60px] md:h-[60px] rounded-full overflow-hidden border-2 border-surface-700 group-hover:border-brand/50 transition-colors duration-500 p-0.5 shadow-2xl bg-gradient-to-br from-brand/20 to-brand-pink/20">
+                                                <div className="w-[48px] h-[48px] md:w-[60px] md:h-[60px] rounded-full overflow-hidden border-2 border-surface-700 group-hover:border-brand/50 transition-colors duration-200 ease-soft p-0.5 shadow-soft-lg bg-gradient-to-br from-brand/20 to-brand-pink/20">
                                                     <img
                                                         loading="lazy"
                                                         decoding="async"
@@ -228,7 +228,7 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                                 <motion.div layoutId={`name-${user.id}`}>
                                                     <Link
                                                         to={profileLink(user)}
-                                                        className="block font-black text-[12px] md:text-[14px] text-white truncate group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-brand group-hover:to-brand-pink transition-all no-underline tracking-tighter uppercase italic"
+                                                        className="block font-black text-[12px] md:text-[14px] text-white truncate group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-brand group-hover:to-brand-pink rounded-md focus-ring no-underline tracking-tighter uppercase italic"
                                                     >
                                                         {user.firstname} {user.lastname}
                                                     </Link>
@@ -241,7 +241,7 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                                 </motion.span>
                                                 {showMatchReasons && isAiMatch(user) && (
                                                     <span
-                                                        className="inline-flex items-center gap-1 mt-1.5 px-1.5 py-0.5 rounded-md bg-violet-500/15 text-violet-300 text-[9px] font-black uppercase tracking-wider"
+                                                        className="inline-flex items-center gap-1 mt-1.5 px-1.5 py-0.5 rounded-md bg-brand/15 text-brand-light text-[9px] font-black uppercase tracking-wider"
                                                         title="Matched by meaning, not just keywords"
                                                     >
                                                         <Sparkles size={10} /> AI match
@@ -251,11 +251,11 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                             {currentUser?.id !== user.id && (
                                                 <motion.button
                                                     layoutId={`btn-${user.id}`}
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
+                                                    whileHover={isDisabled(user.id) ? undefined : { scale: 1.03 }}
+                                                    whileTap={isDisabled(user.id) ? undefined : { scale: 0.96 }}
                                                     onClick={() => handleConnect(user.id)}
                                                     disabled={isDisabled(user.id)}
-                                                    className={`w-full py-2 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 border ${buttonClass(user.id)}`}
+                                                    className={`w-full py-2 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] transition-[background-color,color,border-color,box-shadow] duration-150 ease-soft border focus-ring ${buttonClass(user.id)}`}
                                                 >
                                                     {buttonText(user.id)}
                                                 </motion.button>
@@ -265,7 +265,7 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                         <motion.div
                                             layout
                                             layoutId={`card-inner-${user.id}`}
-                                            className="relative flex flex-row items-center gap-3.5 md:gap-5 p-3 md:p-[18px] rounded-[20px] md:rounded-[22px] border border-white/5 bg-surface-800 hover:bg-white/[0.02] hover:border-white/10 transition-all duration-300 shadow-xl group/card overflow-hidden"
+                                            className="relative flex flex-row items-center gap-3.5 md:gap-5 p-3 md:p-[18px] rounded-[20px] md:rounded-[22px] border border-white/5 bg-surface-800 hover:bg-white/[0.02] hover:border-line transition-colors duration-200 ease-soft shadow-soft-lg group/card overflow-hidden"
                                         >
                                             <motion.div
                                                 layoutId={`avatar-box-${user.id}`}
@@ -273,7 +273,7 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                                 onMouseLeave={handleProfileMouseLeave}
                                                 className="relative shrink-0 flex items-center"
                                             >
-                                                <div className="w-[48px] h-[48px] md:w-[64px] md:h-[64px] rounded-[14px] md:rounded-[18px] overflow-hidden border border-surface-700 group-hover/card:border-brand/50 transition-all duration-500 shadow-2xl p-[2px] bg-gradient-to-br from-brand/20 to-brand-pink/20">
+                                                <div className="w-[48px] h-[48px] md:w-[64px] md:h-[64px] rounded-[14px] md:rounded-[18px] overflow-hidden border border-surface-700 group-hover/card:border-brand/50 transition-colors duration-200 ease-soft shadow-soft-lg p-[2px] bg-gradient-to-br from-brand/20 to-brand-pink/20">
                                                     <img
                                                         loading="lazy"
                                                         decoding="async"
@@ -293,13 +293,13 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                                 >
                                                     <Link
                                                         to={profileLink(user)}
-                                                        className="inline-block font-black text-[15px] md:text-[20px] text-white truncate group-hover/card:text-transparent group-hover/card:bg-clip-text group-hover/card:bg-gradient-to-r group-hover/card:from-brand group-hover/card:to-brand-pink transition-all no-underline tracking-tighter uppercase italic leading-none"
+                                                        className="inline-block font-black text-[15px] md:text-[20px] text-white truncate group-hover/card:text-transparent group-hover/card:bg-clip-text group-hover/card:bg-gradient-to-r group-hover/card:from-brand group-hover/card:to-brand-pink rounded-md focus-ring no-underline tracking-tighter uppercase italic leading-none"
                                                     >
                                                         {user.firstname} {user.lastname}
                                                     </Link>
                                                     {showMatchReasons && isAiMatch(user) && (
                                                         <span
-                                                            className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-violet-500/15 text-violet-300 text-[9px] font-black uppercase tracking-wider shrink-0"
+                                                            className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-brand/15 text-brand-light text-[9px] font-black uppercase tracking-wider shrink-0"
                                                             title="Matched by meaning, not just keywords"
                                                         >
                                                             <Sparkles size={10} /> AI match
@@ -329,11 +329,11 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                                                 {currentUser?.id !== user.id && (
                                                     <motion.button
                                                         layoutId={`btn-${user.id}`}
-                                                        whileHover={{ scale: 1.05 }}
-                                                        whileTap={{ scale: 0.95 }}
+                                                        whileHover={isDisabled(user.id) ? undefined : { scale: 1.03 }}
+                                                        whileTap={isDisabled(user.id) ? undefined : { scale: 0.96 }}
                                                         onClick={() => handleConnect(user.id)}
                                                         disabled={isDisabled(user.id)}
-                                                        className={`px-4 md:px-8 py-2 md:py-3 rounded-[10px] md:rounded-[12px] text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 border ${buttonClass(user.id)}`}
+                                                        className={`px-4 md:px-8 py-2 md:py-3 rounded-[10px] md:rounded-[12px] text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] transition-[background-color,color,border-color,box-shadow] duration-150 ease-soft border focus-ring ${buttonClass(user.id)}`}
                                                     >
                                                         {buttonText(user.id)}
                                                     </motion.button>
@@ -360,10 +360,12 @@ export default function PeopleCards({ title, users, loading = false, showMatchRe
                 <AnimatePresence>
                     {snack && (
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9, x: "-50%" }}
-                            animate={{ opacity: 1, scale: 1, x: "-50%" }}
-                            exit={{ opacity: 0, scale: 0.9, x: "-50%" }}
-                            className="fixed bottom-12 left-1/2 z-[100] px-12 py-6 bg-white text-black text-[11px] font-black uppercase italic tracking-[0.2em] rounded-2xl shadow-3xl pointer-events-none border border-white/20"
+                            initial={{ opacity: 0, y: 16, x: "-50%" }}
+                            animate={{ opacity: 1, y: 0, x: "-50%" }}
+                            exit={{ opacity: 0, y: 12, x: "-50%" }}
+                            transition={{ duration: 0.22, ease: "easeOut" }}
+                            role="status"
+                            className="fixed bottom-12 left-1/2 z-[100] px-10 py-5 bg-white text-black text-[11px] font-black uppercase italic tracking-[0.2em] rounded-2xl shadow-pop pointer-events-none"
                         >
                             {snack}
                         </motion.div>

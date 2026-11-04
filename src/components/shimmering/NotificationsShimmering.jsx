@@ -10,7 +10,7 @@ const NotificationsShimmering = ({ rows = 6, withHeader = true, label = "Loading
                 >
                     <div className="relative shrink-0">
                         <div className="w-11 h-11 md:w-12 md:h-12 rounded-[14px] bg-white/10 border border-white/10"></div>
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-violet-500/15 border-2 border-surface-800"></div>
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-brand/15 border-2 border-surface-800"></div>
                     </div>
                     <div className="flex-1 min-w-0 space-y-2">
                         <div className={`h-3 bg-white/10 rounded-full ${index % 2 ? "w-3/5" : "w-4/5"}`}></div>

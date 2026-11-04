@@ -14,14 +14,14 @@ const ExpertiseAIQuestionsStep = ({
     isGeneratingAI,
     onGenerate,
 }) => (
-    <div className="space-y-10 animate-slideUp">
-        <div className="bg-indigo-50/50 dark:bg-indigo-500/5 p-6 rounded-3xl border border-indigo-100 dark:border-indigo-500/10 flex gap-4">
-            <div className="p-2.5 bg-white dark:bg-indigo-950 rounded-xl shrink-0 h-fit text-indigo-500 shadow-sm border border-indigo-50 dark:border-indigo-900/30">
+    <div className="space-y-10 animate-fadeIn">
+        <div className="bg-brand/5 p-6 rounded-3xl border border-brand/15 flex gap-4">
+            <div className="p-2.5 bg-white rounded-xl shrink-0 h-fit text-brand shadow-sm border border-brand/10">
                 <Zap size={20} />
             </div>
             <div>
-                <h4 className="font-bold text-sm text-indigo-950 dark:text-indigo-200">Intelligent Generation</h4>
-                <p className="text-xs text-indigo-700/80 dark:text-indigo-400/80 mt-1 leading-relaxed">
+                <h4 className="font-bold text-sm text-slate-900">Intelligent Generation</h4>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                     Our AI analyzes your input to craft a high-impact professional narrative. Provide clear details for
                     the best results.
                 </p>
@@ -40,12 +40,13 @@ const ExpertiseAIQuestionsStep = ({
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <label className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                        <Code size={14} className="text-indigo-500" />
+                        <Code size={14} className="text-brand" />
                         Focus Areas
                     </label>
                     <button
+                        type="button"
                         onClick={() => setSeeMoreInterests(!seeMoreInterests)}
-                        className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
+                        className="rounded-md text-xs font-bold text-brand hover:text-brand-light transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                     >
                         {seeMoreInterests ? "See Less" : "Explore All"}
                     </button>
@@ -75,8 +76,9 @@ const ExpertiseAIQuestionsStep = ({
                         Key Technologies
                     </label>
                     <button
+                        type="button"
                         onClick={() => setSeeMoreSkills(!seeMoreSkills)}
-                        className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors"
+                        className="rounded-md text-xs font-bold text-amber-600 hover:text-amber-500 transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                     >
                         {seeMoreSkills ? "See Less" : "Explore All"}
                     </button>
@@ -104,17 +106,20 @@ const ExpertiseAIQuestionsStep = ({
         <button
             onClick={onGenerate}
             disabled={isGeneratingAI}
-            className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-[20px] shadow-xl hover:shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3 group"
+            className="w-full py-5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-[20px] shadow-xl shadow-slate-900/15 hover:shadow-brand/20 enabled:active:scale-[0.98] transition duration-150 ease-out disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         >
             {isGeneratingAI ? (
                 <>
-                    <div className="w-5 h-5 border-3 border-slate-300 dark:border-slate-600 border-t-slate-900 dark:border-t-white rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-[3px] border-white/30 border-t-white rounded-full animate-spin"></div>
                     <span className="tracking-tight italic">Drafting your profile...</span>
                 </>
             ) : (
                 <>
                     <span className="tracking-tight">Generate Professional Profile</span>
-                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight
+                        size={18}
+                        className="group-hover:translate-x-1 transition-transform duration-150 ease-out"
+                    />
                 </>
             )}
         </button>

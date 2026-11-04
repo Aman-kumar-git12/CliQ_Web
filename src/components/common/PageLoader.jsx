@@ -13,7 +13,7 @@ export default function PageLoader() {
 
             <div className="flex flex-col gap-3">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="p-5 rounded-[22px] border border-white/5 bg-surface-800 space-y-3">
+                    <div key={i} className="p-5 rounded-[22px] border border-line-soft bg-surface-800 space-y-3">
                         <div className="h-3.5 w-1/3 bg-white/10 rounded-full"></div>
                         <div className="h-3 w-full bg-white/5 rounded-full"></div>
                         <div className="h-3 w-4/5 bg-white/5 rounded-full"></div>

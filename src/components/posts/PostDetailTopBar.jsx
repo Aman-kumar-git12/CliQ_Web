@@ -1,6 +1,9 @@
 /** Post detail page: back button plus owner edit/delete buttons or the non-owner "more" (report) menu. */
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Edit2, Trash2, MoreHorizontal, Flag } from "lucide-react";
+import { DROP_IN, FOCUS_RING, MENU, MENU_ITEM, PRESS, SOFT_TRANSITION } from "./postUi";
+
+const ROUND_BTN = `p-2 bg-white/5 hover:bg-white/10 rounded-full border border-line-soft hover:border-line ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`;
 
 export default function PostDetailTopBar({
     postId,
@@ -20,9 +23,11 @@ export default function PostDetailTopBar({
                 type="button"
                 aria-label="Go back"
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group"
+                className={`flex items-center gap-2 text-ink-300 hover:text-white rounded-full pr-2 group ${SOFT_TRANSITION} ${FOCUS_RING}`}
             >
-                <div className="p-2 bg-white/5 rounded-full group-hover:bg-white/10 transition-all border border-white/5">
+                <div
+                    className={`p-2 bg-white/5 rounded-full group-hover:bg-white/10 border border-line-soft group-hover:border-line ${SOFT_TRANSITION}`}
+                >
                     <ArrowLeft size={18} />
                 </div>
                 <span className="text-[11px] font-black uppercase tracking-widest hidden sm:inline">Back</span>
@@ -37,7 +42,7 @@ export default function PostDetailTopBar({
                                     type="button"
                                     aria-label="Edit post"
                                     onClick={() => navigate(`/post/${postId}/edit`)}
-                                    className="p-2 text-blue-400/60 hover:text-blue-400 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5"
+                                    className={`${ROUND_BTN} text-blue-400/70 hover:text-blue-400`}
                                     title="Edit Post"
                                 >
                                     <Edit2 size={16} />
@@ -46,7 +51,7 @@ export default function PostDetailTopBar({
                                     type="button"
                                     aria-label="Delete post"
                                     onClick={onDeletePost}
-                                    className="p-2 text-red-400/60 hover:text-red-400 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5"
+                                    className={`${ROUND_BTN} text-red-400/70 hover:text-red-400`}
                                     title="Delete Post"
                                 >
                                     <Trash2 size={16} />
@@ -62,20 +67,22 @@ export default function PostDetailTopBar({
                             aria-haspopup="menu"
                             aria-expanded={showPostMenu}
                             onClick={onTogglePostMenu}
-                            className="p-2 text-white/30 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/5"
+                            className={`${ROUND_BTN} text-ink-300 hover:text-white`}
                         >
                             <MoreHorizontal size={18} />
                         </button>
                         {showPostMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-surface-750 border border-white/[0.08] rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 backdrop-blur-3xl">
+                            <div className={`${MENU} absolute right-0 mt-2 w-48 origin-top-right ${DROP_IN}`}>
                                 <button
                                     onClick={reportedPost ? null : onReportPost}
                                     disabled={reportedPost}
-                                    className={`w-full px-4 py-3 text-left flex items-center space-x-3 transition-colors ${
-                                        reportedPost ? "text-gray-500 cursor-default" : "text-red-500 hover:bg-white/5"
+                                    className={`${MENU_ITEM} ${
+                                        reportedPost
+                                            ? "text-ink-400 cursor-default"
+                                            : "text-red-400 hover:bg-red-500/10"
                                     }`}
                                 >
-                                    <Flag size={14} className={reportedPost ? "text-gray-500" : "text-red-500"} />
+                                    <Flag size={14} />
                                     <span className="font-bold text-[11px] uppercase tracking-wider">
                                         {reportedPost ? "Reported" : "Report Post"}
                                     </span>

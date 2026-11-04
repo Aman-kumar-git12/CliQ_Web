@@ -9,7 +9,7 @@ export const useConnectionCardMotion = () => {
     const rotateY = useTransform(mouseX, [-300, 300], [-8, 8]);
     const springRotateX = useSpring(rotateX, { stiffness: 150, damping: 35 });
     const springRotateY = useSpring(rotateY, { stiffness: 150, damping: 35 });
-    const rotate = useTransform(dragX, [-300, 300], [-35, 35]);
+    const rotate = useTransform(dragX, [-300, 300], [-18, 18]); // a gentle tilt while swiping
     const transformOrigin = useTransform(dragX, (x) => (x >= 0 ? "bottom right" : "bottom left"));
 
     const likeScale = useTransform(dragX, [0, 150], [0.8, 1.2]);

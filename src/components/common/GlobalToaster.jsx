@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertCircle, X } from "lucide-react";
 import { TOAST_EVENT } from "../../utils/toast";
+import { DURATION, EASE_SOFT } from "./motionPresets";
 
 const VISIBLE_MS = 4500;
 const MAX_TOASTS = 3;
@@ -11,6 +12,7 @@ const MAX_TOASTS = 3;
 export default function GlobalToaster() {
     const [toasts, setToasts] = useState([]);
     const nextId = useRef(0);
+    const reduceMotion = useReducedMotion();
 
     useEffect(() => {
         const timers = new Set();
@@ -39,7 +41,9 @@ export default function GlobalToaster() {
 
     return (
         <div
-            className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center gap-2 w-[calc(100%-32px)] max-w-md pointer-events-none"
+            // Above dialogs (z-modal) so an error from a dialog's action isn't hidden behind it; on phones it sits
+            // above the bottom nav and the home-indicator safe area
+            className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:bottom-8 left-1/2 -translate-x-1/2 z-toast flex flex-col items-center gap-2 w-[calc(100%-32px)] max-w-md pointer-events-none"
             role="status"
             aria-live="polite"
         >
@@ -47,17 +51,29 @@ export default function GlobalToaster() {
                 {toasts.map((toast) => (
                     <motion.div
                         key={toast.id}
-                        initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                        layout={reduceMotion ? false : "position"}
+                        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.97 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                        className="pointer-events-auto w-full flex items-start gap-3 px-4 py-3 rounded-2xl bg-[#1a1220] border border-red-500/30 text-white shadow-2xl"
+                        exit={
+                            reduceMotion
+                                ? { opacity: 0, transition: { duration: DURATION.fast } }
+                                : {
+                                      opacity: 0,
+                                      y: 8,
+                                      scale: 0.97,
+                                      transition: { duration: DURATION.fast, ease: EASE_SOFT },
+                                  }
+                        }
+                        transition={{ duration: DURATION.panel, ease: EASE_SOFT }}
+                        className="pointer-events-auto w-full flex items-start gap-3 pl-4 pr-3 py-3 rounded-2xl bg-surface-raised/95 backdrop-blur-xl border border-red-400/25 text-ink-100 shadow-pop"
                     >
-                        <AlertCircle size={18} className="text-red-400 shrink-0 mt-0.5" />
-                        <p className="flex-1 text-[13px] leading-snug">{toast.message}</p>
+                        <AlertCircle size={18} className="text-red-400 shrink-0" aria-hidden="true" />
+                        <p className="flex-1 text-[13px] leading-[18px]">{toast.message}</p>
                         <button
+                            type="button"
                             onClick={() => dismiss(toast.id)}
                             aria-label="Dismiss"
-                            className="text-white/40 hover:text-white shrink-0"
+                            className="-mt-[3px] -mb-1 p-1 rounded-lg text-ink-300 hover:text-ink-100 hover:bg-white/[0.06] cliq-transition shrink-0"
                         >
                             <X size={16} />
                         </button>

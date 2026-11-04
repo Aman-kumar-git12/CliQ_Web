@@ -1,6 +1,10 @@
 /** Post detail page: like / comments / repost / save / share bar, or Cancel / Save buttons while editing. */
 import { Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
 import RepostControl from "./RepostControl";
+import { FOCUS_RING, ICON_FEEDBACK, PRESS, SOFT_TRANSITION } from "./postUi";
+
+const TOOLTIP =
+    "absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition duration-150 ease-soft pointer-events-none whitespace-nowrap z-popover shadow-pop";
 
 export default function PostDetailActionBar({
     post,
@@ -22,20 +26,20 @@ export default function PostDetailActionBar({
     onLikesMouseLeave,
 }) {
     return (
-        <div className="flex items-center justify-between py-4 border-y border-white/[0.05]">
+        <div className="flex items-center justify-between py-3 border-y border-line-soft">
             {isEditing ? (
                 <div className="flex justify-end gap-3 w-full">
                     <button
                         onClick={onCancelEdit}
                         disabled={isSavingEdit}
-                        className="px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/10 transition font-bold text-sm"
+                        className={`px-4 py-2 rounded-full border border-line-strong text-white hover:bg-white/10 font-bold text-sm disabled:opacity-50 ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`}
                     >
                         Cancel
                     </button>
                     <button
                         onClick={onSaveEdit}
                         disabled={isSavingEdit}
-                        className="px-6 py-2 rounded-full bg-brand hover:bg-[#7c3aed] text-white transition font-bold shadow-lg disabled:opacity-50 text-sm"
+                        className={`px-6 py-2 rounded-full bg-brand hover:bg-brand/85 text-white font-bold shadow-soft hover:shadow-glow disabled:opacity-50 text-sm ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`}
                     >
                         {isSavingEdit ? "Saving..." : "Save Changes"}
                     </button>
@@ -55,22 +59,22 @@ export default function PostDetailActionBar({
                             onTooltipLeave();
                             onLikesMouseLeave();
                         }}
-                        className={`flex items-center gap-1.5 group relative transition-colors ${liked ? "text-[var(--cliq-pink)]" : "text-ink-350 hover:text-[var(--cliq-pink)]"}`}
+                        className={`flex items-center gap-1.5 group relative rounded-full ${SOFT_TRANSITION} ${FOCUS_RING} ${liked ? "text-[var(--cliq-pink)]" : "text-ink-300 hover:text-[var(--cliq-pink)]"}`}
                     >
                         <div
-                            className={`p-2 rounded-full transition-colors ${liked ? "bg-[var(--cliq-pink)]/10" : "group-hover:bg-[var(--cliq-pink)]/10"}`}
+                            className={`p-2 rounded-full ${SOFT_TRANSITION} ${liked ? "bg-brand-pink/10" : "group-hover:bg-brand-pink/10"}`}
                         >
                             <Heart
                                 size={20}
                                 fill={liked ? "currentColor" : "none"}
                                 strokeWidth={liked ? 0 : 2}
-                                className="group-hover:scale-110 transition-transform"
+                                className={ICON_FEEDBACK}
                             />
                         </div>
-                        {likesCount > 0 && <span className="text-[13px] font-bold">{likesCount}</span>}
+                        {likesCount > 0 && <span className="text-[13px] font-bold tabular-nums">{likesCount}</span>}
                         {/* Tooltip */}
                         <span
-                            className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === "like" ? "opacity-100 -translate-y-1" : "opacity-0 translate-y-0"}`}
+                            className={`${TOOLTIP} ${activeTooltip === "like" ? "opacity-100 motion-safe:-translate-y-1" : "opacity-0"}`}
                         >
                             Like
                         </span>
@@ -83,22 +87,24 @@ export default function PostDetailActionBar({
                         onClick={onToggleComments}
                         onMouseEnter={() => onTooltipEnter("comments")}
                         onMouseLeave={onTooltipLeave}
-                        className={`flex items-center gap-1.5 group relative transition-colors ${showComments ? "text-brand" : "text-ink-350 hover:text-brand"}`}
+                        className={`flex items-center gap-1.5 group relative rounded-full ${SOFT_TRANSITION} ${FOCUS_RING} ${showComments ? "text-brand-light" : "text-ink-300 hover:text-brand-light"}`}
                     >
                         <div
-                            className={`p-2 rounded-full transition-colors ${showComments ? "bg-brand/10" : "group-hover:bg-brand/10"}`}
+                            className={`p-2 rounded-full ${SOFT_TRANSITION} ${showComments ? "bg-brand/10" : "group-hover:bg-brand/10"}`}
                         >
                             <MessageCircle
                                 size={20}
                                 fill={showComments ? "currentColor" : "none"}
                                 strokeWidth={showComments ? 0 : 2}
-                                className="group-hover:scale-110 transition-transform"
+                                className={ICON_FEEDBACK}
                             />
                         </div>
-                        {post.comments > 0 && <span className="text-[13px] font-bold">{post.comments}</span>}
+                        {post.comments > 0 && (
+                            <span className="text-[13px] font-bold tabular-nums">{post.comments}</span>
+                        )}
                         {/* Tooltip */}
                         <span
-                            className={`absolute -top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-white text-black text-[11px] font-bold rounded-lg transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-gray-100 ${activeTooltip === "comments" ? "opacity-100 -translate-y-1" : "opacity-0 translate-y-0"}`}
+                            className={`${TOOLTIP} ${activeTooltip === "comments" ? "opacity-100 motion-safe:-translate-y-1" : "opacity-0"}`}
                         >
                             Comments
                         </span>
@@ -116,17 +122,21 @@ export default function PostDetailActionBar({
                         onClick={actions.toggleSave}
                         aria-pressed={actions.isSaved}
                         aria-label={actions.isSaved ? "Remove from saved" : "Save post"}
-                        className={`p-2 rounded-full transition-colors ${actions.isSaved ? "text-brand-light bg-brand/10" : "text-ink-350 hover:text-brand-light hover:bg-brand/10"}`}
+                        className={`group p-2 rounded-full ${SOFT_TRANSITION} ${FOCUS_RING} ${actions.isSaved ? "text-brand-light bg-brand/10" : "text-ink-300 hover:text-brand-light hover:bg-brand/10"}`}
                     >
-                        <Bookmark size={20} fill={actions.isSaved ? "currentColor" : "none"} />
+                        <Bookmark
+                            size={20}
+                            fill={actions.isSaved ? "currentColor" : "none"}
+                            className={ICON_FEEDBACK}
+                        />
                     </button>
 
                     <button
                         onClick={actions.share}
                         aria-label="Share"
-                        className="p-2 rounded-full text-ink-350 hover:text-brand hover:bg-brand/10 transition-colors"
+                        className={`group p-2 rounded-full text-ink-300 hover:text-brand-light hover:bg-brand/10 ${SOFT_TRANSITION} ${FOCUS_RING}`}
                     >
-                        <Share2 size={20} />
+                        <Share2 size={20} className={ICON_FEEDBACK} />
                     </button>
                 </>
             )}

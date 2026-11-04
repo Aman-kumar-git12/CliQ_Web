@@ -3,6 +3,7 @@ import { Bookmark } from "lucide-react";
 import * as postsApi from "../api/posts";
 import PostCard from "../components/posts/PostCard";
 import SavedPostsShimmering from "../components/shimmering/SavedPostsShimmering";
+import { FOCUS_RING, PRESS, SOFT_TRANSITION } from "../components/posts/postUi";
 
 export default function SavedPostsPage() {
     const [posts, setPosts] = useState([]);
@@ -43,17 +44,22 @@ export default function SavedPostsPage() {
 
             {error && <p className="text-[13px] text-red-400 mb-4">{error}</p>}
 
-            {posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-            ))}
+            {/* Same 16px rhythm between cards as the Home feed */}
+            {posts.length > 0 && (
+                <div className="space-y-4 mb-4">
+                    {posts.map((post) => (
+                        <PostCard key={post.id} post={post} />
+                    ))}
+                </div>
+            )}
 
             {!loading && !error && posts.length === 0 && (
-                <div className="flex flex-col items-center text-center py-20 rounded-[22px] border border-white/5 bg-surface-800">
-                    <div className="w-16 h-16 rounded-full bg-violet-500/10 flex items-center justify-center mb-4">
+                <div className="flex flex-col items-center text-center py-20 px-6 rounded-2xl border border-line-soft bg-surface-800 motion-safe:animate-[fadeIn_var(--cliq-dur-page)_var(--cliq-ease)]">
+                    <div className="w-16 h-16 rounded-full bg-brand/10 ring-1 ring-brand/20 flex items-center justify-center mb-4">
                         <Bookmark size={26} className="text-brand" />
                     </div>
                     <p className="font-black text-[15px]">Nothing saved yet</p>
-                    <p className="text-[12px] text-ink-450 mt-1 max-w-xs">
+                    <p className="text-[12.5px] leading-relaxed text-ink-300 mt-1.5 max-w-xs">
                         Tap the bookmark on any post to keep it here.
                     </p>
                 </div>
@@ -69,10 +75,10 @@ export default function SavedPostsPage() {
             )}
 
             {nextCursor && !loading && (
-                <div className="flex justify-center">
+                <div className="flex justify-center mt-2">
                     <button
                         onClick={() => load(nextCursor)}
-                        className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-[11px] font-black uppercase tracking-[0.15em]"
+                        className={`px-6 py-2.5 rounded-xl bg-white/5 border border-line hover:bg-white/10 hover:border-line-strong text-[11px] font-black uppercase tracking-[0.15em] ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`}
                     >
                         Load more
                     </button>

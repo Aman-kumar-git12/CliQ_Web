@@ -20,7 +20,7 @@ export default function ExpertiseFormat1({ expertise = {} }) {
 
     return (
         <div className="bg-[#FDFDFD] p-1 selection:bg-indigo-100">
-            <div className="w-full bg-white rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.05)] overflow-hidden border border-neutral-100 font-sans relative">
+            <div className="w-full bg-white rounded-[2rem] shadow-xl shadow-black/5 overflow-hidden border border-neutral-100 font-sans relative">
                 {/* SUBTLE GRADIENT BLOBS */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-50/50 rounded-full blur-[120px] pointer-events-none"></div>
                 <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-50/30 rounded-full blur-[100px] pointer-events-none"></div>

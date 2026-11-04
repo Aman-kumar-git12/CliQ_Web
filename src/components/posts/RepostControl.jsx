@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Repeat2, Quote, X, Loader2 } from "lucide-react";
 import MentionTextarea from "./MentionTextarea";
 import EmbeddedPost from "./EmbeddedPost";
+import { FADE_IN, FOCUS_RING, ICON_FEEDBACK, MENU, MENU_ITEM, PRESS, SOFT_TRANSITION } from "./postUi";
 
 const MAX_LENGTH = 500;
 
@@ -33,7 +34,7 @@ const QuoteModal = ({ post, currentUserId, onClose, onSubmit }) => {
 
     return createPortal(
         <div
-            className="fixed inset-0 z-[200] flex items-start md:items-center justify-center bg-black/70 backdrop-blur-sm p-4 pt-20 md:pt-4"
+            className={`fixed inset-0 z-modal flex items-start md:items-center justify-center bg-black/70 backdrop-blur-sm p-4 pt-20 md:pt-4 ${FADE_IN}`}
             onClick={onClose}
         >
             <div
@@ -41,7 +42,7 @@ const QuoteModal = ({ post, currentUserId, onClose, onSubmit }) => {
                 aria-modal="true"
                 aria-labelledby="quote-post-title"
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-[520px] rounded-2xl border border-white/10 bg-surface-750 p-4 shadow-2xl"
+                className="w-full max-w-[520px] rounded-2xl border border-line-strong bg-surface-raised p-5 shadow-pop"
             >
                 <div className="flex items-center justify-between mb-3">
                     <h2 id="quote-post-title" className="text-[14px] font-black uppercase tracking-wider text-white">
@@ -50,7 +51,7 @@ const QuoteModal = ({ post, currentUserId, onClose, onSubmit }) => {
                     <button
                         onClick={onClose}
                         aria-label="Close"
-                        className="p-1.5 rounded-full hover:bg-white/10 text-ink-350 hover:text-white"
+                        className={`p-1.5 rounded-full hover:bg-white/10 text-ink-300 hover:text-white ${SOFT_TRANSITION} ${FOCUS_RING}`}
                     >
                         <X size={16} />
                     </button>
@@ -64,18 +65,18 @@ const QuoteModal = ({ post, currentUserId, onClose, onSubmit }) => {
                     rows={3}
                     placeholder="Add your thoughts… use @ to mention, # for topics"
                     aria-label="Add your thoughts"
-                    className="w-full resize-none bg-transparent text-[14px] text-white placeholder-ink-450 focus:outline-none mb-3"
+                    className="w-full resize-none bg-transparent text-[14px] leading-relaxed text-white placeholder-ink-400 focus-ring rounded-lg mb-3"
                 />
                 <EmbeddedPost post={post} currentUserId={currentUserId} clickable={false} />
                 {error && <p className="text-[12px] text-red-400 mb-2">{error}</p>}
                 <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-ink-450">
+                    <span className="text-[11px] text-ink-300 tabular-nums">
                         {text.length}/{MAX_LENGTH}
                     </span>
                     <button
                         onClick={submit}
                         disabled={!text.trim() || submitting}
-                        className="flex items-center gap-2 px-5 py-2 rounded-full bg-brand hover:bg-[#7c3aed] text-white text-[13px] font-bold disabled:opacity-50"
+                        className={`flex items-center gap-2 px-5 py-2 rounded-full bg-brand hover:bg-brand/85 text-white text-[13px] font-bold disabled:opacity-50 disabled:pointer-events-none ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`}
                     >
                         {submitting && <Loader2 size={14} className="animate-spin" />} Post
                     </button>
@@ -115,17 +116,14 @@ export default function RepostControl({ post, actions, currentUserId, size = 16,
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
                 aria-label={`Repost options${showCount ? `, ${repostsCount} reposts` : ""}`}
-                className={`flex items-center gap-2 transition group ${isReposted ? "text-emerald-400" : "text-ink-350 hover:text-emerald-400"} ${className}`}
+                className={`group flex items-center gap-1.5 rounded-full hover:bg-emerald-500/10 ${isReposted ? "text-emerald-400" : "text-ink-300 hover:text-emerald-400"} ${SOFT_TRANSITION} ${FOCUS_RING} ${className || "-mx-1.5 px-1.5 py-1"}`}
             >
-                <Repeat2 size={size} className="group-hover:scale-110 transition-transform" />
-                {showCount && <span className="text-[11px] font-black">{repostsCount}</span>}
+                <Repeat2 size={size} className={ICON_FEEDBACK} />
+                {showCount && <span className="text-[12px] font-bold tabular-nums">{repostsCount}</span>}
             </button>
 
             {menuOpen && (
-                <div
-                    role="menu"
-                    className="absolute bottom-full left-0 mb-2 w-44 rounded-xl border border-white/10 bg-surface-750 shadow-2xl z-50 overflow-hidden"
-                >
+                <div role="menu" className={`${MENU} absolute bottom-full left-0 mb-2 w-44 ${FADE_IN}`}>
                     <button
                         role="menuitem"
                         onClick={(e) => {
@@ -133,7 +131,7 @@ export default function RepostControl({ post, actions, currentUserId, size = 16,
                             setMenuOpen(false);
                             toggleRepost();
                         }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] font-bold text-white hover:bg-white/5"
+                        className={`${MENU_ITEM} text-white hover:bg-white/[0.06]`}
                     >
                         <Repeat2 size={15} className={isReposted ? "text-emerald-400" : ""} />{" "}
                         {isReposted ? "Undo repost" : "Repost"}
@@ -145,7 +143,7 @@ export default function RepostControl({ post, actions, currentUserId, size = 16,
                             setMenuOpen(false);
                             setQuoting(true);
                         }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left text-[13px] font-bold text-white hover:bg-white/5"
+                        className={`${MENU_ITEM} text-white hover:bg-white/[0.06]`}
                     >
                         <Quote size={15} /> Quote
                     </button>

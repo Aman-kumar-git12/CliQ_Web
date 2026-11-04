@@ -1,34 +1,30 @@
 /** Full-screen expertise modal of the own profile page, portalled to document.body. */
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import ExpertiseView from "../expertise/ExpertiseView";
+import { backdropMotion, dialogMotion } from "../common/motionPresets";
 
 export default function ProfileExpertiseModal({ isOpen, expertise, onClose }) {
+    const reduceMotion = useReducedMotion();
     return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
                     {/* Backdrop */}
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.5 }}
+                        {...backdropMotion}
                         className="absolute inset-0 bg-black/60 backdrop-blur-md"
                         onClick={onClose}
                     />
 
                     {/* Modal Content */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        {...dialogMotion(reduceMotion)}
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="profile-expertise-modal-title"
-                        className="bg-black/90 w-full md:max-w-5xl rounded-[40px] p-6 md:p-10 border border-white/20 relative shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden"
+                        className="bg-surface-raised/95 w-full md:max-w-5xl rounded-[32px] p-6 md:p-10 border border-line-strong relative shadow-pop overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Glows */}
@@ -46,12 +42,12 @@ export default function ProfileExpertiseModal({ isOpen, expertise, onClose }) {
                                 type="button"
                                 aria-label="Close expertise"
                                 onClick={onClose}
-                                className="bg-white/5 p-3 rounded-full text-white/40 hover:text-white transition-all border border-white/10 active:scale-90"
+                                className="bg-white/5 hover:bg-white/10 p-3 rounded-full text-white/50 hover:text-white cliq-transition border border-line active:scale-95 focus-ring"
                             >
                                 <X size={24} />
                             </button>
                         </div>
-                        <div className="max-h-[75vh] md:max-h-[85vh] overflow-y-auto pr-4 custom-scrollbar relative z-10">
+                        <div className="max-h-[75vh] md:max-h-[85vh] overflow-y-auto overscroll-contain pr-4 custom-scrollbar relative z-10">
                             <ExpertiseView expertise={expertise} />
                         </div>
                     </motion.div>

@@ -18,7 +18,7 @@ export default function ChatbotMessageActions({
     return (
         <>
             <div className="flex items-center gap-0.5 mt-1 px-1">
-                {msg.stopped && <span className="text-[11px] text-neutral-500 mr-1.5">Stopped</span>}
+                {msg.stopped && <span className="text-[11px] text-ink-300 mr-1.5">Stopped</span>}
                 <button
                     type="button"
                     onClick={() => onCopy(msg)}
@@ -84,9 +84,12 @@ export default function ChatbotMessageActions({
                         }
                         placeholder="What was wrong? (optional)"
                         aria-label="What was wrong? (optional)"
-                        className="flex-1 min-w-0 bg-white/5 border border-white/10 text-neutral-200 text-[12px] rounded-full px-3 py-1.5 outline-none focus:border-violet-500/50 placeholder:text-neutral-500"
+                        className="flex-1 min-w-0 bg-white/[0.04] border border-line text-neutral-200 text-[16px] md:text-[12px] rounded-full px-3 py-1.5 outline-none focus:border-brand/40 focus:ring-2 focus:ring-brand/10 transition-[border-color,box-shadow] duration-150 ease-soft placeholder:text-ink-300"
                     />
-                    <button type="submit" className="text-[12px] text-violet-300 hover:text-violet-200 px-2">
+                    <button
+                        type="submit"
+                        className="text-[12px] text-violet-300 hover:text-violet-200 px-2 py-1 rounded-full transition-colors duration-150 focus-ring"
+                    >
                         Send
                     </button>
                 </form>

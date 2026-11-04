@@ -118,11 +118,11 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                 >
                     {/* Arrow / Tail (Top)                        {/* Arrow removed for "perfect box" look */}
 
-                    <div className="bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl overflow-hidden p-5">
+                    <div className="bg-white/90 dark:bg-surface-raised/95 backdrop-blur-xl border border-neutral-200 dark:border-line-strong rounded-2xl shadow-pop overflow-hidden p-5">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-10">
-                                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-                                <p className="text-xs text-neutral-500">Fetching profile...</p>
+                                <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mb-3"></div>
+                                <p className="text-xs text-neutral-500 dark:text-ink-300">Fetching profile...</p>
                             </div>
                         ) : error ? (
                             <div className="py-4 text-center text-red-500 text-sm">{error}</div>
@@ -131,21 +131,21 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                                 {/* Header with Avatar and Names */}
                                 <Link
                                     to={data.isMe ? "/profile" : `/public-profile/${userId}`}
-                                    className="flex items-center gap-4 mb-5 group/header"
+                                    className="flex items-center gap-4 mb-5 rounded-xl group/header focus-ring"
                                 >
                                     <div className="relative">
-                                        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-20 group-hover/header:opacity-50 transition duration-300"></div>
+                                        <div className="absolute -inset-0.5 bg-gradient-to-r from-brand to-brand-pink rounded-full blur opacity-20 group-hover/header:opacity-50 transition-opacity duration-200 ease-soft"></div>
                                         <img
                                             src={data.imageUrl || DEFAULT_AVATAR}
                                             alt={data.firstname}
-                                            className="relative w-16 h-16 rounded-full object-cover border-2 border-white dark:border-neutral-900 shadow-sm"
+                                            className="relative w-16 h-16 rounded-full object-cover border-2 border-white dark:border-surface-raised shadow-sm"
                                         />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="text-lg font-bold text-black dark:text-white truncate leading-tight group-hover/header:text-blue-500 transition-colors">
+                                        <h3 className="text-lg font-bold text-black dark:text-white truncate leading-tight group-hover/header:text-brand-light transition-colors duration-150 ease-soft">
                                             {data.firstname} {data.lastname}
                                         </h3>
-                                        <p className="text-sm text-neutral-500 dark:text-neutral-400 truncate">
+                                        <p className="text-sm text-neutral-500 dark:text-ink-300 truncate">
                                             @{data.username}
                                         </p>
                                     </div>
@@ -181,22 +181,25 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
 
                                 {/* Recent Posts */}
                                 {data.recentPosts && data.recentPosts.length > 0 && (
-                                    <div className="grid grid-cols-3 gap-1 mb-5 rounded-lg overflow-hidden border border-neutral-100 dark:border-neutral-800">
+                                    <div className="grid grid-cols-3 gap-1 mb-5 rounded-lg overflow-hidden border border-neutral-100 dark:border-line-soft">
                                         {data.recentPosts
                                             .concat(Array(Math.max(0, 3 - data.recentPosts.length)).fill(null))
                                             .slice(0, 3)
                                             .map((post, i) => (
                                                 <div
                                                     key={post ? post.id : `empty-slot-${i}`}
-                                                    className="aspect-square bg-neutral-100 dark:bg-neutral-900 overflow-hidden"
+                                                    className="aspect-square bg-neutral-100 dark:bg-white/[0.03] overflow-hidden"
                                                 >
                                                     {post ? (
-                                                        <Link to={`/post/${post.id}`} className="block w-full h-full">
+                                                        <Link
+                                                            to={`/post/${post.id}`}
+                                                            className="block w-full h-full focus-ring focus-visible:ring-inset"
+                                                        >
                                                             {post.video ? (
                                                                 <div className="relative w-full h-full">
                                                                     <video
                                                                         src={post.video}
-                                                                        className="w-full h-full object-cover hover:scale-110 transition duration-300"
+                                                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-250 ease-soft"
                                                                         muted
                                                                         playsInline
                                                                         preload="metadata"
@@ -209,14 +212,14 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                                                             ) : post.image ? (
                                                                 <img
                                                                     src={post.image}
-                                                                    className="w-full h-full object-cover hover:scale-110 transition duration-300"
+                                                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-250 ease-soft"
                                                                     alt={`Post by ${[data.firstname, data.lastname].filter(Boolean).join(" ")}`}
                                                                 />
                                                             ) : (
-                                                                <div className="w-full h-full flex items-center justify-center p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors">
+                                                                <div className="w-full h-full flex items-center justify-center p-2 hover:bg-neutral-200 dark:hover:bg-white/[0.06] transition-colors duration-150 ease-soft">
                                                                     <MessageSquare
                                                                         size={12}
-                                                                        className="text-neutral-400"
+                                                                        className="text-neutral-400 dark:text-ink-400"
                                                                     />
                                                                 </div>
                                                             )}
@@ -231,7 +234,7 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                                 {!data.isMe && isIncomingRequest && (
                                     <Link
                                         to="/requests"
-                                        className="w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-blue-500/25 active:scale-[0.98]"
+                                        className="w-full py-2.5 rounded-xl font-bold text-sm cliq-transition flex items-center justify-center gap-2 shadow-lg bg-gradient-to-r from-brand to-brand-pink text-white hover:shadow-brand/30 hover:brightness-110 active:scale-[0.98] focus-ring"
                                     >
                                         <UserPlus size={16} /> Respond to Request
                                     </Link>
@@ -242,13 +245,13 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                                     <button
                                         onClick={handleFollow}
                                         disabled={connectionStatus === "interested" || connectionStatus === "accepted"}
-                                        className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg
+                                        className={`w-full py-2.5 rounded-xl font-bold text-sm cliq-transition flex items-center justify-center gap-2 focus-ring
                                             ${
                                                 connectionStatus === "accepted"
-                                                    ? "bg-green-600 text-white cursor-default"
+                                                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 cursor-default"
                                                     : connectionStatus === "interested"
-                                                      ? "bg-neutral-800 text-gray-400 cursor-default"
-                                                      : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-blue-500/25 active:scale-[0.98]"
+                                                      ? "bg-neutral-100 dark:bg-white/[0.06] text-neutral-500 dark:text-white/50 border border-neutral-200 dark:border-line cursor-default"
+                                                      : "shadow-lg bg-gradient-to-r from-brand to-brand-pink text-white hover:shadow-brand/30 hover:brightness-110 active:scale-[0.98]"
                                             }`}
                                     >
                                         {connectionStatus === "accepted" ? (
@@ -268,7 +271,7 @@ const ProfileHoverCard = ({ userId, isVisible, anchorRect, onMouseEnter, onMouse
                                 {data.isMe && (
                                     <Link
                                         to="/profile"
-                                        className="block w-full py-2.5 bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white rounded-xl font-bold text-sm text-center transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                                        className="block w-full py-2.5 bg-neutral-100 dark:bg-white/[0.06] text-black dark:text-white border border-transparent dark:border-line rounded-xl font-bold text-sm text-center cliq-transition hover:bg-neutral-200 dark:hover:bg-white/10 active:scale-[0.98] focus-ring"
                                     >
                                         Edit Profile
                                     </Link>

@@ -1,11 +1,14 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
+import { FOCUS_RING } from "./postUi";
 
 // Mirrors the backend parsers in WebsiteBackend/src/utils/contentUtils.js.
 const TOKEN_REGEX = /(https?:\/\/[^\s<>"'`]+)|(#[\p{L}\p{M}\p{N}_]+)|((?<![\p{L}\p{N}_.])@[\p{L}\p{M}\p{N}_.]+)/gu;
 const TRAILING_URL_PUNCTUATION = /[).,!?;:'"\]]+$/;
 
 const stop = (e) => e.stopPropagation();
+
+const LINK = `rounded-sm underline-offset-2 decoration-from-font hover:underline transition-colors duration-150 ease-soft ${FOCUS_RING}`;
 
 /**
  * Renders post/comment text with clickable #hashtags (→ search), @mentions
@@ -43,7 +46,7 @@ export default function RichText({ text, mentions = [], currentUserId, className
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                     onClick={stop}
-                    className="text-[#9e8bff] hover:underline break-all"
+                    className={`text-brand-light hover:text-ink-100 break-all ${LINK}`}
                 >
                     {token.replace(/^https?:\/\/(www\.)?/, "")}
                 </a>,
@@ -54,7 +57,7 @@ export default function RichText({ text, mentions = [], currentUserId, className
                     key={key}
                     to={`/search?q=${encodeURIComponent(token)}&type=posts`}
                     onClick={stop}
-                    className="text-[#9e8bff] font-bold hover:underline"
+                    className={`text-brand-light hover:text-ink-100 font-bold ${LINK}`}
                 >
                     {token}
                 </Link>,
@@ -67,7 +70,7 @@ export default function RichText({ text, mentions = [], currentUserId, className
                         key={key}
                         to={resolved.id === currentUserId ? "/profile" : `/public-profile/${resolved.id}`}
                         onClick={stop}
-                        className="text-[#f0abfc] font-bold hover:underline"
+                        className={`text-fuchsia-300 hover:text-ink-100 font-bold ${LINK}`}
                     >
                         {token}
                     </Link>

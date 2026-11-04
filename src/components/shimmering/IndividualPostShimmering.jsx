@@ -32,7 +32,7 @@ export default function IndividualPostShimmering() {
             <div
                 className="fixed inset-0 z-0 pointer-events-none opacity-[0.03]"
                 style={{
-                    backgroundImage: `linear-gradient(#8b5cf6 1px, transparent 1px), linear-gradient(90deg, #8b5cf6 1px, transparent 1px)`,
+                    backgroundImage: `linear-gradient(var(--cliq-purple) 1px, transparent 1px), linear-gradient(90deg, var(--cliq-purple) 1px, transparent 1px)`,
                     backgroundSize: "50px 50px",
                 }}
             />

@@ -1,35 +1,45 @@
+import { formatCompactCount } from "../../utils/profileDisplay";
+
 /**
  * Shared Profile Stats component for displaying Posts, Connections, and Groups counts.
+ * Cards are only clickable when onStatClick is passed; it receives "posts" | "connections" | "groups".
  */
-const ProfileStats = ({ stats = { posts: 0, connections: 0, groups: 0 }, onStatClick = () => {} }) => {
-    return (
-        <div
-            className="flex gap-2 md:gap-6 mb-2 md:mb-6 px-4 md:px-0"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-            <style dangerouslySetInnerHTML={{ __html: `.no-scrollbar::-webkit-scrollbar { display: none; }` }} />
-            {[
-                { id: "posts", label: "Posts", value: stats.posts },
-                { id: "connections", label: "Network", value: stats.connections },
-                { id: "groups", label: "Groups", value: stats.groups },
-            ].map((stat) => (
-                <button
-                    type="button"
-                    key={stat.id}
-                    onClick={() => onStatClick?.(stat.id)}
-                    className="relative bg-[#150a26]/80 md:bg-white/[0.03] backdrop-blur-xl border border-purple-500/20 md:border-white/10 p-2.5 md:p-6 rounded-2xl md:rounded-[32px] flex flex-col items-center justify-center text-center flex-1 cursor-pointer hover:bg-white/[0.06] transition-all group active:scale-95 shadow-[0_10px_30px_rgba(168,85,247,0.1)] md:shadow-xl overflow-hidden duration-500"
-                >
-                    {/* Inner Glow Overlay */}
-                    <span className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+const ProfileStats = ({ stats = { posts: 0, connections: 0, groups: 0 }, onStatClick }) => {
+    const items = [
+        { id: "posts", label: "Posts", value: stats.posts },
+        { id: "connections", label: "Connections", value: stats.connections },
+        { id: "groups", label: "Groups", value: stats.groups },
+    ];
 
-                    <span className="relative z-10 text-[#8e8e93] text-[9px] md:text-[11px] uppercase font-bold md:font-black tracking-widest md:tracking-[0.2em] mb-0.5 md:mb-1.5 group-hover:text-white/80 transition-colors">
-                        {stat.label}
-                    </span>
-                    <span className="relative z-10 text-[18px] md:text-3xl font-black tracking-tight text-white group-hover:scale-110 transition-transform">
-                        {stat.value || "0"}
-                    </span>
-                </button>
-            ))}
+    return (
+        <div className="grid grid-cols-3 gap-2 md:gap-4 mb-2 md:mb-6">
+            {items.map((stat) => {
+                const count = Number(stat.value) || 0;
+                const Tag = onStatClick ? "button" : "div";
+                return (
+                    <Tag
+                        key={stat.id}
+                        {...(onStatClick && {
+                            type: "button",
+                            onClick: () => onStatClick(stat.id),
+                            "aria-label": `${count.toLocaleString()} ${stat.label}, show ${stat.label.toLowerCase()}`,
+                        })}
+                        title={count >= 1000 ? count.toLocaleString() : undefined}
+                        className={`min-w-0 flex flex-col items-center justify-center text-center rounded-2xl border border-line bg-white/[0.02] px-2 py-3 md:py-4 ${
+                            onStatClick
+                                ? "cursor-pointer cliq-press hover:bg-white/[0.05] hover:border-line-strong focus-ring"
+                                : ""
+                        }`}
+                    >
+                        <span className="text-lg md:text-2xl font-semibold tracking-tight text-white tabular-nums">
+                            {formatCompactCount(count)}
+                        </span>
+                        <span className="mt-0.5 text-xs md:text-[13px] text-ink-300 truncate max-w-full">
+                            {stat.label}
+                        </span>
+                    </Tag>
+                );
+            })}
         </div>
     );
 };

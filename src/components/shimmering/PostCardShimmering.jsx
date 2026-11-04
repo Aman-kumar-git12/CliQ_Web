@@ -36,7 +36,7 @@ const PostCardShimmering = ({ label = "Loading post", nested = false }) => {
                 </div>
 
                 {/* Media Area Skeleton (Realistic Match) */}
-                <div className="w-full h-[320px] bg-black/40 rounded-lg mb-4 border border-white/5 relative overflow-hidden">
+                <div className="w-full h-[240px] bg-black/40 rounded-lg mb-4 border border-line-soft relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                     {/* Caption placeholder */}
                     <div className="absolute bottom-4 left-4 h-3 w-32 bg-white/10 rounded-full"></div>
@@ -44,9 +44,9 @@ const PostCardShimmering = ({ label = "Loading post", nested = false }) => {
 
                 {/* Hashtags placeholders */}
                 <div className="flex gap-2 mb-4">
-                    <div className="h-4 w-16 bg-violet-500/10 border border-violet-300/10 rounded-full"></div>
-                    <div className="h-4 w-14 bg-violet-500/10 border border-violet-300/10 rounded-full"></div>
-                    <div className="h-4 w-18 bg-violet-500/10 border border-violet-300/10 rounded-full"></div>
+                    <div className="h-4 w-16 bg-brand/10 border border-brand-light/10 rounded-full"></div>
+                    <div className="h-4 w-14 bg-brand/10 border border-brand-light/10 rounded-full"></div>
+                    <div className="h-4 w-18 bg-brand/10 border border-brand-light/10 rounded-full"></div>
                 </div>
             </div>
 

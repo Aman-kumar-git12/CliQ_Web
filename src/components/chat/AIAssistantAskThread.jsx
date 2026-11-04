@@ -4,6 +4,7 @@ import { Sparkles, Bot, Search, Brain, CheckCircle2, Wand2 } from "lucide-react"
 import ReactMarkdown from "react-markdown";
 import { markdownComponents, parseStructuredSteps } from "../../utils/aiUtils";
 import AIAssistantThinkingStep from "./AIAssistantThinkingStep";
+import { EASE_SOFT } from "../common/motionPresets";
 
 export default function AIAssistantAskThread({
     mode,
@@ -19,7 +20,7 @@ export default function AIAssistantAskThread({
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    transition={{ duration: 0.6, ease: EASE_SOFT }}
                     className="h-full flex flex-col items-center justify-center text-center px-4"
                 >
                     <div className="relative mb-6">
@@ -34,7 +35,7 @@ export default function AIAssistantAskThread({
                                 repeat: Infinity,
                                 ease: "easeInOut",
                             }}
-                            className="absolute inset-x-0 inset-y-0 bg-violet-500/20 blur-[30px] rounded-full"
+                            className="absolute inset-x-0 inset-y-0 bg-brand/20 blur-[30px] rounded-full"
                         />
 
                         <motion.div
@@ -46,9 +47,9 @@ export default function AIAssistantAskThread({
                                 repeat: Infinity,
                                 ease: "easeInOut",
                             }}
-                            className="relative w-24 h-24 rounded-full bg-ios-gray border-2 border-white/5 flex items-center justify-center shadow-2xl z-10"
+                            className="relative w-24 h-24 rounded-full bg-ios-gray border-2 border-line-soft flex items-center justify-center shadow-soft-lg z-10"
                         >
-                            <Bot size={44} className="text-violet-400 drop-shadow-[0_0_10px_rgba(99,102,241,0.4)]" />
+                            <Bot size={44} className="text-brand-light drop-shadow-[0_0_10px_rgba(139,92,246,0.4)]" />
 
                             {/* Micro-Sparkles */}
                             <motion.div
@@ -86,33 +87,36 @@ export default function AIAssistantAskThread({
                     const parsedSteps = msg.role === "ai" ? parseStructuredSteps(msg.text) : null;
 
                     return (
-                        <div
+                        <motion.div
                             // ChatPage gives every Ask-AI message a client id; idx is only a fallback
                             key={msg.id ?? `ai-msg-${idx}`}
-                            className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.22, ease: EASE_SOFT }}
+                            className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
                         >
                             {msg.role === "ai" && (
                                 <div className="flex items-center gap-2 mb-2 ml-1">
-                                    <Bot size={13} className="text-violet-400" />
-                                    <span className="text-[10px] uppercase tracking-[0.15em] text-violet-300/80 font-bold font-mono">
+                                    <Bot size={13} className="text-brand-light" />
+                                    <span className="text-[10px] uppercase tracking-[0.15em] text-violet-300/80 font-semibold font-mono">
                                         CLI-Q_AGENT
                                     </span>
                                 </div>
                             )}
 
                             <div
-                                className={`p-4 rounded-2xl text-[13.5px] leading-relaxed ${
+                                className={`rounded-[20px] text-[13.5px] leading-relaxed ${
                                     msg.role === "user"
-                                        ? "bg-violet-600 text-white rounded-tr-sm shadow-lg shadow-violet-900/20"
-                                        : "bg-white/5 border border-white/10 text-neutral-300 rounded-tl-sm backdrop-blur-xl"
+                                        ? "px-4 py-3 bg-brand text-white rounded-tr-md shadow-md shadow-brand/20"
+                                        : "p-4 bg-white/[0.04] border border-line text-neutral-300 rounded-tl-md"
                                 } max-w-[92%]`}
                             >
                                 {msg.role === "user" ? (
                                     msg.text
                                 ) : parsedSteps ? (
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-3 p-3 rounded-xl bg-violet-500/10 border border-violet-500/20">
-                                            <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center border border-violet-500/30">
+                                        <div className="flex items-center gap-3 p-3 rounded-xl bg-brand/10 border border-brand/20">
+                                            <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center border border-brand/30">
                                                 <Brain size={16} className="text-violet-300" />
                                             </div>
                                             <span className="text-white font-bold text-[14px]">
@@ -126,9 +130,9 @@ export default function AIAssistantAskThread({
                                                     animate={{ opacity: 1, x: 0 }}
                                                     transition={{ delay: sIdx * 0.1 }}
                                                     key={sIdx}
-                                                    className="flex gap-3 bg-white/[0.03] border border-white/[0.04] p-3 rounded-xl hover:bg-white/[0.05] transition-colors"
+                                                    className="flex gap-3 bg-white/[0.03] border border-line-soft p-3 rounded-xl hover:bg-white/[0.05] transition-colors"
                                                 >
-                                                    <span className="w-6 h-6 rounded-lg bg-violet-500/20 text-violet-200 text-[11px] font-bold flex items-center justify-center border border-violet-500/10 shrink-0">
+                                                    <span className="w-6 h-6 rounded-lg bg-brand/20 text-violet-200 text-[11px] font-bold flex items-center justify-center border border-brand/10 shrink-0">
                                                         {sIdx + 1}
                                                     </span>
                                                     <span className="text-neutral-200 text-[13px] font-medium leading-relaxed">
@@ -142,16 +146,21 @@ export default function AIAssistantAskThread({
                                     <ReactMarkdown components={markdownComponents}>{msg.text}</ReactMarkdown>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
                     );
                 })}
 
             {mode === "ask" && isLoading && (
-                <div className="space-y-6 animate-in fade-in duration-300">
+                <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22, ease: EASE_SOFT }}
+                    className="space-y-6"
+                >
                     {/* Thinking Process Visualizer - Only show during analysis/thinking phases */}
                     {["analysing", "thinking"].includes(thinkingStep) && (
-                        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1">
-                            <h5 className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 font-bold mb-3 px-1">
+                        <div className="p-4 rounded-2xl bg-white/[0.03] border border-line-soft space-y-1">
+                            <h5 className="text-[10px] uppercase tracking-[0.2em] text-ink-300 font-bold mb-3 px-1">
                                 AI Thinking Process
                             </h5>
                             <AIAssistantThinkingStep
@@ -195,14 +204,14 @@ export default function AIAssistantAskThread({
 
                     {/* Loading Skeleton */}
                     <div className="flex gap-4">
-                        <div className="w-8 h-8 rounded-lg bg-white/5 animate-pulse shrink-0" />
+                        <div className="w-8 h-8 rounded-lg bg-white/5 motion-safe:animate-pulse shrink-0" />
                         <div className="flex-1 space-y-3">
-                            <div className="h-4 w-3/4 rounded bg-white/5 animate-pulse" />
-                            <div className="h-4 w-full rounded bg-white/5 animate-pulse" />
-                            <div className="h-4 w-5/6 rounded bg-white/5 animate-pulse" />
+                            <div className="h-4 w-3/4 rounded-full bg-white/5 motion-safe:animate-pulse" />
+                            <div className="h-4 w-full rounded-full bg-white/5 motion-safe:animate-pulse" />
+                            <div className="h-4 w-5/6 rounded-full bg-white/5 motion-safe:animate-pulse" />
                         </div>
                     </div>
-                </div>
+                </motion.div>
             )}
         </>
     );

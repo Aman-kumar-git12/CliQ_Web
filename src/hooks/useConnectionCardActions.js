@@ -1,6 +1,7 @@
 /** Actions on the active smart-connection card: ignore, interested, (not) preferred and save for later. */
 import { useState } from "react";
 import { animate } from "framer-motion";
+import { EASE_SOFT } from "../components/common/motionPresets";
 import * as connectionsApi from "../api/connections";
 
 /**
@@ -37,7 +38,7 @@ export const useConnectionCardActions = ({
         setSending(true);
         const currentUserId = user.id;
 
-        await animate(dragX, -800, { duration: 0.35, ease: "easeOut" });
+        await animate(dragX, -800, { duration: 0.3, ease: EASE_SOFT });
 
         // Let next card mount instantly
         showSnack("User ignored");
@@ -60,7 +61,7 @@ export const useConnectionCardActions = ({
         setSending(true);
         const currentUserId = user.id;
 
-        await animate(dragX, 800, { duration: 0.35, ease: "easeOut" });
+        await animate(dragX, 800, { duration: 0.3, ease: EASE_SOFT });
 
         // Let next card mount instantly
         showSnack("Request sent");

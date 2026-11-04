@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Network, Zap, Globe, Sparkles } from "lucide-react";
+import { EASE_SOFT } from "../common/motionPresets";
 
 const loadingMessages = [
     { text: "Waking up the server...", icon: Zap },
@@ -13,6 +14,7 @@ export default function SplashScreen({ onFinish, isAppReady }) {
     const [isVisible, setIsVisible] = useState(true);
     const [minTimeElapsed, setMinTimeElapsed] = useState(false);
     const [messageIndex, setMessageIndex] = useState(0);
+    const reduceMotion = useReducedMotion();
 
     // Create a stable set of particles so they don't jump around on re-renders
     const [particles] = useState(() =>
@@ -80,39 +82,41 @@ export default function SplashScreen({ onFinish, isAppReady }) {
         <AnimatePresence onExitComplete={onFinish}>
             {isVisible && (
                 <motion.div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-neutral-950 text-white overflow-hidden"
+                    // Above the app's bars and dialogs (it covers the app while it loads)
+                    className="fixed inset-0 z-splash flex items-center justify-center bg-surface-950 text-white overflow-hidden"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                    exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.04, filter: "blur(8px)" }}
+                    transition={{ duration: 0.5, ease: EASE_SOFT }}
                 >
-                    {/* Background Particles */}
-                    {particles.map((p) => (
-                        <motion.div
-                            key={p.id}
-                            className="absolute bg-purple-500/35 rounded-full blur-[1px]"
-                            style={{
-                                width: p.size,
-                                height: p.size,
-                                left: `${p.x}%`,
-                                top: `${p.y}%`,
-                            }}
-                            animate={{
-                                y: ["0%", "-50%", "0%"],
-                                opacity: [0.15, 0.7, 0.15],
-                            }}
-                            transition={{
-                                duration: p.duration,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                                delay: p.delay,
-                            }}
-                        />
-                    ))}
+                    {/* Background particles (left out when the system asks for reduced motion) */}
+                    {!reduceMotion &&
+                        particles.map((p) => (
+                            <motion.div
+                                key={p.id}
+                                className="absolute bg-brand/35 rounded-full blur-[1px]"
+                                style={{
+                                    width: p.size,
+                                    height: p.size,
+                                    left: `${p.x}%`,
+                                    top: `${p.y}%`,
+                                }}
+                                animate={{
+                                    y: ["0%", "-50%", "0%"],
+                                    opacity: [0.15, 0.7, 0.15],
+                                }}
+                                transition={{
+                                    duration: p.duration,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                    delay: p.delay,
+                                }}
+                            />
+                        ))}
 
                     {/* Central Glow */}
                     <motion.div
-                        className="absolute w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px]"
+                        className="absolute w-[600px] h-[600px] bg-brand/10 rounded-full blur-[120px]"
                         animate={{
                             scale: [1, 1.2, 1],
                             opacity: [0.4, 0.7, 0.4],
@@ -138,7 +142,7 @@ export default function SplashScreen({ onFinish, isAppReady }) {
                         >
                             {/* Outer rotating ring */}
                             <motion.div
-                                className="absolute -inset-4 rounded-[2rem] border border-dashed border-purple-500/30"
+                                className="absolute -inset-4 rounded-[2rem] border border-dashed border-brand/30"
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
                             />
@@ -235,7 +239,7 @@ export default function SplashScreen({ onFinish, isAppReady }) {
                                 <motion.span
                                     key={index}
                                     variants={letterVariants}
-                                    className="bg-gradient-to-br from-white to-neutral-400 bg-clip-text text-transparent"
+                                    className="bg-gradient-to-br from-white to-ink-300 bg-clip-text text-transparent"
                                 >
                                     {letter}
                                 </motion.span>
@@ -261,9 +265,9 @@ export default function SplashScreen({ onFinish, isAppReady }) {
                                     animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                                     exit={{ y: -10, opacity: 0, filter: "blur(4px)" }}
                                     transition={{ duration: 0.3 }}
-                                    className="flex items-center space-x-3 text-purple-300"
+                                    className="flex items-center space-x-3 text-brand-light"
                                 >
-                                    <ActiveIcon className="w-5 h-5 animate-pulse" />
+                                    <ActiveIcon className="w-5 h-5 motion-safe:animate-pulse" aria-hidden="true" />
                                     <span className="text-sm tracking-widest uppercase font-medium">
                                         {loadingMessages[messageIndex].text}
                                     </span>

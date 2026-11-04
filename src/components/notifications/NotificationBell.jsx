@@ -11,11 +11,11 @@ export default function NotificationBell({ className = "" }) {
         <Link
             to="/notifications"
             aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
-            className={`relative w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all text-purple-100/80 hover:text-white group shadow-[0_0_15px_rgba(168,85,247,0.1)] ${className}`}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl bg-brand/10 border border-brand/20 hover:bg-brand/20 hover:border-brand/35 text-ink-100/85 hover:text-white group cliq-press focus-ring relative ${className}`}
         >
-            <Bell size={20} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
+            <Bell size={20} strokeWidth={2.5} aria-hidden="true" className="group-hover:scale-105 cliq-transition" />
             {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 flex items-center justify-center rounded-full bg-gradient-to-r from-brand to-brand-pink text-white text-[10px] font-black border-2 border-black shadow-[0_0_12px_rgba(236,72,153,0.5)]">
+                <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 flex items-center justify-center rounded-full bg-gradient-to-r from-brand to-brand-pink text-white text-[10px] font-black border-2 border-surface-850 shadow-glow-pink">
                     {label}
                 </span>
             )}

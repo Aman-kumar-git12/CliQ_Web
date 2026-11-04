@@ -275,7 +275,7 @@ export default function PostPage() {
     return (
         <div
             ref={containerRef}
-            className="min-h-screen bg-[#08080C] text-white relative overflow-x-hidden no-scrollbar transition-all duration-500"
+            className="min-h-screen bg-surface-900 text-white relative overflow-x-hidden no-scrollbar"
         >
             <PostDetailBackdrop />
 
@@ -293,7 +293,7 @@ export default function PostPage() {
                 />
 
                 {/* Post Body */}
-                <article className="px-4 py-2 space-y-3">
+                <article className="px-4 py-2 space-y-3 motion-safe:animate-[fadeIn_var(--cliq-dur-page)_var(--cliq-ease)]">
                     {/* User Profile Info */}
                     <PostDetailAuthorRow
                         post={post}

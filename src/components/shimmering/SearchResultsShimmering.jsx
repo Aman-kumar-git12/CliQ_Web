@@ -59,7 +59,7 @@ const SearchResultsShimmering = ({ tab = "all" }) => {
                                 <div className="flex items-center gap-4 mt-4">
                                     <div className="h-2.5 w-8 bg-white/5 rounded-full"></div>
                                     <div className="h-2.5 w-8 bg-white/5 rounded-full"></div>
-                                    <div className="h-2.5 w-12 bg-violet-500/10 rounded-full"></div>
+                                    <div className="h-2.5 w-12 bg-brand/10 rounded-full"></div>
                                 </div>
                             </div>
                         ))}

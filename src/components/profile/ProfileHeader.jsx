@@ -1,5 +1,45 @@
-import { Camera, Eye, Upload, ShieldCheck, MessageSquare, ArrowLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+    ArrowLeft,
+    CalendarDays,
+    Camera,
+    Check,
+    Eye,
+    Mail,
+    MessageSquare,
+    PenLine,
+    Share2,
+    Upload,
+} from "lucide-react";
 import { DEFAULT_AVATAR } from "../../utils/avatar";
+import { popoverMotion } from "../common/motionPresets";
+import { useEscapeKey } from "../../hooks/useEscapeKey";
+import { formatJoinedDate, getProfileHandle, getProfileHeadline, getSkillLabels } from "../../utils/profileDisplay";
+
+const MAX_SKILL_CHIPS = 4;
+const COPIED_FEEDBACK_MS = 1500;
+
+const primaryButton =
+    "bg-gradient-to-r from-brand to-brand-pink text-white shadow-soft hover:shadow-glow hover:brightness-110";
+const secondaryButton =
+    "bg-white/[0.04] text-ink-100 border border-line hover:bg-white/[0.07] hover:border-line-strong";
+const actionButton =
+    "h-10 md:h-11 px-4 md:px-6 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 cliq-press focus-ring";
+
+const connectLabels = { requested: "Requested", connected: "Connected", incoming: "Respond" };
+
+/** Token-only banner used when the user has no banner image. */
+const DefaultBanner = () => (
+    <>
+        <div className="absolute inset-0 bg-gradient-to-br from-brand/20 via-surface-night to-brand-pink/10" />
+        <div className="absolute -top-20 -left-10 h-56 w-72 rounded-full bg-brand/25 blur-3xl" />
+        <div className="absolute -top-16 right-0 h-48 w-64 rounded-full bg-brand-pink/15 blur-3xl" />
+        {/* Faint grid that fades out towards the bottom edge */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgb(255_255_255/0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgb(255_255_255/0.035)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
+    </>
+);
 
 /**
  * Shared Profile Header component for both own profile and public profile views.
@@ -16,18 +56,72 @@ const ProfileHeader = ({
     onChat,
     onAvatarMouseEnter,
     onAvatarMouseLeave,
-    bannerUrl = "https://images.unsplash.com/photo-1542382156909-9ae37b3f56fd?q=80&w=2938&auto=format&fit=crop",
+    bannerUrl,
 }) => {
+    const reduceMotion = useReducedMotion();
+    const avatarRef = useRef(null);
+    const copiedTimerRef = useRef(null);
+    const [copied, setCopied] = useState(false);
+    const isMenuOpen = isOwnProfile && showImageMenu;
+
+    // onImageClick is usually a fresh arrow each render; read it through a ref so the listener isn't re-added
+    const toggleMenuRef = useRef(onImageClick);
+    toggleMenuRef.current = onImageClick;
+    const closeMenu = () => toggleMenuRef.current?.();
+
+    useEscapeKey(isMenuOpen, closeMenu);
+
+    useEffect(() => {
+        if (!isMenuOpen) return undefined;
+        const handleMouseDown = (event) => {
+            // The camera button lives inside avatarRef, so its own click still toggles normally
+            if (!avatarRef.current?.contains(event.target)) toggleMenuRef.current?.();
+        };
+        document.addEventListener("mousedown", handleMouseDown);
+        return () => document.removeEventListener("mousedown", handleMouseDown);
+    }, [isMenuOpen]);
+
+    useEffect(() => () => clearTimeout(copiedTimerRef.current), []);
+
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(`${window.location.origin}/public-profile/${user.id}`);
+            setCopied(true);
+            clearTimeout(copiedTimerRef.current);
+            copiedTimerRef.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
+        } catch {
+            // Clipboard can be blocked (insecure origin, denied permission); nothing useful to show
+        }
+    };
+
+    const fullName = [user.firstname, user.lastname].filter(Boolean).join(" ");
+    const handle = getProfileHandle(user);
+    const headline = getProfileHeadline(user.expertise);
+    const joined = formatJoinedDate(user.createdAt);
+    const skills = getSkillLabels(user.expertise?.skills);
+    const visibleSkills = skills.slice(0, MAX_SKILL_CHIPS);
+    const hiddenSkills = skills.slice(MAX_SKILL_CHIPS);
+    const showEmail = isOwnProfile && user.email;
+
+    const isConnectDisabled = connectionStatus === "connected" || connectionStatus === "requested";
+    const connectStyle =
+        connectionStatus === "requested"
+            ? "bg-surface-600 text-ink-300 border border-line cursor-default"
+            : connectionStatus === "connected"
+              ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/25 cursor-default"
+              : primaryButton;
+
     return (
-        <div className="relative bg-gradient-to-b from-surface-night/50 to-transparent md:bg-white/[0.03] backdrop-blur-md md:backdrop-blur-2xl md:border md:border-white/10 shadow-2xl rounded-none md:rounded-[36px] overflow-hidden group/header transition-all duration-500">
-            {/* Subtle Texture Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+        <div className="relative md:bg-white/[0.02] md:border md:border-line md:shadow-soft-lg rounded-none md:rounded-3xl overflow-hidden">
             {/* Header Banner */}
             <div
-                className="w-full h-[90px] md:h-[180px] bg-[#1a0b2e] relative overflow-hidden group-hover/header:h-[100px] md:group-hover/header:h-[190px] transition-all duration-700"
-                style={{ backgroundImage: `url(${bannerUrl})` }}
+                className={`relative w-full h-[110px] md:h-[180px] overflow-hidden bg-surface-night ${
+                    bannerUrl ? "bg-cover bg-center" : ""
+                }`}
+                style={bannerUrl ? { backgroundImage: `url(${bannerUrl})` } : undefined}
             >
-                <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-transparent to-black/20 backdrop-blur-[1px]"></div>
+                {!bannerUrl && <DefaultBanner />}
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-surface-night/40 pointer-events-none" />
 
                 {/* Back Button (Public Profile / Mobile) */}
                 {onBack && (
@@ -35,29 +129,28 @@ const ProfileHeader = ({
                         type="button"
                         aria-label="Go back"
                         onClick={onBack}
-                        className="absolute top-5 left-5 bg-black/60 hover:bg-black/80 backdrop-blur-xl text-white p-2.5 rounded-full border border-white/10 transition-all z-20 md:hidden"
+                        className="absolute top-4 left-4 bg-black/40 hover:bg-black/60 backdrop-blur-xl text-white p-2.5 rounded-full border border-line cliq-press z-20 md:hidden focus-ring"
                     >
                         <ArrowLeft size={18} />
                     </button>
                 )}
-
-                {/* Banner Content (Optional Overlay) */}
             </div>
 
-            <div className="px-4 md:px-10 pb-4 md:pb-8 pt-6 md:pt-14 relative z-10">
-                {/* AVATAR & INFO HEADER */}
-                <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-[45px] md:-mt-[65px] mb-4 md:mb-6 gap-3 md:gap-6 relative z-10 transition-all duration-500">
+            <div className="relative z-10 px-4 md:px-8 pb-5 md:pb-7">
+                {/* Mobile: one centred column. sm+: avatar with actions on its right, details below. */}
+                <div className="flex flex-col items-center gap-4 sm:grid sm:grid-cols-[auto_1fr] sm:items-end sm:gap-x-6 sm:gap-y-4">
                     {/* Avatar Wrapper */}
                     <div
-                        className="relative group/avatar cursor-pointer shrink-0"
+                        ref={avatarRef}
+                        className="relative group/avatar cursor-pointer shrink-0 -mt-[44px] md:-mt-[60px] sm:col-start-1 sm:row-start-1"
                         onMouseEnter={onAvatarMouseEnter}
                         onMouseLeave={onAvatarMouseLeave}
                     >
-                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-fuchsia-500 rounded-full blur opacity-0 group-hover/avatar:opacity-40 transition duration-500 pointer-events-none"></div>
+                        <div className="absolute -inset-1 bg-gradient-to-r from-brand to-brand-pink rounded-full blur opacity-0 group-hover/avatar:opacity-25 transition-opacity duration-250 ease-soft pointer-events-none"></div>
                         <img
                             src={user.imageUrl || DEFAULT_AVATAR}
-                            alt={[user.firstname, user.lastname].filter(Boolean).join(" ") || "Profile photo"}
-                            className="relative w-[76px] h-[76px] md:w-[130px] md:h-[130px] rounded-full object-cover border-[3px] md:border-[4px] border-[#1a0b2e] md:border-black shadow-2xl transition-all duration-500 bg-surface-night"
+                            alt={fullName || "Profile photo"}
+                            className="relative w-[88px] h-[88px] md:w-[120px] md:h-[120px] rounded-full object-cover border-4 border-surface-night shadow-soft-lg bg-surface-night"
                         />
 
                         {/* Camera/Action button on avatar (Own Profile) */}
@@ -65,99 +158,156 @@ const ProfileHeader = ({
                             <button
                                 type="button"
                                 aria-label="Profile photo options"
+                                aria-haspopup="menu"
                                 aria-expanded={showImageMenu}
                                 onClick={onImageClick}
-                                className="absolute bottom-2 right-2 bg-white/[0.03] backdrop-blur-xl text-white p-2.5 rounded-full shadow-lg border border-white/20 hover:bg-white/[0.06] transition-all z-20 active:scale-90"
+                                className="absolute bottom-0.5 right-0.5 md:bottom-1.5 md:right-1.5 bg-surface-raised/90 backdrop-blur-xl text-ink-100 p-2 rounded-full shadow-soft border border-line-strong hover:text-white hover:bg-surface-600 cliq-press z-20 focus-ring"
                             >
-                                <Camera size={16} />
+                                <Camera size={15} />
                             </button>
                         )}
 
-                        {/* Image Options Menu (Own Profile) */}
-                        {isOwnProfile && showImageMenu && (
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white/[0.03] border border-white/20 rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-300 backdrop-blur-xl">
-                                <button
-                                    onClick={() => onImageOptionClick?.("view")}
-                                    className="px-4 py-3 text-left hover:bg-white/5 flex items-center gap-2 text-sm font-medium text-white"
-                                >
-                                    <Eye size={16} className="text-gray-400" /> View Image
-                                </button>
-                                <button
-                                    onClick={() => onImageOptionClick?.("upload")}
-                                    className="px-4 py-3 text-left hover:bg-white/5 flex items-center gap-2 text-sm font-medium text-white"
-                                >
-                                    <Upload size={16} className="text-gray-400" /> Upload Image
-                                </button>
+                        {/* Image Options Menu (Own Profile). Outer div positions, inner one animates. */}
+                        <AnimatePresence>
+                            {isMenuOpen && (
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 z-50">
+                                    <motion.div
+                                        {...popoverMotion(reduceMotion)}
+                                        role="menu"
+                                        className="cliq-popover origin-top sm:origin-top-left w-48 p-1 rounded-2xl flex flex-col"
+                                    >
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            onClick={() => onImageOptionClick?.("view")}
+                                            className="px-3 py-2.5 rounded-xl text-left hover:bg-white/[0.06] transition-colors duration-150 ease-soft flex items-center gap-2 text-sm font-medium text-white focus-visible:outline-none focus-visible:bg-white/[0.08]"
+                                        >
+                                            <Eye size={16} className="text-ink-300" /> View Image
+                                        </button>
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            onClick={() => onImageOptionClick?.("upload")}
+                                            className="px-3 py-2.5 rounded-xl text-left hover:bg-white/[0.06] transition-colors duration-150 ease-soft flex items-center gap-2 text-sm font-medium text-white focus-visible:outline-none focus-visible:bg-white/[0.08]"
+                                        >
+                                            <Upload size={16} className="text-ink-300" /> Upload Image
+                                        </button>
+                                    </motion.div>
+                                </div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    {/* User details */}
+                    <div className="min-w-0 w-full text-center sm:text-left sm:col-span-2 sm:row-start-2">
+                        <h1 className="text-xl md:text-3xl font-bold tracking-tight text-white break-words">
+                            {fullName}
+                        </h1>
+                        {handle && <p className="mt-0.5 text-sm text-brand-light/90 font-medium">@{handle}</p>}
+                        {headline && (
+                            <p className="mt-2 text-sm md:text-[15px] text-ink-200 truncate" title={headline}>
+                                {headline}
+                            </p>
+                        )}
+
+                        {(joined || showEmail) && (
+                            <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-xs md:text-[13px] text-ink-300">
+                                {joined && (
+                                    <span className="inline-flex items-center gap-1.5">
+                                        <CalendarDays size={14} className="text-ink-400" aria-hidden="true" />
+                                        Joined {joined}
+                                    </span>
+                                )}
+                                {showEmail && (
+                                    <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
+                                        <Mail size={14} className="text-ink-400 shrink-0" aria-hidden="true" />
+                                        <span className="truncate">{user.email}</span>
+                                    </span>
+                                )}
                             </div>
                         )}
+
+                        {visibleSkills.length > 0 && (
+                            <ul
+                                aria-label="Skills"
+                                className="mt-3 flex flex-wrap justify-center sm:justify-start gap-1.5"
+                            >
+                                {visibleSkills.map((skill, index) => (
+                                    <li
+                                        key={`${skill}-${index}`}
+                                        className="max-w-[12rem] truncate rounded-full bg-brand/10 border border-brand/20 px-2.5 py-1 text-xs font-medium text-brand-light"
+                                    >
+                                        {skill}
+                                    </li>
+                                ))}
+                                {hiddenSkills.length > 0 && (
+                                    <li
+                                        title={hiddenSkills.join(", ")}
+                                        className="rounded-full bg-white/[0.04] border border-line px-2.5 py-1 text-xs font-medium text-ink-300"
+                                    >
+                                        +{hiddenSkills.length}
+                                    </li>
+                                )}
+                            </ul>
+                        )}
                     </div>
 
-                    {/* User Name & Handle */}
-                    <div className="text-center sm:text-left flex-1 pb-1 md:pb-2">
-                        <h1 className="text-[16px] md:text-[28px] font-black tracking-tight flex items-center gap-1.5 md:gap-3 group-hover/header:scale-105 origin-left md:origin-center transition-transform duration-500 text-white drop-shadow-md">
-                            {user.firstname} {user.lastname}
-                            {!isOwnProfile && (
-                                <ShieldCheck className="text-purple-500 w-[16px] h-[16px] md:w-[20px] md:h-[20px]" />
-                            )}
-                        </h1>
-                        <code className="text-[11px] md:text-sm text-purple-300 font-bold bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20 shadow-inner group-hover/header:text-purple-200 transition-colors">
-                            @{user.username}
-                        </code>
-                        <div className="text-[10px] md:text-[13px] font-medium text-gray-500 px-3 py-1 bg-white/[0.02] rounded-full border border-white/5 w-fit mt-0.5 md:mt-1 shadow-inner">
-                            {user.email}
-                        </div>
+                    {/* ACTION BUTTONS: last on mobile, beside the avatar on sm+ */}
+                    <div className="order-last w-full flex gap-2 sm:w-auto sm:col-start-2 sm:row-start-1 sm:justify-self-end sm:self-end">
+                        {isOwnProfile ? (
+                            <>
+                                <Link
+                                    to="/edit-profile"
+                                    className={`${actionButton} ${secondaryButton} flex-1 sm:flex-none`}
+                                >
+                                    <PenLine size={16} aria-hidden="true" /> Edit profile
+                                </Link>
+                                <button
+                                    type="button"
+                                    onClick={handleShare}
+                                    aria-label={copied ? "Profile link copied" : "Copy profile link"}
+                                    title="Copy profile link"
+                                    className={`${actionButton} ${secondaryButton} !px-3 min-w-[2.75rem]`}
+                                >
+                                    {copied ? (
+                                        <>
+                                            <Check size={16} className="text-emerald-300" aria-hidden="true" />
+                                            <span className="text-emerald-300">Copied</span>
+                                        </>
+                                    ) : (
+                                        <Share2 size={16} aria-hidden="true" />
+                                    )}
+                                </button>
+                                <span className="sr-only" aria-live="polite">
+                                    {copied ? "Profile link copied" : ""}
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={onConnect}
+                                    disabled={isConnectDisabled}
+                                    className={`${actionButton} ${connectStyle} flex-1 sm:flex-none sm:min-w-[8.5rem]`}
+                                >
+                                    {connectLabels[connectionStatus] || "Connect"}
+                                </button>
+                                {/* Only connections can message each other */}
+                                <button
+                                    type="button"
+                                    onClick={onChat}
+                                    disabled={connectionStatus !== "connected"}
+                                    title={
+                                        connectionStatus === "connected" ? undefined : "Connect first to send messages"
+                                    }
+                                    className={`${actionButton} ${secondaryButton} flex-1 sm:flex-none sm:min-w-[7rem] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white/[0.04] disabled:hover:border-line`}
+                                >
+                                    <MessageSquare size={16} aria-hidden="true" /> Chat
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
-
-                {/* ACTION BUTTONS (Public Profile Only) */}
-                {!isOwnProfile && (
-                    <div className="flex flex-row gap-2 md:gap-4 mt-2 mb-1">
-                        <div className="relative flex-1 group">
-                            <div
-                                className={`absolute -inset-0.5 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-200 ${
-                                    connectionStatus === "connected"
-                                        ? "bg-green-500"
-                                        : connectionStatus === "requested"
-                                          ? "bg-gray-500"
-                                          : "bg-gradient-to-r from-purple-600 to-fuchsia-600"
-                                }`}
-                            ></div>
-                            <button
-                                onClick={onConnect}
-                                disabled={connectionStatus === "connected" || connectionStatus === "requested"}
-                                className={`relative w-full py-2 md:py-3.5 rounded-[10px] md:rounded-2xl font-black uppercase tracking-[0.05em] md:tracking-widest text-[10px] md:text-xs shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all flex items-center justify-center gap-2
-                                    ${
-                                        connectionStatus === "requested"
-                                            ? "bg-neutral-800 text-gray-500 cursor-default"
-                                            : connectionStatus === "connected"
-                                              ? "bg-green-600 text-white cursor-default"
-                                              : "bg-white text-black hover:bg-neutral-100 active:scale-95"
-                                    }`}
-                            >
-                                {connectionStatus === "requested"
-                                    ? "Requested"
-                                    : connectionStatus === "connected"
-                                      ? "Connected"
-                                      : connectionStatus === "incoming"
-                                        ? "Respond"
-                                        : "Connect"}
-                            </button>
-                        </div>
-
-                        <div className="relative flex-1 group">
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-purple-400 rounded-xl md:rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-200"></div>
-                            {/* Only connections can message each other */}
-                            <button
-                                onClick={onChat}
-                                disabled={connectionStatus !== "connected"}
-                                title={connectionStatus === "connected" ? undefined : "Connect first to send messages"}
-                                className="relative w-full bg-[#150a26] text-purple-100 rounded-[10px] md:rounded-2xl py-2 md:py-3.5 font-black uppercase tracking-[0.05em] md:tracking-widest text-[10px] md:text-xs flex items-center justify-center gap-1.5 hover:opacity-90 active:scale-95 transition-all border border-purple-500/30 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
-                            >
-                                <MessageSquare className="w-4 h-4" /> Chat
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

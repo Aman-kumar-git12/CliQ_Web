@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { DURATION, EASE_SOFT } from "../common/motionPresets";
 import { MessageSquare, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import * as postsApi from "../../api/posts";
 
 const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMouseLeave }) => {
+    const reduceMotion = useReducedMotion();
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -63,10 +65,10 @@ const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMous
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: showBelow ? -10 : 10 }}
+                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: showBelow ? -6 : 6 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: showBelow ? -10 : 10 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: showBelow ? -6 : 6 }}
+                    transition={{ duration: DURATION.panel, ease: EASE_SOFT }}
                     style={{
                         position: "absolute",
                         top: top,
@@ -82,10 +84,10 @@ const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMous
                     {/* Arrow / Tail (Top) */}
                     {/* Arrow removed for "perfect box" look */}
 
-                    <div className="bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl overflow-hidden p-4">
-                        <div className="flex items-center gap-2 mb-4 border-b border-neutral-100 dark:border-neutral-800 pb-2">
+                    <div className="bg-white/95 dark:bg-surface-raised/95 backdrop-blur-xl border border-neutral-200 dark:border-line-strong rounded-2xl shadow-pop overflow-hidden p-4">
+                        <div className="flex items-center gap-2 mb-4 border-b border-neutral-100 dark:border-line pb-2">
                             <MessageSquare size={16} className="text-blue-500" />
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-ink-300">
                                 Recent Comments
                             </h3>
                         </div>
@@ -93,12 +95,14 @@ const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMous
                         {loading ? (
                             <div className="flex flex-col items-center justify-center py-6">
                                 <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-                                <p className="text-[10px] text-neutral-500 font-medium tracking-tight">Loading...</p>
+                                <p className="text-[10px] text-neutral-500 dark:text-ink-300 font-medium tracking-tight">
+                                    Loading...
+                                </p>
                             </div>
                         ) : error ? (
                             <div className="py-4 text-center text-red-500 text-[11px] font-medium">{error}</div>
                         ) : comments.length === 0 ? (
-                            <div className="py-6 text-center text-neutral-400 text-xs italic">
+                            <div className="py-6 text-center text-neutral-400 dark:text-ink-300 text-xs italic">
                                 No comments yet. Be the first!
                             </div>
                         ) : (
@@ -106,7 +110,7 @@ const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMous
                                 {comments.map((comment) => (
                                     <div key={comment.id} className="flex gap-3 items-start group/comment">
                                         <div className="relative shrink-0">
-                                            <div className="absolute -inset-0.5 bg-gradient-to-tr from-blue-500/20 to-purple-500/20 rounded-full blur opacity-0 group-hover/comment:opacity-100 transition duration-300"></div>
+                                            <div className="absolute -inset-0.5 bg-gradient-to-tr from-brand/20 to-brand-pink/20 rounded-full blur opacity-0 group-hover/comment:opacity-100 transition-opacity duration-200 ease-soft"></div>
                                             {comment.avatar ? (
                                                 <img
                                                     loading="lazy"
@@ -117,12 +121,12 @@ const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMous
                                                         e.target.style.display = "none";
                                                         e.target.nextSibling.style.display = "flex";
                                                     }}
-                                                    className="relative w-8 h-8 rounded-full object-cover border border-neutral-100 dark:border-neutral-800 shadow-sm"
+                                                    className="relative w-8 h-8 rounded-full object-cover border border-neutral-100 dark:border-line shadow-sm"
                                                 />
                                             ) : null}
                                             <div
                                                 style={{ display: comment.avatar ? "none" : "flex" }}
-                                                className="relative w-8 h-8 rounded-full bg-gradient-to-tr from-brand to-brand-rose items-center justify-center text-white text-[11px] font-black border border-neutral-800 shadow-sm"
+                                                className="relative w-8 h-8 rounded-full bg-gradient-to-tr from-brand to-brand-rose items-center justify-center text-white text-[11px] font-black border border-line shadow-sm"
                                             >
                                                 {comment.username?.charAt(0)?.toUpperCase() || "?"}
                                             </div>
@@ -131,7 +135,7 @@ const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMous
                                             <p className="text-[13px] font-bold text-black dark:text-white leading-tight truncate">
                                                 {comment.username}
                                             </p>
-                                            <p className="text-[12px] text-neutral-600 dark:text-neutral-400 line-clamp-2 leading-snug mt-1">
+                                            <p className="text-[12px] text-neutral-600 dark:text-ink-100/75 line-clamp-2 leading-relaxed mt-1">
                                                 {comment.comment}
                                             </p>
                                         </div>
@@ -140,12 +144,12 @@ const CommentsHoverCard = ({ postId, isVisible, anchorRect, onMouseEnter, onMous
 
                                 <Link
                                     to={`/post/${postId}`}
-                                    className="flex items-center justify-between w-full mt-2 py-2 px-3 bg-neutral-50 dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 rounded-xl text-[11px] font-bold text-blue-500 transition-all group/link"
+                                    className="flex items-center justify-between w-full mt-2 py-2 px-3 bg-neutral-50 dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 rounded-xl text-[11px] font-bold text-blue-500 transition-colors duration-150 ease-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-light/50 group/link"
                                 >
                                     <span>View all comments</span>
                                     <ArrowRight
                                         size={14}
-                                        className="group-hover/link:translate-x-1 transition-transform"
+                                        className="motion-safe:group-hover/link:translate-x-1 transition-transform duration-150 ease-soft"
                                     />
                                 </Link>
                             </div>

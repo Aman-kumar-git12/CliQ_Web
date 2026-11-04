@@ -7,11 +7,13 @@ import * as searchApi from "../../api/search";
 import * as usersApi from "../../api/users";
 import { avatarUrl } from "../../utils/avatar";
 import { cachedRequest, invalidateCachedRequests } from "../../utils/requestCache";
+import { FOCUS_RING, PRESS, SOFT_TRANSITION } from "../posts/postUi";
 
 // Reused for a minute: coming back to Home (or switching to Search) doesn't reload them
 const SIDEBAR_MAX_AGE_MS = 60000;
 
-const SPARKLINE_COLORS = ["#6600FF", "#FF3399", "#00E0FF", "#7928CA", "#22C55E"];
+// Palette colours (the line is drawn in currentColor)
+const SPARKLINE_COLORS = ["text-brand", "text-brand-pink", "text-brand-light", "text-brand-rose"];
 
 const Sparkline = ({ color }) => (
     <svg
@@ -20,12 +22,12 @@ const Sparkline = ({ color }) => (
         viewBox="0 0 60 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="opacity-60"
+        className={`${color} opacity-60 group-hover:opacity-90 transition-opacity duration-200 ease-soft`}
         aria-hidden="true"
     >
         <path
             d="M1 23L12 18L24 21L36 10L48 14L59 1"
-            stroke={color}
+            stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -78,38 +80,42 @@ const HomeSidebar = () => {
             {/* TRENDING */}
             <div className="px-1">
                 <div className="flex items-center justify-between mb-6 px-1">
-                    <h3 className="text-[11px] font-black text-white/50 uppercase tracking-[0.25em] flex items-center gap-2">
+                    <h3 className="text-[11px] font-black text-ink-300 uppercase tracking-[0.25em] flex items-center gap-2">
                         Trending
                     </h3>
                     <Link
                         to="/search?type=hashtags"
-                        className="text-[11px] font-bold text-brand-light hover:text-white transition-colors flex items-center gap-1"
+                        className={`text-[11px] font-bold text-brand-light hover:text-white rounded-sm flex items-center gap-1 ${SOFT_TRANSITION} ${FOCUS_RING}`}
                     >
                         See all <ChevronRight size={12} />
                     </Link>
                 </div>
 
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
                     {hashtagsLoading ? (
-                        [1, 2, 3].map((i) => <div key={i} className="h-9 bg-white/5 rounded-xl animate-pulse" />)
+                        [1, 2, 3].map((i) => (
+                            <div key={i} className="h-[52px] bg-white/5 rounded-xl motion-safe:animate-pulse" />
+                        ))
                     ) : hashtags.length === 0 ? (
-                        <p className="px-1 text-[12px] text-white/40">No hashtags yet. Add a #tag to your next post.</p>
+                        <p className="px-1 text-[12px] leading-relaxed text-ink-300">
+                            No hashtags yet. Add a #tag to your next post.
+                        </p>
                     ) : (
                         hashtags.map((item, idx) => (
                             <Link
                                 key={item.tag}
                                 to={`/search?q=${encodeURIComponent(`#${item.tag}`)}&type=posts`}
-                                className="flex items-center justify-between group cursor-pointer px-1 no-underline"
+                                className={`flex items-center justify-between group cursor-pointer px-2 py-2 rounded-xl hover:bg-white/[0.03] no-underline ${SOFT_TRANSITION} ${FOCUS_RING}`}
                             >
                                 <div className="flex items-center gap-4">
-                                    <span className="text-[28px] font-black text-white/20 leading-none w-6">
+                                    <span className="text-[28px] font-black text-white/20 group-hover:text-white/30 transition-colors duration-150 ease-soft leading-none w-6">
                                         {idx + 1}
                                     </span>
                                     <div className="flex flex-col">
-                                        <span className="text-[13.5px] font-bold text-white group-hover:text-brand-light transition-colors tracking-tight">
+                                        <span className="text-[13.5px] font-bold text-white group-hover:text-brand-light transition-colors duration-150 ease-soft tracking-tight">
                                             #{item.tag}
                                         </span>
-                                        <span className="text-[10px] font-bold text-white/40 mt-0.5 tracking-wide">
+                                        <span className="text-[10.5px] font-bold text-ink-300 mt-0.5 tracking-wide tabular-nums">
                                             {item.postsCount} {item.postsCount === 1 ? "post" : "posts"}
                                         </span>
                                     </div>
@@ -124,41 +130,41 @@ const HomeSidebar = () => {
             {/* DISCOVER PEOPLE */}
             <div className="px-1">
                 <div className="flex items-center justify-between mb-6 px-1">
-                    <h3 className="text-[11px] font-black text-white/50 uppercase tracking-[0.25em]">
-                        Discover People
-                    </h3>
+                    <h3 className="text-[11px] font-black text-ink-300 uppercase tracking-[0.25em]">Discover People</h3>
                     <Link
                         to="/search"
-                        className="text-[11px] font-bold text-brand-light hover:text-white transition-colors flex items-center gap-1"
+                        className={`text-[11px] font-bold text-brand-light hover:text-white rounded-sm flex items-center gap-1 ${SOFT_TRANSITION} ${FOCUS_RING}`}
                     >
                         Explore <ChevronRight size={12} />
                     </Link>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     {loading
-                        ? [1, 2, 3].map((i) => <div key={i} className="h-12 bg-white/5 rounded-xl animate-pulse" />)
+                        ? [1, 2, 3].map((i) => (
+                              <div key={i} className="h-14 bg-white/5 rounded-xl motion-safe:animate-pulse" />
+                          ))
                         : suggestedUsers.map((user) => (
                               <div
                                   key={user.id}
-                                  className="flex items-center justify-between group p-2 hover:bg-white/[0.02] rounded-xl transition-all border border-transparent hover:border-white/5"
+                                  className={`flex items-center justify-between group p-2 hover:bg-white/[0.03] rounded-xl border border-transparent hover:border-line-soft ${SOFT_TRANSITION}`}
                               >
                                   <Link
                                       to={`/public-profile/${user.id}`}
-                                      className="flex items-center gap-3 min-w-0 no-underline"
+                                      className={`flex items-center gap-3 min-w-0 rounded-lg no-underline ${FOCUS_RING}`}
                                   >
                                       <img
                                           loading="lazy"
                                           decoding="async"
                                           src={avatarUrl(user.imageUrl)}
-                                          className="w-10 h-10 rounded-full object-cover border border-white/10 p-0.5 shrink-0"
+                                          className="w-10 h-10 rounded-full object-cover border border-line p-0.5 shrink-0 bg-surface-600"
                                           alt={`${user.firstname} ${user.lastname}`}
                                       />
                                       <div className="flex flex-col min-w-0">
-                                          <span className="text-[13px] font-black text-white truncate group-hover:text-[var(--cliq-lilac)] transition-colors tracking-tight">
+                                          <span className="text-[13px] font-black text-white truncate group-hover:text-brand-light transition-colors duration-150 ease-soft tracking-tight">
                                               {user.firstname} {user.lastname}
                                           </span>
-                                          <span className="text-[10px] text-white/40 font-black uppercase tracking-tighter mt-0.5">
+                                          <span className="text-[10px] text-ink-300 font-black uppercase tracking-tighter mt-0.5">
                                               New Discovery
                                           </span>
                                       </div>
@@ -166,7 +172,7 @@ const HomeSidebar = () => {
                                   <button
                                       onClick={() => handleConnect(user.id)}
                                       disabled={requested.has(user.id)}
-                                      className="px-4 py-1.5 border border-brand/30 rounded-full text-[12px] font-bold text-brand-light hover:bg-gradient-to-r hover:from-brand hover:to-brand-pink hover:text-white hover:border-transparent transition-all active:scale-95 bg-brand/10 shadow-[0_0_10px_rgba(139,92,246,0.1)] disabled:opacity-50 disabled:pointer-events-none"
+                                      className={`px-4 py-1.5 border border-brand/30 rounded-full text-[12px] font-bold text-brand-light hover:bg-gradient-to-r hover:from-brand hover:to-brand-pink hover:text-white hover:border-transparent bg-brand/10 hover:shadow-glow disabled:opacity-50 disabled:pointer-events-none ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`}
                                   >
                                       {requested.has(user.id) ? "Requested" : "Connect"}
                                   </button>
@@ -180,18 +186,18 @@ const HomeSidebar = () => {
                 <nav aria-label="Legal" className="flex items-center gap-4 mb-3">
                     <Link
                         to="/privacy"
-                        className="text-[11px] font-bold text-white/40 hover:text-brand-light transition-colors no-underline"
+                        className={`text-[11px] font-bold text-ink-300 hover:text-brand-light rounded-sm no-underline ${SOFT_TRANSITION} ${FOCUS_RING}`}
                     >
                         Privacy
                     </Link>
                     <Link
                         to="/terms"
-                        className="text-[11px] font-bold text-white/40 hover:text-brand-light transition-colors no-underline"
+                        className={`text-[11px] font-bold text-ink-300 hover:text-brand-light rounded-sm no-underline ${SOFT_TRANSITION} ${FOCUS_RING}`}
                     >
                         Terms
                     </Link>
                 </nav>
-                <p className="text-[11px] text-white/20 font-black tracking-widest uppercase">
+                <p className="text-[11px] text-ink-500 font-black tracking-widest uppercase">
                     © {new Date().getFullYear()} CLIQ
                 </p>
             </div>

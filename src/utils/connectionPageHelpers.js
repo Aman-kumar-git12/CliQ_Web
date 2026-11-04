@@ -1,7 +1,7 @@
 // @ts-check
 /** Pure display helpers for the smart-connections page: profile-strength nudge, badge colours, panel titles. */
 
-const PLACEHOLDER_VALUES = new Set(["", "****", "professional seeker", "n/a", "na", "null", "undefined"]);
+export const PLACEHOLDER_VALUES = new Set(["", "****", "professional seeker", "n/a", "na", "null", "undefined"]);
 
 /**
  * Expertise fields the helpers read. Values come from user input, so any of them may be missing or a placeholder.

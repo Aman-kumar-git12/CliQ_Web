@@ -1,341 +1,252 @@
-# 🚀 CliQ
+<div align="center">
 
-**Connect. Share. Collaborate.**
+# 🎨 CliQ — Frontend
 
-CliQ is a modern social + professional networking platform where users can post content, showcase their expertise, build meaningful connections, and collaborate through real-time chat.
+### Connect · Share · Collaborate
 
-It brings together content sharing, networking, messaging, and AI assistance into one connected experience.
+_A fast, animated, fully responsive React app for an AI-powered social + professional network_
 
----
+<br/>
 
-# 🧩 The Problem
-
-Today’s platforms make communication easy, but meaningful collaboration is still hard.
-
-People struggle with:
-
-1.  **Social apps** that focus more on entertainment than expertise
-2.  **Professional platforms** that feel static and inactive
-3.  **No smooth flow** from discovering someone → understanding them → reaching out
-4.  **Messaging, networking, and profile building** are scattered across different tools
-5.  **No intelligent assistant** to help users communicate better or present themselves well
-
-Finding people is easy. Finding the right people, and knowing how to start, is hard.
-
----
-
-# 💡 The Solution — CliQ
-
-CliQ solves this by creating one seamless workflow:
-**Post → Discover → Connect → Chat → Collaborate**
-
-Users can:
-
-1.  Share updates and ideas through posts
-2.  Build a profile around expertise, not just identity
-3.  Discover relevant people through smart recommendations
-4.  Start real conversations through built-in chat
-5.  Use AI to improve profiles, replies, and collaboration flow
-
----
-
-# 🚀 What CliQ Offers
-
-1.  **🔐 Secure Authentication** -> Easy and safe Signup/Login flow with protected sessions, email verification, password reset, and Google Sign-In.
-2.  **👤 Profile Management** -> Update personal details anytime, upload profile images, manage expertise, and view public profiles of other users.
-3.  **🧠 Expertise Showcase** -> Users can highlight their skills, projects, achievements, interests, and professional identity in a structured expertise section.
-4.  **🤖 AI Expertise Generator** -> Users can generate expertise content with AI based on their answers, making profile building faster and smarter.
-5.  **🤝 Build Connections** -> Discover people, send connection requests, accept or reject requests, and manage your network in one place.
-6.  **🎯 Smart Connection Recommendations** -> CliQ suggests relevant people using recommendation logic, preference tracking, ranking, and feedback-based improvement.
-7.  **📊 Recommendation Insights** -> The system tracks recommendation actions like shown, saved, ignored, and interested to improve the connection experience over time.
-8.  **📝 Share Experiences Through Posts** -> Create and publish posts, upload images, browse feeds, open individual post pages, and explore user-specific posts.
-9.  **💬 Real-Time Chat & Collaboration** -> Once connected, users can chat instantly, send files, share images, send voice messages, edit messages, delete messages, and continue conversations in real time.
-10. **✨ AI Message Assistant** -> Inside chat, users can generate smart reply suggestions, ask AI about conversation context, and get help deciding what to say next.
-11. **🤖 AI Agent Chatbot** -> Users can interact with the CliQ AI Agent through a dedicated AI chat experience for guidance, idea generation, and support.
-12. **⚙️ Settings & Account Control** -> Manage account preferences, blocked account flows, and account-level actions from one place.
-13. **📱 Fully Responsive Design** -> Works smoothly across desktop, tablet, and mobile devices.
-
----
-
-# 🤖 AI Features
-
-CliQ includes a dedicated AI layer that supports profile building, communication, and discovery.
-
-Users can use AI for:
-
-1.  Generating expertise/profile content
-2.  Asking AI to understand conversation context
-3.  Getting smart reply suggestions in chat
-4.  Streaming AI responses in real time
-5.  Talking to the CliQ AI Agent directly
-6.  Improving matching and recommendation quality
-
-AI in CliQ is not just an extra chatbot. It is integrated into the product experience to make collaboration easier and more intelligent.
-
----
-
-# 🛠️ Tech Stack
-
-### Frontend
-
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)
 ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-### Backend
+<br/>
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-4ea94b?style=for-the-badge&logo=mongodb&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
-![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
-![Helmet](https://img.shields.io/badge/Helmet-white?style=for-the-badge&logo=helmet&logoColor=black)
+**`Post`** ➜ **`Discover`** ➜ **`Connect`** ➜ **`Chat`** ➜ **`Collaborate`**
 
-### AI Agent Service
+<br/>
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq-black?style=for-the-badge&logo=groq&logoColor=white)
+[🌐 Live Demo](https://cliq-web-rho.vercel.app/) &nbsp;•&nbsp;
+[⚙️ Backend](https://github.com/Aman-kumar-git12/CliQ_Backend) &nbsp;•&nbsp;
+[🤖 AI Agent](https://github.com/Aman-kumar-git12/CliQ_Agent)
+
+</div>
 
 ---
 
-# 🌍 Live Application
+**CliQ** is a social + professional networking platform: build a profile around your **expertise**, share
+posts, discover the **right people** through AI-ranked recommendations, and collaborate over **real-time chat**,
+with AI helping at every step.
 
-- **Frontend**: [cliq-web-rho.vercel.app](https://cliq-web-rho.vercel.app)
-- **Backend API**: [cliq-backend-1.onrender.com](https://cliq-backend-1.onrender.com)
-- **AI Agent**: Connected through the backend proxy and local AI service configuration
+> [!NOTE]
+> This repository is the **web app** users interact with. It is built with React + Vite, styled with
+> Tailwind, animated with Framer Motion, and kept live with Socket.IO. It talks **only** to the backend API;
+> all AI features reach the AI agent through the backend.
 
----
+## 📦 Repositories
 
-# 🏁 Getting Started
+CliQ is split into three services:
 
-Follow the steps below to run the project on your machine.
-
-### ✅ Requirements
-
-1.  **Node.js** (v18+ recommended)
-2.  **npm** or **yarn**
-3.  **Python**
-4.  **MongoDB** database connection
-5.  **Redis** server
-6.  **Cloudinary** account
-
-### 📥 Installation
-
-Clone the repository -> `git clone <repository-url>`
-
-Move into the main project folder -> `cd Website`
-
-**Install dependencies:**
-
-1.  **Frontend** -> `cd website_Dev/vite-project && npm install`
-2.  **Backend** -> `cd ../../WebsiteBackend && npm install`
-3.  **AI Agent** -> `cd ../WebsiteAgent && pip install -r requirements.txt`
+| Service                     | Tech                                      | Repository                                                                        |
+| --------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------- |
+| 🎨 **Frontend** (this repo) | React · Vite · Tailwind                   | [Aman-kumar-git12/CliQ_Web](https://github.com/Aman-kumar-git12/CliQ_Web)         |
+| ⚙️ **Backend**              | Node · Express · Prisma · MongoDB · Redis | [Aman-kumar-git12/CliQ_Backend](https://github.com/Aman-kumar-git12/CliQ_Backend) |
+| 🤖 **AI Agent**             | Python · FastAPI · Groq · Embeddings      | [Aman-kumar-git12/CliQ_Agent](https://github.com/Aman-kumar-git12/CliQ_Agent)     |
 
 ---
 
-# 🔑 Environment Variables
+## 🧩 The Problem
 
-Create the required `.env` files for each service.
+Communication is easy today, but meaningful collaboration is still hard:
 
-### # Frontend -> `website_Dev/vite-project/.env`
+1. Social apps focus on entertainment, not expertise.
+2. Professional platforms feel static and inactive.
+3. There is no smooth path from **discovering** someone → **understanding** them → **reaching out**.
+4. Messaging, networking and profile building are spread across different tools.
+5. Nothing helps users present themselves well or know what to say.
 
-1.  `VITE_BACKEND_URL=http://localhost:2004` (see `.env.example`; the frontend never calls the AI agent directly)
+## 💡 The Solution
 
-### # Backend -> `WebsiteBackend/.env`
-
-1.  `DATABASE_URL=your_mongodb_connection_string`
-2.  `JWT_SECRET_KEY=your_jwt_secret`
-3.  `PORT=2003`
-4.  `FRONTEND_URL=http://localhost:5173`
-5.  `REDIS_URL=redis://127.0.0.1:6379`
-6.  `CLOUD_NAME=your_cloudinary_name`
-7.  `CLOUD_KEY=your_cloudinary_key`
-8.  `CLOUD_SECRET=your_cloudinary_secret`
-9.  `LLM_SERVICE_URL=http://localhost:8000`
-10. `GOOGLE_CLIENT_ID=your_google_client_id`
-11. `GOOGLE_CLIENT_SECRET=your_google_client_secret`
-12. `GOOGLE_REDIRECT_URI=http://localhost:2003/auth/google/callback`
-13. `SMTP_HOST=your_smtp_host`
-14. `SMTP_PORT=587`
-15. `SMTP_SECURE=false`
-16. `SMTP_USER=your_smtp_user`
-17. `SMTP_PASS=your_smtp_password`
-18. `SMTP_FROM=your_sender_email`
-
-### # AI Agent -> `WebsiteAgent/.env`
-
-1.  `FRONTEND_URL=http://localhost:5173`
-2.  `GROQ_API_KEY=your_groq_api_key`
-3.  `MESSAGE_ASSISTANT_CLASSIFIER_MODEL=llama-3.1-8b-instant`
-4.  `MESSAGE_ASSISTANT_RESPONSE_MODEL=llama-3.1-8b-instant`
-5.  `MESSAGE_ASSISTANT_FALLBACK_MODEL=llama-3.1-8b-instant`
+CliQ puts the whole journey in **one app**, with an interface that feels fast and alive: a live feed,
+swipeable match cards, real-time chat, and AI built into the screens where it helps most.
 
 ---
 
-# ▶ Run Development Servers
+## 🏗️ Architecture
 
-Run each service separately:
+```mermaid
+flowchart TB
+    U([👤 User]) --> R
 
-1.  **Frontend**
-    `cd website_Dev/vite-project`
-    `npm run dev`
+    subgraph FE["🎨 Frontend — CliQ_Web (this repo)"]
+        R[React Router<br/>lazy-loaded pages]
+        R --> CTX[Contexts<br/>User · Socket · Notifications · Feed]
+        R --> H[Feature hooks<br/>useChat* · useConnection* · useChatbot*]
+        H --> API[api/ services<br/>axiosClient · socket · SSE]
+    end
 
-2.  **Backend**
-    `cd ../../WebsiteBackend`
-    `npm run dev`
-
-3.  **AI Agent**
-    `cd ../WebsiteAgent`
-    `./start_agent.sh`
-
----
-
-# 🔄 Local Service Flow
-
-CliQ works through 3 connected services:
-
-1.  **Frontend** runs on `http://localhost:5173`
-2.  **Backend** runs on `http://localhost:2003` and may retry on the next port if `2003` is already occupied
-3.  **AI Agent** runs on `http://localhost:8000`
-
-**How they connect:**
-
-1.  Frontend sends API requests to the backend using `VITE_BACKEND_URL`
-2.  Backend communicates with MongoDB, Redis, and Cloudinary
-3.  Backend communicates with the AI service using `LLM_SERVICE_URL`
-4.  AI chat traffic is proxied through the backend to the AI agent
-
-If you use the default local setup, make sure your frontend `VITE_BACKEND_URL` matches the backend port you are actually using.
-
----
-
-# 🏗 Create Production Build
-
-- **Frontend build**: `npm run build`
-- **Backend build step**: `npm run build`
-- **AI Agent**: Run with Uvicorn or containerize using the provided Dockerfile
-
----
-
-# 🌍 Deployment
-
-- **Frontend** -> Optimized for Vercel / Netlify
-- **Backend** -> Suitable for Render / Railway / DigitalOcean / VPS deployment
-- **AI Agent** -> Can be deployed separately using Docker or Uvicorn-based hosting
-
-**Production tip:**
-Set `NODE_ENV=production` in the backend for production cookie settings, optimized middleware behavior, and production logging mode.
-
----
-
-# 📁 Project Structure
-
-### # Frontend
-
-```
-vite-project/
-├── src/
-│   ├── main.jsx             # Entry point
-│   ├── App.jsx              # Route definitions and providers
-│   ├── api/                 # axiosClient, socket (Socket.IO), one service module per feature (posts, users…)
-│   ├── context/             # UserContext, SocketContext (one shared Socket.IO connection), NotificationContext, FeedContext
-│   ├── hooks/               # Stateful logic pulled out of pages (useChat*, useChatbot*, usePostDetail*, useConnection*, useTabFeed, useMediaQuery…)
-│   ├── layouts/             # MainLayout (sidebar + feed pages), ChatLayout
-│   ├── routes/              # ProtectedRoute, PublicRoute
-│   ├── pages/               # One component per route (HomePage, SearchPage, ChatPage…), loaded lazily on first visit
-│   │   └── auth/            # Login, signup, email/OTP verification, blocked account
-│   ├── components/          # Building blocks, grouped by feature
-│   │   ├── chat/            # Inbox, AI assistant overlay, chat toasts
-│   │   ├── chatbot/         # CliQ AI help chat
-│   │   ├── connections/     # Get Connections cards, history, dashboard, saved
-│   │   ├── expertise/       # Expertise view and its four layouts
-│   │   ├── home/            # Home sidebar (trending hashtags, Discover People)
-│   │   ├── layout/          # Sidebar, mobile nav/top bar, splash screen
-│   │   ├── notifications/   # Notification bell
-│   │   ├── posts/           # Post card, comments, mentions, reposts, link previews
-│   │   ├── profile/         # Profile header, stats, tabs, hover card
-│   │   ├── search/          # People cards (Suggested Network and people results)
-│   │   ├── common/          # ConfirmDialog, ErrorBoundary, GlobalToaster, PageLoader, lazy EmojiPicker
-│   │   └── shimmering/      # Loading skeletons
-│   ├── utils/               # Small pure helpers (avatar, pageTitles, toast, timeAgo…)
-│   └── test/                # Test setup and cross-module tests (other tests sit next to their file as *.test.js[x])
-└── .env                     # Frontend environment variables
+    API -- "REST + cookies" --> BE[⚙️ Backend<br/>Express API]
+    API -- "WebSocket" --> BE
+    API -- "SSE streams" --> BE
+    BE --> AI[🤖 AI Agent]
 ```
 
-Conventions:
+Pages stay thin: **feature hooks** hold the logic, and **API services** are the only code that calls the
+network.
 
-- A file is named after the component it exports (PascalCase), hooks start with `use`, and a route's component lives in `pages/` as `<Name>Page.jsx`. Keep files under ~400 lines by pulling sections into components and logic into hooks.
-- Colours come from the palette in `tailwind.config.js` (`brand`, `ink-*`, `surface-*`, `ios-*`), e.g. `text-ink-450`, `bg-surface-800`, `border-brand/30`, not raw hex values.
-- Lists use a stable id as `key`; index keys only for fixed lists (skeletons).
-- Timers, sockets and requests started in an effect are cleaned up in its return (clear the timer, `socket.off`, abort the request).
+---
 
-Before every commit run `npm run check` (ESLint + Prettier + Vitest tests); `npm run format` fixes formatting and `npm run test:watch` re-runs tests as you edit. CI runs the same checks plus a build on every push. Components never call axios directly: they call a service function from `src/api/` (`auth`, `users`, `posts`, `connections`, `chat`, `aiChat`, `notifications`, `search`), which returns the response body. Services go through `src/api/axiosClient.js`, which retries failed reads, logs the user out when the session ends and shows an error toast; pass `{ silent: true }` as the last argument of a service call when a screen shows its own error message.
+## 🖥️ The Frontend in Depth
 
-Sessions: the backend's access cookie lasts 15 minutes. When a request gets `401 { code: "TOKEN_EXPIRED" }`, `axiosClient` calls `POST /auth/refresh` once (shared by every request waiting on it) and resends the request; the socket does the same on connect. Streaming calls use `fetchWithSession` from `axiosClient.js` instead of `fetch` to get the same behaviour. Error monitoring (Sentry) turns on when `VITE_SENTRY_DSN` is set at build time; `ErrorBoundary` reports page crashes. `Dockerfile` + `nginx.conf` build and serve the site in a container (`docker build --build-arg VITE_BACKEND_URL=... .`).
+### 🎯 Get Connections: swipeable match cards
 
-### # Backend
+- Swipe right or left (or use the buttons) to decide on a person. The card **tilts with the pointer** and
+  springs back with Framer Motion physics.
+- Each card shows **why** this person was suggested (shared skills, similar interests).
+- Panels for **history, saved people and insights**. Every action (shown, saved, ignored, interested) is tracked
+  to improve future recommendations.
+- Recent batches are cached in the browser, so reopening the page is instant.
+
+### 💬 Real-time chat
+
+- Messages, edits, deletes and **online status** arrive live over **one shared Socket.IO connection**.
+- Send **files, images, emoji and voice messages** (recorded in the browser with a running timer).
+- Duplicate events around a reconnect are ignored, so a message never shows twice.
+- **✨ AI assistant overlay:** get reply suggestions in a chosen tone, or ask AI about the conversation, with
+  answers streamed live.
+
+### 🤖 CliQ AI chatbot
+
+- A floating help chat, **loaded only when opened**, with multiple saved sessions in a sidebar.
+- Answers **stream token by token** via Server-Sent Events, parsed by a small reader that also works in Safari.
+- Shows a thinking indicator and **suggestion chips**, renders **Markdown** answers, and has 👍/👎 feedback buttons.
+
+### 📝 Posts and feed
+
+- Home feed with tabs, trending hashtags and "Discover People".
+- Posts with images, **link previews**, **@mentions**, reposts, likes, comments, saves and reports.
+- **Hover cards** show a person's profile without leaving the page.
+
+### 🧠 Expertise Studio
+
+- Build a structured expertise profile (skills, projects, achievements, interests), shown in **four layouts**.
+- **✨ Magic Builder:** answer a few questions and AI drafts the section for you.
+
+### 🔐 Auth and sessions
+
+- Signup, login, **Google Sign-In**, email and OTP verification, password reset and blocked-account flows.
+- `ProtectedRoute` and `PublicRoute` guard pages.
+- **Silent token refresh:** when the 15-minute session cookie expires, one shared `/auth/refresh` call renews it
+  and retries every waiting request. The socket and streaming calls do the same.
+
+---
+
+## ⚡ Performance and UX
+
+| What                  | How                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| **Fast first load**   | Every page is **lazy-loaded**; React, icons and animation get separate long-cached vendor chunks |
+| **No layout jumps**   | A dedicated **shimmer skeleton** for every screen (20+)                                          |
+| **Fewer requests**    | A short-lived request cache shares results between screens and **dedupes in-flight requests**    |
+| **Resilient network** | Failed reads are retried; errors show as toasts; an `ErrorBoundary` catches page crashes         |
+| **Smooth motion**     | Shared Framer Motion presets; everything respects the OS **"reduce motion"** setting             |
+| **Accessible**        | WCAG AA text contrast, a visible keyboard focus ring everywhere, Escape closes dialogs           |
+| **Mobile-first**      | Bottom nav, top bar, safe-area padding for phones with a home indicator                          |
+| **Measured**          | Lighthouse CI checks performance, accessibility, best practices and SEO (target ≥ 80)            |
+
+## 🛠️ Problems Solved with Tech
+
+| Problem                               | How the frontend solves it                       | Tech                                  |
+| ------------------------------------- | ------------------------------------------------ | ------------------------------------- |
+| Discovery feels like scrolling a list | Swipeable, explainable match cards               | Framer Motion gestures                |
+| Chat must feel instant                | Live messages, edits and presence                | Socket.IO (one shared connection)     |
+| Waiting for AI feels slow             | Answers stream word by word                      | Server-Sent Events + `ReadableStream` |
+| Sessions expire mid-use               | Silent refresh and retry, shared by all requests | Axios interceptors                    |
+| Big bundles load slowly               | Lazy pages + vendor chunk splitting              | React `lazy`, Vite / Rollup           |
+| Screens flash while loading           | Per-screen skeletons                             | Tailwind shimmer components           |
+| Duplicate API calls                   | Short-lived cache with in-flight dedupe          | Custom `requestCache`                 |
+| Works on every device                 | Responsive layouts, mobile nav, safe areas       | Tailwind CSS                          |
+
+## ✨ Features
+
+- 🔐 **Secure authentication**: signup/login, email verification, OTP, password reset, Google Sign-In
+- 👤 **Profiles**: edit details, upload photos, public profiles, hover cards
+- 🧠 **Expertise Studio** with the **AI Magic Builder**
+- 🤝 **Connections**: send, accept and reject requests, manage your network
+- 🎯 **Get Connections**: swipeable AI-ranked match cards with history, saved people and insights
+- 📝 **Posts**: images, link previews, mentions, reposts, likes, comments, saves, reports
+- 💬 **Real-time chat**: files, images, voice messages, emoji, edit and delete, online status
+- ✨ **AI message assistant** and 🤖 **CliQ AI chatbot**, both streaming
+- 🔔 **Live notifications** and 🔍 **people search**
+- 📱 **Fully responsive** on desktop, tablet and mobile
+
+## 🧰 Tech Stack
+
+| Layer                 | Technologies                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **UI**                | React 18, React Router 6, Tailwind CSS, Framer Motion, Lucide icons, React Markdown, Emoji Picker                                        |
+| **Data and realtime** | Axios, Socket.IO client, Server-Sent Events                                                                                              |
+| **Quality**           | Vitest + Testing Library, Playwright (e2e), TypeScript type checks (`@ts-check`), ESLint, Prettier, Lighthouse CI                        |
+| **Ops**               | Vite, Vercel, Docker + Nginx, Sentry                                                                                                     |
+| **Backend / AI**      | See the [Backend](https://github.com/Aman-kumar-git12/CliQ_Backend) and [AI Agent](https://github.com/Aman-kumar-git12/CliQ_Agent) repos |
+
+---
+
+## ⚡ Getting Started
+
+Requires **Node.js 20.19+** and the [backend](https://github.com/Aman-kumar-git12/CliQ_Backend) running.
+
+```bash
+npm install
+cp .env.example .env     # set VITE_BACKEND_URL (default http://localhost:2004)
+npm run dev              # http://localhost:5173
+```
+
+| Variable           | Purpose                              |
+| ------------------ | ------------------------------------ |
+| `VITE_BACKEND_URL` | Backend API, also used for Socket.IO |
+| `VITE_SENTRY_DSN`  | Optional: Sentry error monitoring    |
+
+Only `VITE_` variables reach the browser, so never put secrets in `.env`.
+
+**Production build:** `npm run build` (served by Vercel). To run it in a container:
+`docker build --build-arg VITE_BACKEND_URL=... .` (Nginx).
+
+## 🧪 Tests
+
+```bash
+npm run check        # ESLint + Prettier + type check + Vitest
+npm run test:watch   # re-run unit tests as you edit
+npm run test:e2e     # Playwright browser tests: auth, chat, posts, pages
+npm run lhci         # Lighthouse CI report
+```
+
+## 📁 Project Layout
 
 ```
-WebsiteBackend/
-├── prisma/                  # schema.prisma, prismaClient.js, seed.js
-├── src/
-│   ├── app.js               # Entry point
-│   ├── config/              # The only place that reads environment variables
-│   ├── routes/              # API route definitions
-│   ├── controllers/         # Request handlers, one folder per feature
-│   ├── middlewares/         # Auth, validation, central error handler
-│   ├── socket/              # Socket.IO real-time messaging
-│   ├── upload/              # Multer limits and Cloudinary uploads
-│   └── utils/               # Logger and feature helpers
-└── .env                     # Backend environment variables
-```
-
-### # AI Agent
-
-```
-WebsiteAgent/
-├── src/
-│   ├── main.py              # FastAPI app setup
-│   ├── core/                # Config, logging, database, LLM clients, internal-key check
-│   ├── help_chat/           # CliQ AI help chat (RAG over knowledge/data)
-│   ├── message_assistant/   # Reply suggestions in chat
-│   ├── expertise/           # Magic Builder
-│   ├── matching/            # Smart connections and semantic people search
-│   └── system/              # Health check and status page
-└── .env                     # AI service environment variables
+src/
+├── main.jsx             entry point
+├── App.jsx              routes (lazy-loaded) and providers
+├── api/                 axiosClient, socket, one service module per feature (posts, users, chat, aiChat…)
+├── context/             UserContext, SocketContext (one shared connection), NotificationContext, FeedContext
+├── hooks/               logic pulled out of pages: useChat*, useChatbot*, useConnection*, usePostDetail*…
+├── layouts/             MainLayout (sidebar + feed pages), ChatLayout
+├── routes/              ProtectedRoute, PublicRoute
+├── pages/               one component per route; auth/ holds login, signup, verification
+├── components/          building blocks grouped by feature
+│   ├── chat/            inbox, AI assistant overlay
+│   ├── chatbot/         CliQ AI help chat
+│   ├── connections/     match cards, history, dashboard, saved
+│   ├── expertise/       expertise view and its four layouts
+│   ├── posts/           post card, comments, mentions, reposts, link previews
+│   ├── profile/         header, stats, tabs, hover card
+│   ├── common/          ConfirmDialog, ErrorBoundary, toaster, PageLoader, motion presets
+│   └── shimmering/      loading skeletons
+├── utils/               small pure helpers (requestCache, readSseEvents, timeAgo…)
+└── test/                test setup and cross-module tests
+e2e/                     Playwright specs
 ```
 
 ---
 
-# 🧭 System Flow
+## 🔗 Related Repositories
 
-**Frontend -> Backend API -> MongoDB / Redis / Cloudinary / AI Agent**
-
-CliQ works as a multi-service product:
-
-1.  **Frontend** handles UI, routing, and user interactions
-2.  **Backend** manages authentication, posts, chat, profiles, and recommendations
-3.  **AI Agent** service powers chatbot, message assistance, expertise generation, and matching
-4.  **Backend** acts as the bridge between the frontend and the AI service
-
----
-
-# 🚧 Future Improvements
-
-1.  Improve deployment documentation for frontend, backend, and AI services separately
-2.  Expand AI configuration docs with provider options and model tuning guidance
-3.  Add architecture diagrams for chat, recommendations, and AI request flow
-4.  Add contributor setup instructions and API route documentation
-
----
-
-# 🎯 Vision
-
-CliQ is not just a social platform. It is a **connection engine** built to help people discover talent, communicate better, and collaborate on real ideas in one unified experience.
+- 🌐 Live website: https://cliq-web-rho.vercel.app/
+- ⚙️ Backend: https://github.com/Aman-kumar-git12/CliQ_Backend
+- 🤖 AI Agent: https://github.com/Aman-kumar-git12/CliQ_Agent

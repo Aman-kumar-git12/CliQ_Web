@@ -7,21 +7,21 @@ export default function AIAssistantThinkingStep({ icon: Icon, label, status = "p
 
     return (
         <div
-            className={`flex items-center gap-2.5 py-1 px-2 rounded-lg transition-all duration-500 ${isActive ? "bg-violet-500/10 border border-violet-500/20" : ""}`}
+            className={`flex items-center gap-2.5 py-1 px-2 rounded-lg border transition-colors duration-300 ease-soft ${isActive ? "bg-brand/10 border-brand/20" : "border-transparent"}`}
         >
             {isCompleted ? (
                 <CheckCircle2 size={14} className="text-emerald-400" />
             ) : isActive ? (
-                <Loader2 size={14} className="text-violet-400 animate-spin" />
+                <Loader2 size={14} className="text-brand-light animate-spin" />
             ) : (
-                <div className="w-3.5 h-3.5 rounded-full border border-white/20" />
+                <div className="w-3.5 h-3.5 rounded-full border border-line-strong" />
             )}
             <Icon
                 size={14}
-                className={isActive ? "text-violet-300" : isCompleted ? "text-neutral-400" : "text-neutral-600"}
+                className={isActive ? "text-violet-300" : isCompleted ? "text-neutral-400" : "text-ink-400"}
             />
             <span
-                className={`text-[12px] font-medium tracking-tight ${isActive ? "text-violet-100" : isCompleted ? "text-neutral-400" : "text-neutral-600"}`}
+                className={`text-[12px] font-medium tracking-tight ${isActive ? "text-violet-100" : isCompleted ? "text-neutral-400" : "text-ink-400"}`}
             >
                 {label}
             </span>

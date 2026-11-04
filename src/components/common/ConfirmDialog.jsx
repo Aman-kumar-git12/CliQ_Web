@@ -1,7 +1,8 @@
 import { useEffect, useId } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
+import { backdropMotion, dialogMotion } from "./motionPresets";
 
 export default function ConfirmDialog({
     isOpen,
@@ -16,6 +17,7 @@ export default function ConfirmDialog({
 }) {
     const titleId = useId();
     const messageId = useId();
+    const reduceMotion = useReducedMotion();
 
     // Escape closes the dialog (unless an action is in progress)
     useEffect(() => {
@@ -31,36 +33,35 @@ export default function ConfirmDialog({
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
                     {/* Backdrop */}
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                        {...backdropMotion}
+                        className="absolute inset-0 bg-surface-950/70 backdrop-blur-sm"
                         onClick={onClose}
                     />
 
                     {/* Content */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        {...dialogMotion(reduceMotion)}
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby={titleId}
                         aria-describedby={message ? messageId : undefined}
-                        className="bg-black/90 rounded-[32px] shadow-2xl p-8 w-full max-w-[340px] text-center border border-white/10 relative z-10 overflow-hidden"
+                        className="bg-surface-raised/95 backdrop-blur-xl rounded-[32px] shadow-pop p-8 w-full max-w-[340px] text-center border border-line-strong relative z-10 overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Glow */}
-                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand/10 rounded-full blur-2xl pointer-events-none" />
 
-                        <h2 id={titleId} className="text-xl font-black tracking-tight text-white uppercase italic mb-2">
+                        <h2
+                            id={titleId}
+                            className="text-xl font-black tracking-tight text-ink-100 uppercase italic mb-2"
+                        >
                             {title}
                         </h2>
                         {message && (
-                            <p id={messageId} className="mb-6 text-[13px] text-white/40 font-bold leading-relaxed">
+                            <p id={messageId} className="mb-6 text-[13px] text-ink-300 font-semibold leading-relaxed">
                                 {message}
                             </p>
                         )}
@@ -70,7 +71,7 @@ export default function ConfirmDialog({
                                 type="button"
                                 onClick={onConfirm}
                                 disabled={isLoading}
-                                className={`w-full py-3.5 rounded-2xl text-white font-black uppercase italic tracking-widest text-[11px] transition-all active:scale-95 flex items-center justify-center ${confirmColor} shadow-lg`}
+                                className={`w-full py-3.5 rounded-2xl text-white font-black uppercase italic tracking-widest text-[11px] cliq-press disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center ${confirmColor} shadow-soft`}
                             >
                                 {isLoading ? (
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
@@ -82,7 +83,7 @@ export default function ConfirmDialog({
                                 type="button"
                                 onClick={onClose}
                                 disabled={isLoading}
-                                className="w-full py-3.5 rounded-2xl bg-white/5 text-white/40 hover:text-white font-black uppercase italic tracking-widest text-[11px] transition-all border border-white/5 active:scale-95"
+                                className="w-full py-3.5 rounded-2xl bg-white/[0.04] text-ink-300 hover:text-ink-100 hover:bg-white/[0.07] font-black uppercase italic tracking-widest text-[11px] cliq-press disabled:opacity-60 disabled:cursor-not-allowed border border-line-soft"
                             >
                                 {cancelText}
                             </button>

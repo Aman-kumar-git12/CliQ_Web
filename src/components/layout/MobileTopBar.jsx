@@ -5,6 +5,14 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import NotificationBell from "../notifications/NotificationBell";
 import { useUserContext } from "../../context/UserContext";
 
+// Shared looks: square icon buttons on the bar, and rows in the dropdown menu
+const ACTION_BUTTON =
+    "w-10 h-10 flex items-center justify-center rounded-xl bg-brand/10 border border-brand/20 hover:bg-brand/20 hover:border-brand/35 text-ink-100/85 hover:text-white group cliq-press";
+const MENU_ITEM =
+    "flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-brand/10 text-[13px] font-bold text-ink-200 hover:text-white group cliq-transition";
+const MENU_ICON =
+    "w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center group-hover:bg-brand/20 cliq-transition";
+
 export default function MobileTopBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showLogoutPopup, setShowLogoutPopup] = useState(false);
@@ -20,7 +28,9 @@ export default function MobileTopBar() {
     return (
         <>
             {/* Overlay for menu */}
-            {isMenuOpen && <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)}></div>}
+            {isMenuOpen && (
+                <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} aria-hidden="true"></div>
+            )}
 
             {/* Logout Confirmation */}
             <ConfirmDialog
@@ -32,7 +42,7 @@ export default function MobileTopBar() {
             />
 
             {/* Top Bar */}
-            <div className="fixed top-0 left-0 w-full h-[70px] bg-gradient-to-b from-surface-night to-black/95 backdrop-blur-xl border-b border-purple-500/20 flex items-center justify-between px-6 z-[100] md:hidden transition-all duration-500 shadow-[0_10px_40px_rgba(88,28,135,0.3)]">
+            <div className="fixed top-0 left-0 w-full h-[70px] bg-gradient-to-b from-surface-night to-surface-950/95 backdrop-blur-xl border-b border-brand/15 flex items-center justify-between px-6 z-nav md:hidden shadow-soft-lg">
                 {/* CONDITIONAL HEADER FOR POST VIEW */}
                 {location.pathname.startsWith("/post/") ? (
                     <>
@@ -40,12 +50,12 @@ export default function MobileTopBar() {
                             type="button"
                             aria-label="Go back"
                             onClick={() => navigate(-1)}
-                            className="p-2 -ml-2 rounded-xl hover:bg-purple-500/10 transition-all text-purple-200 hover:text-white"
+                            className="p-2 -ml-2 rounded-xl hover:bg-brand/10 text-ink-200 hover:text-white cliq-press"
                         >
                             <ArrowLeft size={22} strokeWidth={2.5} />
                         </button>
 
-                        <div className="absolute left-1/2 -translate-x-1/2 text-[15px] font-black uppercase tracking-[0.2em] text-purple-100">
+                        <div className="absolute left-1/2 -translate-x-1/2 text-[15px] font-black uppercase tracking-[0.2em] text-ink-100">
                             Post
                         </div>
 
@@ -54,43 +64,38 @@ export default function MobileTopBar() {
                 ) : (
                     <>
                         {/* Left: Branding */}
-                        <Link to="/home" className="group">
-                            <h1 className="text-[26px] font-black tracking-[-0.05em] text-white flex items-center gap-1 group-hover:scale-105 transition-transform duration-300 italic">
+                        <Link to="/home" className="group rounded-lg">
+                            <h1 className="text-[26px] font-black tracking-[-0.05em] text-white flex items-center gap-1 group-hover:scale-[1.03] origin-left cliq-transition italic">
                                 CliQ
-                                <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,1)] mt-3 animate-pulse"></div>
+                                <span className="w-1.5 h-1.5 rounded-full bg-brand shadow-glow mt-3 motion-safe:animate-pulse"></span>
                             </h1>
                         </Link>
 
                         {/* Center: Context Tab */}
                         <div className="absolute left-1/2 -translate-x-1/2 hidden min-[460px]:flex flex-col items-center">
-                            <span className="text-[13px] font-black text-purple-100/90 tracking-tight">For you</span>
-                            <div className="w-1 h-1 rounded-full bg-purple-500/40 mt-1"></div>
+                            <span className="text-[13px] font-black text-ink-100/90 tracking-tight">For you</span>
+                            <div className="w-1 h-1 rounded-full bg-brand/50 mt-1"></div>
                         </div>
 
                         {/* Right: Actions */}
                         <div className="flex items-center gap-2">
-                            <Link
-                                to="/search"
-                                aria-label="Search"
-                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all text-purple-100/80 hover:text-white group shadow-[0_0_15px_rgba(168,85,247,0.1)]"
-                            >
+                            <Link to="/search" aria-label="Search" className={ACTION_BUTTON}>
                                 <Search
                                     size={20}
                                     strokeWidth={2.5}
-                                    className="group-hover:scale-110 transition-transform"
+                                    aria-hidden="true"
+                                    className="group-hover:scale-105 cliq-transition"
                                 />
                             </Link>
 
                             <NotificationBell />
 
-                            <Link
-                                to="/messages"
-                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all text-purple-100/80 hover:text-white group shadow-[0_0_15px_rgba(168,85,247,0.1)]"
-                            >
+                            <Link to="/messages" aria-label="Messages" className={ACTION_BUTTON}>
                                 <MessageSquare
                                     size={20}
                                     strokeWidth={2.5}
-                                    className="group-hover:scale-110 transition-transform"
+                                    aria-hidden="true"
+                                    className="group-hover:scale-105 cliq-transition"
                                 />
                             </Link>
 
@@ -100,47 +105,41 @@ export default function MobileTopBar() {
                                     aria-label="Open menu"
                                     aria-expanded={isMenuOpen}
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all text-purple-100/80 hover:text-white group shadow-[0_0_15px_rgba(168,85,247,0.1)]"
+                                    className={ACTION_BUTTON}
                                 >
                                     <Menu
                                         size={20}
                                         strokeWidth={2.5}
-                                        className="group-hover:scale-110 transition-transform"
+                                        aria-hidden="true"
+                                        className="group-hover:scale-105 cliq-transition"
                                     />
                                 </button>
 
                                 {/* Dropdown Menu */}
                                 {isMenuOpen && (
-                                    <div className="absolute top-[52px] right-0 w-56 bg-[#0a0510] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-purple-500/20 p-2 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-200 origin-top-right z-[110] backdrop-blur-3xl">
-                                        <Link
-                                            to="/settings"
-                                            onClick={() => setIsMenuOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple-500/10 transition-all text-[13px] font-bold text-purple-100/70 hover:text-white group"
-                                        >
-                                            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
-                                                <Settings size={16} className="text-purple-400" strokeWidth={2.5} />
+                                    <div className="absolute top-[52px] right-0 w-56 cliq-popover rounded-2xl p-1.5 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-200 origin-top-right z-[110]">
+                                        <Link to="/settings" onClick={() => setIsMenuOpen(false)} className={MENU_ITEM}>
+                                            <div className={MENU_ICON}>
+                                                <Settings size={16} className="text-brand-light" strokeWidth={2.5} />
                                             </div>
                                             Settings
                                         </Link>
 
-                                        <Link
-                                            to="/saved"
-                                            onClick={() => setIsMenuOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-purple-500/10 transition-all text-[13px] font-bold text-purple-100/70 hover:text-white group"
-                                        >
-                                            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
-                                                <Bookmark size={16} className="text-purple-400" strokeWidth={2.5} />
+                                        <Link to="/saved" onClick={() => setIsMenuOpen(false)} className={MENU_ITEM}>
+                                            <div className={MENU_ICON}>
+                                                <Bookmark size={16} className="text-brand-light" strokeWidth={2.5} />
                                             </div>
                                             Saved
                                         </Link>
 
-                                        <div className="h-px bg-purple-500/10 my-1 mx-2"></div>
+                                        <div className="h-px bg-line-soft my-1 mx-2"></div>
 
                                         <button
+                                            type="button"
                                             onClick={() => setShowLogoutPopup(true)}
-                                            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 transition-all text-[13px] font-bold text-red-400/70 hover:text-red-500 group text-left"
+                                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-500/10 text-[13px] font-bold text-red-400 hover:text-red-300 group text-left cliq-transition"
                                         >
-                                            <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+                                            <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 cliq-transition">
                                                 <LogOut size={16} strokeWidth={2.5} />
                                             </div>
                                             Log out

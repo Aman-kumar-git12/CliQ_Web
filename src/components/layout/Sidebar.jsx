@@ -16,18 +16,31 @@ import { Link, useLocation } from "react-router-dom";
 import { useUserContext } from "../../context/UserContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "../../context/NotificationContext";
+import { EASE_SOFT } from "../common/motionPresets";
+
+const labelTransition = { duration: 0.2, ease: EASE_SOFT };
 
 const NavItem = ({ to, icon: Icon, label, badge, active, isChatView }) => (
     <Link
         to={to}
-        className={`flex items-center group relative h-[52px] transition-colors duration-200
+        aria-current={active ? "page" : undefined}
+        aria-label={isChatView ? label : undefined}
+        title={isChatView ? label : undefined}
+        // Every item has a 1px border (transparent when inactive), so selecting one doesn't nudge it by a pixel
+        className={`flex items-center group relative h-[52px] border cliq-transition
             ${isChatView ? "justify-center w-[52px] mx-auto rounded-2xl" : "gap-4 px-5 rounded-[14px] mx-2"}
-            ${active ? "bg-gradient-to-r from-violet-500/15 to-pink-500/10 text-white shadow-[inset_20px_0_20px_-20px_rgba(139,92,246,0.3),0_8px_16px_rgba(0,0,0,0.2)] border border-violet-500/20" : "text-white hover:bg-white/[0.06] hover:text-white"}`}
+            ${active ? "bg-gradient-to-r from-brand/15 to-brand-pink/10 text-white border-brand/25 shadow-soft" : "text-ink-200 border-transparent hover:bg-white/[0.05] hover:text-ink-100"}`}
     >
+        {/* Active marker on the left edge */}
+        <span
+            aria-hidden="true"
+            className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-brand-light cliq-transition ${active ? "h-5 opacity-100" : "h-0 opacity-0"}`}
+        />
         <div className="flex items-center justify-center w-6 h-6 shrink-0">
             <Icon
                 size={22}
-                className={`${active ? "text-brand-light drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]" : "text-white group-hover:text-brand-light transition-colors"}`}
+                aria-hidden="true"
+                className={`cliq-transition ${active ? "text-brand-light drop-shadow-glow" : "text-ink-300 group-hover:text-brand-light"}`}
             />
         </div>
 
@@ -38,8 +51,8 @@ const NavItem = ({ to, icon: Icon, label, badge, active, isChatView }) => (
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className={`flex-1 font-bold text-[14px] truncate ${active ? "text-white" : "text-white"}`}
+                    transition={labelTransition}
+                    className="flex-1 font-bold text-[14px] truncate"
                 >
                     {label}
                 </motion.span>
@@ -48,8 +61,8 @@ const NavItem = ({ to, icon: Icon, label, badge, active, isChatView }) => (
 
         {badge && (
             <span
-                className={`bg-gradient-to-r from-brand to-brand-pink text-white text-[10px] font-black rounded-full text-center shadow-[0_0_12px_rgba(236,72,153,0.4)]
-                ${isChatView ? "absolute top-1 right-1 w-5 h-5 flex items-center justify-center border-2 border-[#12111d]" : "px-2 py-0.5 min-w-[20px] ml-auto"}`}
+                className={`bg-gradient-to-r from-brand to-brand-pink text-white text-[10px] font-black leading-none rounded-full text-center shadow-glow-pink tabular-nums
+                ${isChatView ? "absolute top-1 right-1 min-w-5 h-5 px-1 flex items-center justify-center border-2 border-surface-sidebar" : "px-2 py-1 min-w-[20px] ml-auto"}`}
             >
                 {badge}
             </span>
@@ -66,10 +79,11 @@ const Section = ({ title, children, isChatView }) => (
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="text-[11px] font-black text-white/80 uppercase tracking-[0.25em] px-5 mb-4 flex items-center gap-3 overflow-hidden"
+                    transition={labelTransition}
+                    className="text-[11px] font-black text-ink-300 uppercase tracking-[0.25em] px-5 mb-4 flex items-center gap-3 overflow-hidden"
                 >
                     {title}
-                    <div className="flex-1 h-[1px] bg-gradient-to-r from-white/[0.15] to-transparent rounded-full" />
+                    <div className="flex-1 h-px bg-gradient-to-r from-white/[0.12] to-transparent rounded-full" />
                 </motion.h3>
             )}
         </AnimatePresence>
@@ -98,15 +112,16 @@ export default function Sidebar() {
             initial={false}
             animate={{ width: isChatView ? 90 : 260 }}
             transition={{ type: "tween", ease: "circOut", duration: 0.4 }}
-            className="fixed left-0 top-0 h-screen hidden md:flex flex-col bg-gradient-to-b from-[#12111d] via-[#0d0c15] to-surface-850 border-r border-white/10 z-50 shadow-[8px_0_32px_rgba(0,0,0,0.8)] overflow-hidden"
+            className="fixed left-0 top-0 h-screen hidden md:flex flex-col bg-gradient-to-b from-surface-sidebar via-surface-800 to-surface-850 border-r border-line z-sidebar shadow-rail overflow-hidden"
         >
             {/* LOGO (Fixed vertical position) */}
             <div className="flex items-center px-10 h-[120px] shrink-0">
                 <Link
                     to="/home"
-                    className={`flex items-center gap-4 group ${isChatView ? "w-full justify-center" : ""}`}
+                    aria-label="CliQ home"
+                    className={`flex items-center gap-4 group rounded-[16px] ${isChatView ? "w-full justify-center" : ""}`}
                 >
-                    <div className="w-11 h-11 rounded-[16px] bg-gradient-to-br from-brand to-brand-pink flex items-center justify-center shadow-[0_0_24px_rgba(139,92,246,0.4)] group-hover:scale-110 transition-transform duration-300 shrink-0">
+                    <div className="w-11 h-11 rounded-[16px] bg-gradient-to-br from-brand to-brand-pink flex items-center justify-center shadow-glow group-hover:scale-105 cliq-transition shrink-0">
                         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7">
                             <defs>
                                 <filter id="neon-glow-sidebar" x="-20%" y="-20%" width="140%" height="140%">
@@ -182,7 +197,7 @@ export default function Sidebar() {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                transition={{ duration: 0.3 }}
+                                transition={labelTransition}
                                 className="text-3xl font-black tracking-tighter text-white uppercase italic leading-none whitespace-nowrap"
                             >
                                 CLIQ
@@ -274,11 +289,11 @@ export default function Sidebar() {
             {user && (
                 <div className="mt-auto p-4 shrink-0 h-[88px] flex items-center justify-center">
                     <div
-                        className={`rounded-[20px] bg-surface-800 border border-white/5 flex items-center group cursor-pointer hover:bg-white/[0.04] shadow-xl overflow-hidden h-14 transition-colors duration-300
+                        className={`rounded-[20px] bg-surface-800 border border-line-soft flex items-center group hover:bg-white/[0.03] hover:border-line shadow-soft overflow-hidden h-14 cliq-transition
                         ${isChatView ? "w-14 justify-center" : "p-3 gap-3 w-full"}`}
                     >
-                        <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-brand to-brand-pink p-[2px] shadow-lg group-hover:rotate-3 transition-transform shrink-0">
-                            <div className="w-full h-full rounded-[12px] bg-black flex items-center justify-center text-white font-black text-xs">
+                        <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-brand to-brand-pink p-[2px] shadow-soft shrink-0">
+                            <div className="w-full h-full rounded-[12px] bg-surface-900 flex items-center justify-center text-ink-100 font-black text-xs">
                                 {user.firstname?.substring(0, 1).toUpperCase() || "A"}
                             </div>
                         </div>
@@ -289,12 +304,13 @@ export default function Sidebar() {
                                     initial={{ opacity: 0, width: 0 }}
                                     animate={{ opacity: 1, width: "auto" }}
                                     exit={{ opacity: 0, width: 0 }}
+                                    transition={labelTransition}
                                     className="flex flex-col min-w-0 flex-1 whitespace-nowrap overflow-hidden"
                                 >
-                                    <span className="text-[13px] font-black text-white truncate leading-none">
+                                    <span className="text-[13px] font-black text-ink-100 truncate leading-none">
                                         {user.firstname} {user.lastname}
                                     </span>
-                                    <span className="text-[9px] text-ink-550 font-bold truncate tracking-tight uppercase mt-1">
+                                    <span className="text-[10px] text-ink-350 font-bold truncate tracking-tight uppercase mt-1">
                                         @{user.firstname?.toLowerCase()}_{user.lastname?.toLowerCase()}
                                     </span>
                                 </motion.div>
@@ -303,7 +319,7 @@ export default function Sidebar() {
                         {!isChatView && (
                             <MoreHorizontal
                                 size={16}
-                                className="text-ink-600 group-hover:text-white transition-colors"
+                                className="text-ink-400 group-hover:text-ink-100 cliq-transition"
                             />
                         )}
                     </div>

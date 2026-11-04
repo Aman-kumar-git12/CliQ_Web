@@ -2,6 +2,9 @@ import { useState } from "react";
 import { X, AlertCircle, Loader2 } from "lucide-react";
 import { useEscapeKey } from "../../hooks/useEscapeKey";
 import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
+import { motion, useReducedMotion } from "framer-motion";
+import { backdropMotion, dialogMotion } from "../common/motionPresets";
+import { FOCUS_RING, PRESS, SOFT_TRANSITION } from "./postUi";
 
 const reportReasons = [
     "Spam",
@@ -18,6 +21,7 @@ const reportReasons = [
 const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
     const [selectedReason, setSelectedReason] = useState("");
     const [otherReason, setOtherReason] = useState("");
+    const reduceMotion = useReducedMotion();
 
     useBodyScrollLock(isOpen);
 
@@ -33,18 +37,23 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fadeIn" onClick={onClose}></div>
+        <div className="fixed inset-0 z-modal flex items-center justify-center p-4">
+            <motion.div
+                {...backdropMotion}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={onClose}
+            />
 
-            <div
+            <motion.div
+                {...dialogMotion(reduceMotion)}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="report-modal-title"
-                className="relative bg-[#1a1a1a] border border-white/10 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-zoomIn"
+                className="relative bg-surface-raised border border-line-strong w-full max-w-md rounded-2xl shadow-pop overflow-hidden"
             >
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-red-500">
+                <div className="px-6 py-4 border-b border-line flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-red-400">
                         <AlertCircle size={20} />
                         <h2 id="report-modal-title" className="text-xl font-bold text-white">
                             Report Post
@@ -54,7 +63,7 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
                         type="button"
                         aria-label="Close"
                         onClick={onClose}
-                        className="p-1 hover:bg-white/10 rounded-full text-gray-400 transition-colors"
+                        className={`p-1 hover:bg-white/10 rounded-full text-ink-300 hover:text-white ${SOFT_TRANSITION} ${FOCUS_RING}`}
                     >
                         <X size={24} />
                     </button>
@@ -62,7 +71,7 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
 
                 {/* Body */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <p className="text-gray-400 text-sm mb-2">
+                    <p className="text-ink-300 text-sm leading-relaxed mb-2">
                         Why are you reporting this post? Your report is anonymous.
                     </p>
 
@@ -70,10 +79,10 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
                         {reportReasons.map((reason) => (
                             <label
                                 key={reason}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-200 ${
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer ${SOFT_TRANSITION} has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-light/50 ${
                                     selectedReason === reason
                                         ? "bg-red-500/10 border-red-500/50 text-white"
-                                        : "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10"
+                                        : "bg-white/5 border-line-soft text-ink-300 hover:bg-white/10 hover:text-ink-100"
                                 }`}
                             >
                                 <input
@@ -85,8 +94,8 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
                                     className="sr-only"
                                 />
                                 <div
-                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                        selectedReason === reason ? "border-red-500" : "border-gray-600"
+                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors duration-150 ease-soft ${
+                                        selectedReason === reason ? "border-red-500" : "border-ink-500"
                                     }`}
                                 >
                                     {selectedReason === reason && (
@@ -105,7 +114,7 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
                             maxLength={500}
                             placeholder="Please explain the issue..."
                             aria-label="Describe the issue"
-                            className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder:text-gray-600 focus:outline-none focus:border-red-500/50 transition-colors resize-none h-24"
+                            className="w-full bg-white/5 border border-line rounded-xl p-3 text-white placeholder:text-ink-400 focus:outline-none focus:border-red-500/50 transition-colors duration-150 ease-soft resize-none h-24"
                             autoFocus
                         />
                     )}
@@ -115,7 +124,7 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-3 rounded-xl bg-white/5 text-white font-semibold hover:bg-white/10 transition-colors"
+                            className={`flex-1 px-4 py-3 rounded-xl bg-white/5 text-white font-semibold hover:bg-white/10 ${SOFT_TRANSITION} ${PRESS} ${FOCUS_RING}`}
                         >
                             Cancel
                         </button>
@@ -124,7 +133,7 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
                             disabled={
                                 isReporting || !selectedReason || (selectedReason === "Other" && !otherReason.trim())
                             }
-                            className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className={`flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${SOFT_TRANSITION} ${FOCUS_RING}`}
                         >
                             {isReporting ? (
                                 <>
@@ -137,7 +146,7 @@ const ReportModal = ({ isOpen, onClose, onReport, isReporting }) => {
                         </button>
                     </div>
                 </form>
-            </div>
+            </motion.div>
         </div>
     );
 };

@@ -31,8 +31,8 @@ export default function AIAssistantReplyResults({
     return (
         <>
             {replyLoading && (
-                <SectionCard className="animate-pulse space-y-4 border-violet-500/20 bg-violet-500/[0.02]">
-                    <div className="h-3 w-24 rounded bg-violet-500/20" />
+                <SectionCard className="motion-safe:animate-pulse space-y-4 border-brand/20 bg-brand/[0.02]">
+                    <div className="h-3 w-24 rounded bg-brand/20" />
                     <div className="space-y-3">
                         <div className="h-4 w-3/4 rounded bg-white/10" />
                         <div className="h-4 w-full rounded bg-white/[0.06]" />
@@ -53,7 +53,7 @@ export default function AIAssistantReplyResults({
                     </div>
                     <button
                         onClick={() => onGenerateReplies?.()}
-                        className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-white transition hover:bg-white/15"
+                        className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-white transition duration-150 ease-soft hover:bg-white/15 active:scale-95 focus-ring"
                     >
                         <Wand2 size={14} />
                         Try Again
@@ -62,9 +62,9 @@ export default function AIAssistantReplyResults({
             )}
 
             {!replyLoading && !error && !replyData?.top_reply && !replyData?.reply_suggestions?.length && (
-                <SectionCard className="flex flex-col items-center justify-center p-8 text-center border-dashed border-white/10 bg-transparent">
-                    <div className="w-16 h-16 rounded-3xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
-                        <Bot size={32} className="text-violet-400" />
+                <SectionCard className="flex flex-col items-center justify-center p-8 text-center border-dashed border-line bg-transparent">
+                    <div className="w-16 h-16 rounded-3xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-4">
+                        <Bot size={32} className="text-brand-light" />
                     </div>
                     <h4 className="text-[15px] font-bold text-white tracking-wide mb-2">Ready to assist</h4>
                     <p className="text-[13px] text-neutral-400 max-w-[240px] leading-relaxed">
@@ -81,16 +81,16 @@ export default function AIAssistantReplyResults({
                         <SectionCard>
                             <SectionLabel icon={History}>Actual Context</SectionLabel>
                             {replyData?.context_preview ? (
-                                <div className="rounded-xl bg-black/20 p-3 border border-white/[0.03]">
+                                <div className="rounded-xl bg-black/20 p-3 border border-line-soft">
                                     <pre className="whitespace-pre-wrap text-[13px] text-neutral-300 font-sans leading-relaxed">
                                         {replyData.context_preview}
                                     </pre>
                                 </div>
                             ) : (
-                                <p className="text-[13px] text-neutral-500 italic">No recent chat context.</p>
+                                <p className="text-[13px] text-ink-300 italic">No recent chat context.</p>
                             )}
                             {replyData?.last_other_message && (
-                                <div className="mt-3 rounded-xl border border-violet-500/10 bg-violet-500/[0.02] p-3">
+                                <div className="mt-3 rounded-xl border border-brand/10 bg-brand/[0.02] p-3">
                                     <p className="text-[10px] uppercase tracking-[0.18em] text-violet-300/70 font-bold mb-1.5">
                                         Last Message
                                     </p>
@@ -107,12 +107,12 @@ export default function AIAssistantReplyResults({
                             </p>
                             {replyData?.detected_intent && (
                                 <div className="mt-4 flex flex-wrap gap-2">
-                                    <div className="rounded-md bg-white/[0.04] border border-white/[0.06] px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold">
-                                        <span className="text-neutral-500">Intent: </span>
+                                    <div className="rounded-md bg-white/[0.04] border border-line-soft px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold">
+                                        <span className="text-ink-300">Intent: </span>
                                         <span className="text-pink-300">{replyData.detected_intent}</span>
                                     </div>
-                                    <div className="rounded-md bg-white/[0.04] border border-white/[0.06] px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold">
-                                        <span className="text-neutral-500">Tone: </span>
+                                    <div className="rounded-md bg-white/[0.04] border border-line-soft px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold">
+                                        <span className="text-ink-300">Tone: </span>
                                         <span className="text-violet-300">{replyData.tone || selectedTone}</span>
                                     </div>
                                 </div>
@@ -130,7 +130,7 @@ export default function AIAssistantReplyResults({
 
             {!replyLoading && !error && replyData?.top_reply && (
                 <SectionCard>
-                    <SectionLabel icon={Sparkles} className="!text-violet-400">
+                    <SectionLabel icon={Sparkles} className="!text-brand-light">
                         Top Recommendation
                     </SectionLabel>
                     {renderReplyCard(replyData.top_reply, "top-reply", { highlighted: true })}

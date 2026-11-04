@@ -38,7 +38,7 @@ const VoicePlayer = ({ src, isMe, avatar, name }) => {
 
     return (
         <div
-            className={`flex items-center gap-3 p-1 rounded-2xl min-w-[210px] ${isMe ? "text-white" : "text-neutral-200"}`}
+            className={`flex items-center gap-3 p-1 rounded-2xl min-w-[210px] ${isMe ? "text-white" : "text-white/85"}`}
         >
             <audio
                 ref={audioRef}
@@ -52,7 +52,7 @@ const VoicePlayer = ({ src, isMe, avatar, name }) => {
                 type="button"
                 aria-label={isPlaying ? "Pause voice message" : "Play voice message"}
                 onClick={togglePlay}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 shrink-0 ${isMe ? "bg-white text-ios-blue" : "bg-ios-blue text-white"}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition duration-150 ease-soft active:scale-95 shrink-0 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 ${isMe ? "bg-white text-brand hover:bg-white/90" : "bg-brand text-white hover:brightness-110"}`}
             >
                 {isPlaying ? (
                     <Pause size={20} fill="currentColor" />
@@ -68,17 +68,19 @@ const VoicePlayer = ({ src, isMe, avatar, name }) => {
                         return (
                             <div
                                 key={i}
-                                className={`w-[2px] rounded-full transition-colors ${isActive ? (isMe ? "bg-white" : "bg-ios-blue") : isMe ? "bg-white/30" : "bg-white/10"}`}
+                                className={`w-[2px] rounded-full transition-colors duration-150 ${isActive ? (isMe ? "bg-white" : "bg-brand-light") : isMe ? "bg-white/35" : "bg-white/15"}`}
                                 style={{ height: `${h * 2}px` }}
                             />
                         );
                     })}
                 </div>
                 <div className="flex justify-between items-center px-0.5">
-                    <span className="text-[10px] opacity-70 font-medium">
+                    <span className="text-[10px] opacity-70 font-medium tabular-nums">
                         {formatTime(audioRef.current?.currentTime || 0)}
                     </span>
-                    <span className="text-[10px] opacity-70 font-medium tracking-tight">{formatTime(duration)}</span>
+                    <span className="text-[10px] opacity-70 font-medium tracking-tight tabular-nums">
+                        {formatTime(duration)}
+                    </span>
                 </div>
             </div>
 
@@ -86,10 +88,10 @@ const VoicePlayer = ({ src, isMe, avatar, name }) => {
                 <img
                     src={avatar || DEFAULT_AVATAR}
                     alt={name || "User"}
-                    className="w-10 h-10 rounded-full object-cover border border-white/10"
+                    className="w-10 h-10 rounded-full object-cover border border-line"
                 />
                 <div
-                    className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center border ${isMe ? "bg-ios-blue border-white/20" : "bg-[#262626] border-white/10"}`}
+                    className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center border ${isMe ? "bg-brand border-line-strong" : "bg-ios-gray-light border-line"}`}
                 >
                     <Mic size={8} className="text-white" />
                 </div>

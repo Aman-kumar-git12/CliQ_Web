@@ -14,7 +14,7 @@ const AITextArea = ({ label, value, onChange, placeholder, icon }) => {
             </label>
             <textarea
                 id={fieldId}
-                className="min-h-[112px] w-full resize-none rounded-[22px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-900 placeholder-slate-400 transition-all focus:border-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-900/5"
+                className="min-h-[112px] w-full resize-none rounded-[22px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-900 placeholder-slate-400 transition duration-150 ease-out hover:border-slate-300 focus:border-brand/60 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand/10"
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}

@@ -1,29 +1,31 @@
 /** "AI is thinking..." bubble with bouncing dots and the live agent status line. */
 import { motion, AnimatePresence } from "framer-motion";
+import { EASE_SOFT } from "../common/motionPresets";
 
 export default function ChatbotThinkingIndicator({ status }) {
     return (
         <div className="self-start flex flex-col gap-1.5 max-w-[85%]">
             <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl rounded-tl-sm p-4 self-start flex gap-2 items-center shadow-lg"
+                transition={{ duration: 0.2, ease: EASE_SOFT }}
+                className="bg-white/[0.04] border border-line rounded-2xl rounded-tl-md px-4 py-3 self-start flex gap-2 items-center"
             >
                 <div className="flex gap-1">
                     {[0, 1, 2].map((i) => (
                         <motion.div
                             key={i}
                             animate={{
-                                scale: [1, 1.2, 1],
-                                opacity: [0.4, 1, 0.4],
+                                y: [0, -2, 0],
+                                opacity: [0.35, 1, 0.35],
                             }}
                             transition={{
-                                duration: 1,
+                                duration: 1.2,
                                 repeat: Infinity,
                                 delay: i * 0.2,
                                 ease: "easeInOut",
                             }}
-                            className="w-1.5 h-1.5 bg-violet-400 rounded-full"
+                            className="w-1.5 h-1.5 bg-brand-light rounded-full"
                         />
                     ))}
                 </div>
@@ -38,7 +40,7 @@ export default function ChatbotThinkingIndicator({ status }) {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         aria-live="polite"
-                        className="text-[11px] text-neutral-500 px-1"
+                        className="text-[11px] text-ink-300 px-1"
                     >
                         {status}
                     </motion.span>

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import { Route, Routes, Navigate, useLocation, Outlet as RouterOutlet } from "react-router-dom";
-import { motion } from "framer-motion";
+import { MotionConfig, motion } from "framer-motion";
 import MainLayout from "./layouts/MainLayout";
 import { useUserContext } from "./context/UserContext";
 
@@ -70,7 +70,7 @@ const AuthenticatedLayout = () => {
     return (
         <div
             id="root-container"
-            className={`flex w-full ${isChatView ? "h-[100dvh] overflow-hidden" : "min-h-screen overflow-x-hidden"} bg-surface-950 text-white relative transition-all duration-700`}
+            className={`flex w-full ${isChatView ? "h-[100dvh] overflow-hidden" : "min-h-screen overflow-x-hidden"} bg-surface-950 text-white relative transition-[filter,transform] duration-300 ease-soft`}
         >
             {/* ------------ Premium Global Background (Static during navigation) ------------- */}
             <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -190,8 +190,9 @@ function App() {
         sessionStorage.setItem("splashSeen", "true");
     };
 
+    // Every animation in the app follows the visitor's "reduce motion" setting
     return (
-        <>
+        <MotionConfig reducedMotion="user">
             {showSplash && <SplashScreen onFinish={handleSplashFinish} isAppReady={!loading} />}
             <GlobalToaster />
             {/* Last resort: layouts have their own boundaries that keep the sidebar usable */}
@@ -253,7 +254,7 @@ function App() {
                     </FeedProvider>
                 </Suspense>
             </ErrorBoundary>
-        </>
+        </MotionConfig>
     );
 }
 

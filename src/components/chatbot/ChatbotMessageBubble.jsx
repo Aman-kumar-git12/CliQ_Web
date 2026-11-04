@@ -9,12 +9,12 @@ export default function ChatbotMessageBubble({ msg }) {
 
     return (
         <div
-            className={`p-3 max-w-full rounded-2xl text-[13.5px] leading-relaxed shadow-sm ${
+            className={`max-w-full rounded-[18px] text-[13.5px] leading-relaxed break-words ${
                 msg.role === "user"
-                    ? "bg-violet-600 text-white rounded-tr-sm shadow-violet-900/20"
+                    ? "px-3.5 py-2.5 bg-brand text-white rounded-tr-md shadow-md shadow-brand/20"
                     : msg.error
-                      ? "bg-amber-500/10 border border-amber-400/25 text-amber-100 rounded-tl-sm whitespace-pre-wrap"
-                      : "bg-white/5 border border-white/5 text-neutral-300 rounded-tl-sm whitespace-pre-wrap backdrop-blur-sm"
+                      ? "p-3 bg-amber-500/10 border border-amber-400/25 text-amber-100 rounded-tl-md whitespace-pre-wrap"
+                      : "p-3 bg-white/[0.04] border border-line-soft text-neutral-300 rounded-tl-md whitespace-pre-wrap"
             }`}
             role={msg.error ? "alert" : undefined}
         >
@@ -32,8 +32,8 @@ export default function ChatbotMessageBubble({ msg }) {
                 msg.text
             ) : parsedStep ? (
                 <div className="flex flex-col gap-3">
-                    <div className="flex items-start gap-3 rounded-2xl bg-violet-500/8 border border-violet-400/10 p-3">
-                        <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-400/15 flex items-center justify-center shrink-0">
+                    <div className="flex items-start gap-3 rounded-2xl bg-brand/[0.08] border border-brand-light/10 p-3">
+                        <div className="w-8 h-8 rounded-xl bg-brand/15 border border-brand-light/15 flex items-center justify-center shrink-0">
                             <Sparkles size={14} className="text-violet-300" />
                         </div>
                         <div className="min-w-0">
@@ -47,9 +47,9 @@ export default function ChatbotMessageBubble({ msg }) {
                         {parsedStep.steps.map((step, i) => (
                             <li
                                 key={i}
-                                className="flex items-start gap-3 rounded-xl bg-white/[0.03] border border-white/[0.04] px-3 py-2.5"
+                                className="flex items-start gap-3 rounded-xl bg-white/[0.03] border border-line-soft px-3 py-2.5"
                             >
-                                <span className="min-w-[24px] h-6 rounded-full bg-violet-500/15 text-violet-200 text-[11px] font-semibold flex items-center justify-center border border-violet-400/10">
+                                <span className="min-w-[24px] h-6 rounded-full bg-brand/15 text-violet-200 text-[11px] font-semibold flex items-center justify-center border border-brand-light/10">
                                     {i + 1}
                                 </span>
                                 <span className="text-neutral-200 text-[13px] leading-relaxed">{step}</span>

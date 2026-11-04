@@ -30,10 +30,10 @@ const ExpertiseStudioForm = ({ form, selectedFormat, skillList, onSave }) => {
 
     return (
         <>
-            <div className="rounded-[28px] border border-slate-200 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] backdrop-blur-xl">
+            <div className="rounded-[28px] border border-slate-200 bg-white/90 p-6 shadow-xl shadow-slate-900/[0.04] backdrop-blur-xl">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div className="space-y-2">
-                        <span className="inline-flex w-fit items-center rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-indigo-600">
+                        <span className="inline-flex w-fit items-center rounded-full border border-brand/15 bg-brand/5 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-brand">
                             Profile Theme
                         </span>
                         <h2 className="text-3xl font-black tracking-tight text-slate-950">
@@ -132,7 +132,7 @@ const ExpertiseStudioForm = ({ form, selectedFormat, skillList, onSave }) => {
             <div className="pt-2">
                 <button
                     onClick={onSave}
-                    className="flex w-full items-center justify-center gap-3 rounded-[24px] bg-slate-900 py-4 text-base font-black text-white shadow-lg transition-all active:scale-[0.98] hover:bg-slate-800"
+                    className="flex w-full items-center justify-center gap-3 rounded-[24px] bg-slate-900 py-4 text-base font-black text-white shadow-lg shadow-slate-900/20 transition duration-150 ease-out active:scale-[0.98] hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
                 >
                     <Save size={20} />
                     Update Expertise

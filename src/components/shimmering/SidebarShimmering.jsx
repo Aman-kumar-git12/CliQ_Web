@@ -5,7 +5,7 @@ const SECTIONS = [6, 1, 3];
 const SidebarShimmering = ({ compact = false }) => {
     return (
         <div
-            className={`fixed left-0 top-0 h-screen hidden md:flex flex-col bg-gradient-to-b from-[#12111d] via-[#0d0c15] to-surface-850 border-r border-white/10 z-50 shadow-[8px_0_32px_rgba(0,0,0,0.8)] overflow-hidden motion-safe:animate-pulse ${compact ? "w-[90px]" : "w-[260px]"}`}
+            className={`fixed left-0 top-0 h-screen hidden md:flex flex-col bg-gradient-to-b from-surface-sidebar via-surface-800 to-surface-850 border-r border-line z-sidebar shadow-rail overflow-hidden motion-safe:animate-pulse ${compact ? "w-[90px]" : "w-[260px]"}`}
         >
             <div className={`flex items-center h-[120px] shrink-0 ${compact ? "justify-center" : "px-10 gap-4"}`}>
                 <div className="w-11 h-11 rounded-[16px] bg-brand/30 shrink-0"></div>
@@ -33,7 +33,7 @@ const SidebarShimmering = ({ compact = false }) => {
 
             <div className="p-4 shrink-0 h-[88px] flex items-center justify-center">
                 <div
-                    className={`h-14 rounded-[20px] bg-surface-800 border border-white/5 flex items-center gap-3 ${compact ? "w-14 justify-center" : "w-full px-2"}`}
+                    className={`h-14 rounded-[20px] bg-surface-800 border border-line-soft flex items-center gap-3 ${compact ? "w-14 justify-center" : "w-full px-2"}`}
                 >
                     <div className="w-10 h-10 rounded-[14px] bg-brand/20 shrink-0"></div>
                     {!compact && (

@@ -10,19 +10,19 @@ export default function NotFoundPage() {
                 404
             </span>
             <h1 className="mt-4 text-[22px] font-black uppercase italic tracking-tighter">Page not found</h1>
-            <p className="mt-2 max-w-sm text-[13px] text-ink-450 break-all">
-                Nothing lives at <span className="text-white/70">{pathname}</span>.
+            <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-300 break-all">
+                Nothing lives at <span className="text-ink-100">{pathname}</span>.
             </p>
             <div className="mt-8 flex gap-3">
                 <Link
                     to="/home"
-                    className="px-6 py-3 bg-white text-black text-[11px] font-black uppercase italic rounded-xl hover:scale-105 active:scale-95 transition-all no-underline"
+                    className="px-6 py-3 bg-white text-black text-[11px] font-black uppercase italic rounded-xl shadow-soft hover:bg-white/90 cliq-press focus-ring no-underline"
                 >
                     Go to Feed
                 </Link>
                 <Link
                     to="/search"
-                    className="px-6 py-3 border border-white/10 text-white text-[11px] font-black uppercase italic rounded-xl hover:bg-white/5 transition-all no-underline"
+                    className="px-6 py-3 border border-line text-white text-[11px] font-black uppercase italic rounded-xl hover:bg-white/5 hover:border-line-strong cliq-press focus-ring no-underline"
                 >
                     Search
                 </Link>

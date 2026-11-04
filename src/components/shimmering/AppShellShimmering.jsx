@@ -25,7 +25,7 @@ export default function AppShellShimmering({ pathname }) {
             {isChatView ? (
                 <div className="flex-1 w-full min-w-0 h-full flex md:pl-[90px]">
                     <div
-                        className={`w-full md:w-[310px] shrink-0 h-full flex-col border-r border-white/5 bg-surface-800/60 ${threadOpen ? "hidden md:flex" : "flex"}`}
+                        className={`w-full md:w-[310px] shrink-0 h-full flex-col border-r border-line-soft bg-surface-800/60 ${threadOpen ? "hidden md:flex" : "flex"}`}
                     >
                         <MyConnectionShimmering />
                     </div>
@@ -39,7 +39,7 @@ export default function AppShellShimmering({ pathname }) {
                     {!pathname.startsWith("/post/") && (
                         <div
                             aria-hidden="true"
-                            className="fixed top-0 left-0 w-full h-[70px] bg-gradient-to-b from-surface-night to-black/95 border-b border-purple-500/20 flex items-center justify-between px-6 z-[100] md:hidden"
+                            className="fixed top-0 left-0 w-full h-[70px] bg-gradient-to-b from-surface-night to-surface-950/95 border-b border-brand/15 flex items-center justify-between px-6 z-nav md:hidden shadow-soft-lg"
                         >
                             <div className="h-6 w-20 rounded-lg bg-white/10 motion-safe:animate-pulse"></div>
                             <div className="h-9 w-9 rounded-xl bg-white/5 motion-safe:animate-pulse"></div>

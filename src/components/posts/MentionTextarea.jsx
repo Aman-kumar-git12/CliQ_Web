@@ -140,7 +140,7 @@ const MentionTextarea = forwardRef(function MentionTextarea(
             {open && (
                 <ul
                     role="listbox"
-                    className={`absolute left-0 top-full mt-1 z-[120] w-full max-w-xs rounded-xl border border-white/10 bg-surface-750 shadow-2xl overflow-hidden ${dropdownClassName}`}
+                    className={`cliq-popover absolute left-0 top-full mt-1 z-popover w-full max-w-xs rounded-xl overflow-hidden py-1 motion-safe:animate-[fadeIn_var(--cliq-dur-fast)_var(--cliq-ease)] ${dropdownClassName}`}
                 >
                     {suggestions.map((user, i) => (
                         <li key={user.id} role="option" aria-selected={i === activeIndex}>
@@ -152,20 +152,20 @@ const MentionTextarea = forwardRef(function MentionTextarea(
                                     pick(user);
                                 }}
                                 onMouseEnter={() => setActiveIndex(i)}
-                                className={`w-full flex items-center gap-2.5 px-3 py-2 text-left ${i === activeIndex ? "bg-violet-500/15" : "hover:bg-white/5"}`}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors duration-150 ease-soft ${i === activeIndex ? "bg-brand/15" : "hover:bg-white/5"}`}
                             >
                                 <img
                                     loading="lazy"
                                     decoding="async"
                                     src={user.imageUrl || DEFAULT_AVATAR}
                                     alt=""
-                                    className="w-7 h-7 rounded-full object-cover"
+                                    className="w-7 h-7 rounded-full object-cover bg-surface-600 shrink-0"
                                 />
                                 <span className="min-w-0">
                                     <span className="block text-[13px] font-bold text-white truncate">
                                         {user.firstname} {user.lastname}
                                     </span>
-                                    <span className="block text-[11px] text-ink-350 truncate">@{user.handle}</span>
+                                    <span className="block text-[11px] text-ink-300 truncate">@{user.handle}</span>
                                 </span>
                             </button>
                         </li>

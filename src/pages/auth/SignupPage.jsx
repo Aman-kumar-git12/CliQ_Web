@@ -3,7 +3,21 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { User, Mail, Lock, Calendar, Eye, EyeOff } from "lucide-react";
 import * as authApi from "../../api/auth";
 import { useUserContext } from "../../context/UserContext";
+import { MotionConfig, motion } from "framer-motion";
 import GoogleAuthButton from "../../components/auth/GoogleAuthButton";
+import {
+    authAppear,
+    authCardClass,
+    authFieldButtonClass,
+    authFieldClass,
+    authFieldIconClass,
+    authInputClass,
+    authLinkClass,
+    authNoticeClass,
+    authPageClass,
+    authPrimaryButtonClass,
+    authSpinnerClass,
+} from "../../components/auth/authStyles";
 
 export default function SignupPage() {
     const [formData, setFormData] = useState({
@@ -69,157 +83,174 @@ export default function SignupPage() {
         }
     };
 
+    const termsError = showErr && error?.includes("Terms");
+
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4">
-            <div className="text-center mb-10">
-                <h1 className="text-4xl sm:text-5xl font-semibold">One step away</h1>
-                <h2 className="italic text-4xl sm:text-5xl text-gray-200">from joining CliQ</h2>
+        <MotionConfig reducedMotion="user">
+            <div className={authPageClass}>
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight">One step away</h1>
+                    <h2 className="italic text-4xl sm:text-5xl text-white/70 tracking-tight">from joining CliQ</h2>
+                </div>
+
+                <form onSubmit={handleSubmit} className={`${authCardClass} max-w-sm p-5 sm:p-7 space-y-5`}>
+                    {/* Title */}
+                    <div className="flex justify-between items-center gap-3">
+                        <h3 className="text-2xl font-semibold tracking-tight">Register Now!</h3>
+
+                        <div className="flex items-center gap-1 text-sm shrink-0">
+                            <span className="text-ink-300">Already registered?</span>
+                            <Link to="/login" className={`text-white/90 ${authLinkClass}`}>
+                                Login
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* FIRST NAME + LAST NAME */}
+                    <div className="flex gap-2">
+                        {/* First Name */}
+                        <div className={`${authFieldClass()} w-1/2`}>
+                            <User className={authFieldIconClass} size={18} aria-hidden="true" />
+                            <input
+                                type="text"
+                                name="firstname"
+                                placeholder="First name"
+                                aria-label="First name"
+                                autoComplete="given-name"
+                                value={formData.firstname}
+                                onChange={handleChange}
+                                className={authInputClass}
+                            />
+                        </div>
+
+                        {/* Last Name */}
+                        <div className={`${authFieldClass()} w-1/2`}>
+                            <User className={authFieldIconClass} size={18} aria-hidden="true" />
+                            <input
+                                type="text"
+                                name="lastname"
+                                placeholder="Last name"
+                                aria-label="Last name"
+                                autoComplete="family-name"
+                                value={formData.lastname}
+                                onChange={handleChange}
+                                className={authInputClass}
+                            />
+                        </div>
+                    </div>
+
+                    {/* EMAIL */}
+                    <div className={authFieldClass()}>
+                        <Mail className={authFieldIconClass} size={18} aria-hidden="true" />
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Enter email"
+                            aria-label="Email"
+                            autoComplete="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className={authInputClass}
+                        />
+                    </div>
+
+                    {/* PASSWORD + AGE */}
+                    <div className="flex gap-2">
+                        {/* Password */}
+                        <div className={`${authFieldClass()} w-1/2`}>
+                            <Lock className={authFieldIconClass} size={18} aria-hidden="true" />
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                placeholder="Password"
+                                aria-label="Password"
+                                autoComplete="new-password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                className={authInputClass}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                className={authFieldButtonClass}
+                            >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
+
+                        {/* Age */}
+                        <div className={`${authFieldClass()} w-1/2`}>
+                            <Calendar className={authFieldIconClass} size={18} aria-hidden="true" />
+                            <input
+                                type="number"
+                                name="age"
+                                placeholder="Age"
+                                aria-label="Age"
+                                inputMode="numeric"
+                                value={formData.age}
+                                onChange={handleChange}
+                                className={authInputClass}
+                                min="1"
+                            />
+                        </div>
+                    </div>
+
+                    {/* TERMS */}
+                    <div
+                        className={`flex items-start gap-2.5 text-sm leading-relaxed transition-colors duration-150 ${termsError ? "text-red-300" : "text-ink-300"}`}
+                    >
+                        <input
+                            type="checkbox"
+                            name="terms"
+                            aria-label="I agree to the Terms and Privacy Policy"
+                            aria-invalid={termsError || undefined}
+                            checked={formData.terms}
+                            onChange={handleChange}
+                            className={`mt-1 h-4 w-4 shrink-0 rounded accent-brand cursor-pointer focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-900 ${termsError ? "ring-2 ring-red-500/70 ring-offset-2 ring-offset-surface-900" : ""}`}
+                        />
+                        <p>
+                            By creating an account, you agree to the{" "}
+                            <Link
+                                to="/terms"
+                                target="_blank"
+                                className="underline underline-offset-4 decoration-white/30 hover:text-ink-100 cliq-transition focus-ring rounded"
+                            >
+                                Terms
+                            </Link>{" "}
+                            and{" "}
+                            <Link
+                                to="/privacy"
+                                target="_blank"
+                                className="underline underline-offset-4 decoration-white/30 hover:text-ink-100 cliq-transition focus-ring rounded"
+                            >
+                                Privacy Policy
+                            </Link>
+                            .
+                        </p>
+                    </div>
+
+                    {showErr && (
+                        <motion.div {...authAppear} role="alert" className={authNoticeClass.error}>
+                            {error}
+                        </motion.div>
+                    )}
+
+                    {/* SUBMIT */}
+                    <button disabled={loading} type="submit" className={authPrimaryButtonClass}>
+                        {loading && <span className={authSpinnerClass} aria-hidden="true" />}
+                        {loading ? "Signing up..." : "Create an account"}
+                    </button>
+
+                    <div className="flex items-center gap-3 py-1">
+                        <div className="h-px flex-1 bg-white/10" />
+                        <span className="text-xs uppercase tracking-[0.25em] text-ink-400">or</span>
+                        <div className="h-px flex-1 bg-white/10" />
+                    </div>
+
+                    <GoogleAuthButton label="signup_with" />
+                </form>
             </div>
-
-            <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-5">
-                {/* Title */}
-                <div className="flex justify-between items-center">
-                    <h3 className="text-2xl font-semibold">Register Now!</h3>
-
-                    <div className="flex items-center gap-1 text-sm">
-                        <span className="text-gray-300">Already registered?</span>
-                        <Link to="/login" className="underline hover:text-gray-200 transition">
-                            Login
-                        </Link>
-                    </div>
-                </div>
-
-                {/* FIRST NAME + LAST NAME */}
-                <div className="flex gap-2">
-                    {/* First Name */}
-                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2 group focus-within:border-white transition-colors">
-                        <User
-                            className="text-gray-400 mr-2 group-focus-within:text-white transition-colors"
-                            size={18}
-                        />
-                        <input
-                            type="text"
-                            name="firstname"
-                            placeholder="First name"
-                            aria-label="First name"
-                            value={formData.firstname}
-                            onChange={handleChange}
-                            className="bg-transparent outline-none text-gray-200 w-full"
-                        />
-                    </div>
-
-                    {/* Last Name */}
-                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2 group focus-within:border-white transition-colors">
-                        <User
-                            className="text-gray-400 mr-2 group-focus-within:text-white transition-colors"
-                            size={18}
-                        />
-                        <input
-                            type="text"
-                            name="lastname"
-                            placeholder="Last name"
-                            aria-label="Last name"
-                            value={formData.lastname}
-                            onChange={handleChange}
-                            className="bg-transparent outline-none text-gray-200 w-full"
-                        />
-                    </div>
-                </div>
-
-                {/* EMAIL */}
-                <div className="flex items-center border border-gray-600 rounded px-3 py-2 group focus-within:border-white transition-colors">
-                    <Mail className="text-gray-400 mr-2 group-focus-within:text-white transition-colors" size={18} />
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Enter email"
-                        aria-label="Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="bg-transparent outline-none text-gray-200 w-full"
-                    />
-                </div>
-
-                {/* PASSWORD + AGE */}
-                <div className="flex gap-2">
-                    {/* Password */}
-                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2 group focus-within:border-white transition-colors">
-                        <Lock className="text-gray-400 mr-2 group-focus-within:text-white" size={18} />
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            name="password"
-                            placeholder="Password"
-                            aria-label="Password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="bg-transparent outline-none text-gray-200 w-full"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                            className="text-gray-400 hover:text-white transition-colors"
-                        >
-                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
-                    </div>
-
-                    {/* Age */}
-                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 w-1/2 group focus-within:border-white transition-colors">
-                        <Calendar
-                            className="text-gray-400 mr-2 group-focus-within:text-white transition-colors"
-                            size={18}
-                        />
-                        <input
-                            type="number"
-                            name="age"
-                            placeholder="Age"
-                            aria-label="Age"
-                            value={formData.age}
-                            onChange={handleChange}
-                            className="bg-transparent outline-none text-gray-200 w-full"
-                            min="1"
-                        />
-                    </div>
-                </div>
-
-                {/* TERMS */}
-                <div
-                    className={`flex items-start text-sm space-x-2 transition-colors ${showErr && error?.includes("Terms") ? "text-red-400 font-medium" : "text-gray-400"}`}
-                >
-                    <input
-                        type="checkbox"
-                        name="terms"
-                        aria-label="I agree to the Terms and Privacy Policy"
-                        checked={formData.terms}
-                        onChange={handleChange}
-                        className={`mt-1 ${showErr && error?.includes("Terms") ? "ring-2 ring-red-500 ring-offset-1 ring-offset-black rounded-sm" : ""}`}
-                    />
-                    <p>
-                        By creating an account, you agree to the <span className="underline cursor-pointer">Terms</span>{" "}
-                        and <span className="underline cursor-pointer">Privacy Policy</span>.
-                    </p>
-                </div>
-
-                {showErr && !error?.includes("Terms") && <div className=" text-red-600 px-4 py-2 rounded">{error}</div>}
-
-                {/* SUBMIT */}
-                <button
-                    disabled={loading}
-                    type="submit"
-                    className={`w-full bg-white text-black font-semibold py-3 rounded-full hover:opacity-90 transition-all ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
-                >
-                    {loading ? "Signing up..." : "Create an account"}
-                </button>
-
-                <div className="flex items-center gap-3 py-1">
-                    <div className="h-px flex-1 bg-white/10" />
-                    <span className="text-xs uppercase tracking-[0.25em] text-neutral-500">or</span>
-                    <div className="h-px flex-1 bg-white/10" />
-                </div>
-
-                <GoogleAuthButton label="signup_with" />
-            </form>
-        </div>
+        </MotionConfig>
     );
 }

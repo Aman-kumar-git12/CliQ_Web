@@ -16,14 +16,14 @@ const LoadingChat = () => {
             role="status"
             aria-label="Loading conversation"
             aria-busy="true"
-            className="h-full bg-[#040406] text-white flex flex-col overflow-hidden"
+            className="h-full bg-surface-950 text-white flex flex-col overflow-hidden"
         >
             {/* Header Skeleton - Matches ChatHeader */}
-            <div className="flex items-center justify-between pl-2 pr-6 py-4 h-[88px] bg-white/[0.03] backdrop-blur-3xl border-b border-white/10 shrink-0">
+            <div className="flex items-center justify-between pl-2 pr-6 py-4 h-[88px] bg-surface-900/70 backdrop-blur-2xl border-b border-line-soft shrink-0">
                 <div className="flex items-center gap-2">
                     <div className="w-10 h-10 mr-2 rounded-full bg-white/5" />
                     <div className="flex items-center gap-4">
-                        <div className="w-[56px] h-[56px] rounded-[24px] bg-white/10 overflow-hidden relative">
+                        <div className="w-[56px] h-[56px] rounded-[22px] bg-white/10 overflow-hidden relative">
                             <Shine />
                         </div>
                         <div className="flex flex-col gap-2">
@@ -39,12 +39,12 @@ const LoadingChat = () => {
             </div>
 
             {/* Messages Area Skeleton */}
-            <div className="flex-1 p-4 md:px-6 space-y-6 overflow-hidden">
+            <div className="flex-1 px-5 py-4 md:px-7 space-y-5 overflow-hidden">
                 {BUBBLES.map(({ side, width, height }, index) =>
                     side === "left" ? (
                         <div key={index} className={`flex flex-col gap-2 ${width}`}>
                             <div
-                                className={`${height} w-full bg-white/5 rounded-[24px] rounded-bl-none relative overflow-hidden`}
+                                className={`${height} w-full bg-white/[0.05] rounded-[20px] rounded-bl-md relative overflow-hidden`}
                             >
                                 <Shine />
                             </div>
@@ -53,7 +53,7 @@ const LoadingChat = () => {
                     ) : (
                         <div key={index} className={`flex flex-col gap-2 ${width} ml-auto items-end`}>
                             <div
-                                className={`${height} w-full bg-gradient-to-r from-white/10 to-white/5 rounded-[24px] rounded-br-none relative overflow-hidden`}
+                                className={`${height} w-full bg-gradient-to-br from-brand/15 to-brand-pink/10 rounded-[20px] rounded-br-md relative overflow-hidden`}
                             >
                                 <Shine />
                             </div>
@@ -64,15 +64,12 @@ const LoadingChat = () => {
             </div>
 
             {/* Footer Input Bar Skeleton - Matches ChatComposer */}
-            <div className="shrink-0 pt-4 pb-[calc(env(safe-area-inset-bottom)+24px)] px-2 bg-white/[0.03] backdrop-blur-3xl border-t border-white/10">
-                <div className="flex items-center gap-1 w-full">
+            <div className="shrink-0 pt-3 pb-[calc(env(safe-area-inset-bottom)+24px)] px-2 bg-surface-900/75 backdrop-blur-2xl border-t border-line-soft">
+                <div className="flex items-center gap-1 md:gap-1.5 w-full">
                     <div className="w-[44px] h-[44px] rounded-full bg-white/5 shrink-0 relative overflow-hidden">
                         <Shine />
                     </div>
-                    <div className="flex-1 h-12 bg-white/5 rounded-[24px] border border-white/10 relative overflow-hidden">
-                        <Shine />
-                    </div>
-                    <div className="w-[44px] h-[44px] rounded-full bg-white/10 shrink-0 relative overflow-hidden">
+                    <div className="flex-1 h-14 bg-ios-gray/90 rounded-[26px] border border-line-soft relative overflow-hidden">
                         <Shine />
                     </div>
                     <div className="w-[48px] h-[48px] rounded-full bg-ios-gray shrink-0 relative overflow-hidden">

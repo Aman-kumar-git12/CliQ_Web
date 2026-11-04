@@ -215,10 +215,10 @@ const ExpertiseStudioPage = () => {
     if (loadingProfile) return <ExpertiseStudioShimmering />;
 
     return (
-        <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-indigo-200/60 relative overflow-hidden">
+        <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-brand/20 relative overflow-hidden">
             <div className="absolute top-[-10%] left-[-10%] h-[420px] w-[420px] rounded-full bg-slate-200/60 blur-[120px] pointer-events-none" />
-            <div className="absolute right-[-8%] top-[8%] h-[360px] w-[360px] rounded-full bg-indigo-100/70 blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-12%] right-[-6%] h-[420px] w-[420px] rounded-full bg-sky-100/60 blur-[140px] pointer-events-none" />
+            <div className="absolute right-[-8%] top-[8%] h-[360px] w-[360px] rounded-full bg-brand/10 blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-[-12%] right-[-6%] h-[420px] w-[420px] rounded-full bg-brand-pink/5 blur-[140px] pointer-events-none" />
 
             <ExpertiseStudioHeader
                 onBack={() => navigate("/profile")}
@@ -286,7 +286,7 @@ const ExpertiseStudioPage = () => {
                 onConfirm={executeUpload}
                 title="Finalize Portfolio?"
                 confirmText="Push Changes"
-                confirmColor="bg-indigo-600 hover:bg-indigo-700"
+                confirmColor="bg-brand hover:bg-brand-light"
             />
 
             {/* SAVING OVERLAY */}

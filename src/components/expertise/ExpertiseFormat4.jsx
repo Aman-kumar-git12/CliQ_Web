@@ -19,7 +19,7 @@ export default function ExpertiseFormat4({ expertise = {} }) {
 
     return (
         <div className="bg-[#F0F4F8] p-1 font-mono selection:bg-teal-100">
-            <div className="w-full bg-white rounded-[1.5rem] shadow-[0_15px_50px_rgba(0,0,0,0.05)] overflow-hidden border border-neutral-200 relative group/terminal">
+            <div className="w-full bg-white rounded-[1.5rem] shadow-xl shadow-black/5 overflow-hidden border border-neutral-200 relative group/terminal">
                 {/* SUBTLE TECH GRID */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px]"></div>
 

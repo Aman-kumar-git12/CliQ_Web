@@ -3,7 +3,22 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import * as authApi from "../../api/auth";
 import { useUserContext } from "../../context/UserContext";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import GoogleAuthButton from "../../components/auth/GoogleAuthButton";
+import {
+    authAppear,
+    authCardClass,
+    authFieldButtonClass,
+    authFieldClass,
+    authFieldIconClass,
+    authInputClass,
+    authLinkClass,
+    authNoticeClass,
+    authPageClass,
+    authPrimaryButtonClass,
+    authSecondaryButtonClass,
+    authSpinnerClass,
+} from "../../components/auth/authStyles";
 
 export default function LoginPage() {
     const [formData, setFormData] = useState({
@@ -136,125 +151,143 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4">
-            <div className="text-center mb-10">
-                <h1 className="text-4xl sm:text-5xl font-semibold">Welcome back</h1>
-                <h2 className="italic text-4xl sm:text-5xl text-gray-200">to CliQ</h2>
-            </div>
+        <MotionConfig reducedMotion="user">
+            <div className={authPageClass}>
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight">Welcome back</h1>
+                    <h2 className="italic text-4xl sm:text-5xl text-white/70 tracking-tight">to CliQ</h2>
+                </div>
 
-            <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-5">
-                {sessionExpired && (
-                    <p className="text-sm text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
-                        Your session has ended. Please log in again.
-                    </p>
-                )}
-                {/* Top Heading */}
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-2xl font-semibold">{forgotPasswordMode ? "Reset Password" : "Login Now!"}</h3>
+                <form onSubmit={handleSubmit} className={`${authCardClass} max-w-sm p-6 sm:p-7 space-y-5`}>
+                    {sessionExpired && (
+                        <p role="status" className={authNoticeClass.warning}>
+                            Your session has ended. Please log in again.
+                        </p>
+                    )}
+                    {/* Top Heading */}
+                    <div className="flex justify-between items-center gap-3 mb-1">
+                        <AnimatePresence mode="wait" initial={false}>
+                            <motion.h3
+                                key={forgotPasswordMode ? "reset" : "login"}
+                                {...authAppear}
+                                className="text-2xl font-semibold tracking-tight"
+                            >
+                                {forgotPasswordMode ? "Reset Password" : "Login Now!"}
+                            </motion.h3>
+                        </AnimatePresence>
 
-                    <div className="flex items-center gap-1 text-sm">
-                        <span className="text-gray-300">New here?</span>
-                        <Link to="/" className="underline hover:text-gray-200 transition">
-                            Signup
-                        </Link>
+                        <div className="flex items-center gap-1 text-sm shrink-0">
+                            <span className="text-ink-300">New here?</span>
+                            <Link to="/" className={`text-white/90 ${authLinkClass}`}>
+                                Signup
+                            </Link>
+                        </div>
                     </div>
-                </div>
 
-                {/* Email */}
-                <div className="flex items-center border border-gray-600 rounded px-3 py-2 group focus-within:border-white transition-colors">
-                    <Mail className="text-gray-400 mr-2 group-focus-within:text-white transition-colors" size={18} />
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Enter email"
-                        aria-label="Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="bg-transparent outline-none text-gray-200 w-full"
-                    />
-                </div>
-
-                {/* Password / New Password */}
-                <div>
-                    <div className="flex items-center border border-gray-600 rounded px-3 py-2 group focus-within:border-white transition-colors">
-                        <Lock
-                            className="text-gray-400 mr-2 group-focus-within:text-white transition-colors"
-                            size={18}
-                        />
+                    {/* Email */}
+                    <div className={authFieldClass()}>
+                        <Mail className={authFieldIconClass} size={18} aria-hidden="true" />
                         <input
-                            type={showPassword ? "text" : "password"}
-                            name={forgotPasswordMode ? "newPassword" : "password"}
-                            placeholder={forgotPasswordMode ? "Enter new password" : "Enter password"}
-                            aria-label={forgotPasswordMode ? "New password" : "Password"}
-                            value={forgotPasswordMode ? formData.newPassword : formData.password}
+                            type="email"
+                            name="email"
+                            placeholder="Enter email"
+                            aria-label="Email"
+                            autoComplete="email"
+                            value={formData.email}
                             onChange={handleChange}
-                            className="bg-transparent outline-none text-gray-200 w-full"
+                            className={authInputClass}
                         />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                            className="text-gray-400 hover:text-white transition-colors"
-                        >
-                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
                     </div>
 
-                    {/* Toggle Forgot Password Mode */}
-                    <div className="flex justify-end mt-2">
+                    {/* Password / New Password */}
+                    <div>
+                        <div className={authFieldClass()}>
+                            <Lock className={authFieldIconClass} size={18} aria-hidden="true" />
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                name={forgotPasswordMode ? "newPassword" : "password"}
+                                placeholder={forgotPasswordMode ? "Enter new password" : "Enter password"}
+                                aria-label={forgotPasswordMode ? "New password" : "Password"}
+                                autoComplete={forgotPasswordMode ? "new-password" : "current-password"}
+                                value={forgotPasswordMode ? formData.newPassword : formData.password}
+                                onChange={handleChange}
+                                className={authInputClass}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                className={authFieldButtonClass}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
+
+                        {/* Toggle Forgot Password Mode */}
+                        <div className="flex justify-between items-center gap-3 mt-2">
+                            <p className="text-xs text-ink-400">
+                                {forgotPasswordMode ? "At least 8 characters. We'll email you a code." : ""}
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setForgotPasswordMode(!forgotPasswordMode);
+                                    setError(null);
+                                    setShowErr(false);
+                                }}
+                                className="shrink-0 rounded-sm text-xs text-ink-300 hover:text-white transition-colors duration-150 cursor-pointer focus-ring"
+                            >
+                                {forgotPasswordMode ? "Back to Login" : "Forgot Password?"}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Error Message */}
+                    {showErr && (
+                        <motion.div {...authAppear} role="alert" className={authNoticeClass.error}>
+                            {error}
+                        </motion.div>
+                    )}
+
+                    {resendMessage && (
+                        <motion.div {...authAppear} role="status" className={authNoticeClass.success}>
+                            {resendMessage}
+                        </motion.div>
+                    )}
+
+                    {showErr && error === "Please verify your email before logging in." && (
                         <button
                             type="button"
-                            onClick={() => {
-                                setForgotPasswordMode(!forgotPasswordMode);
-                                setError(null);
-                                setShowErr(false);
-                            }}
-                            className="text-xs text-neutral-400 hover:text-white transition cursor-pointer"
+                            onClick={handleResendVerification}
+                            disabled={resendLoading}
+                            className={authSecondaryButtonClass}
                         >
-                            {forgotPasswordMode ? "Back to Login" : "Forgot Password?"}
+                            {resendLoading && <span className={authSpinnerClass} aria-hidden="true" />}
+                            {resendLoading ? "Sending..." : "Resend verification email"}
                         </button>
-                    </div>
-                </div>
+                    )}
 
-                {/* Error Message */}
-                {showErr && <div className="text-red-600 px-4 py-2 rounded">{error}</div>}
-
-                {resendMessage && <div className="text-green-500 px-4 py-2 rounded">{resendMessage}</div>}
-
-                {showErr && error === "Please verify your email before logging in." && (
-                    <button
-                        type="button"
-                        onClick={handleResendVerification}
-                        disabled={resendLoading}
-                        className={`w-full border border-white/20 text-white font-medium py-3 rounded-full hover:bg-white/5 transition-all ${resendLoading ? "opacity-70 cursor-not-allowed" : ""}`}
-                    >
-                        {resendLoading ? "Sending..." : "Resend verification email"}
+                    {/* Submit Button */}
+                    <button disabled={loading} type="submit" className={authPrimaryButtonClass}>
+                        {loading && <span className={authSpinnerClass} aria-hidden="true" />}
+                        {loading
+                            ? forgotPasswordMode
+                                ? "Sending..."
+                                : "Logging in..."
+                            : forgotPasswordMode
+                              ? "Send OTP"
+                              : "Login"}
                     </button>
-                )}
 
-                {/* Submit Button */}
-                <button
-                    disabled={loading}
-                    type="submit"
-                    className={`w-full bg-white text-black font-semibold py-3 rounded-full hover:opacity-90 transition-all ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
-                >
-                    {loading
-                        ? forgotPasswordMode
-                            ? "Sending..."
-                            : "Logging in..."
-                        : forgotPasswordMode
-                          ? "Send OTP"
-                          : "Login"}
-                </button>
+                    <div className="flex items-center gap-3 py-1">
+                        <div className="h-px flex-1 bg-white/10" />
+                        <span className="text-xs uppercase tracking-[0.25em] text-ink-400">or</span>
+                        <div className="h-px flex-1 bg-white/10" />
+                    </div>
 
-                <div className="flex items-center gap-3 py-1">
-                    <div className="h-px flex-1 bg-white/10" />
-                    <span className="text-xs uppercase tracking-[0.25em] text-neutral-500">or</span>
-                    <div className="h-px flex-1 bg-white/10" />
-                </div>
-
-                <GoogleAuthButton label="signin_with" />
-            </form>
-        </div>
+                    <GoogleAuthButton label="signin_with" />
+                </form>
+            </div>
+        </MotionConfig>
     );
 }

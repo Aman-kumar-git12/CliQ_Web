@@ -8,6 +8,7 @@ import AIAssistantAskThread from "./AIAssistantAskThread";
 import AIAssistantReplyControls from "./AIAssistantReplyControls";
 import AIAssistantReplyResults from "./AIAssistantReplyResults";
 import AIAssistantComposer from "./AIAssistantComposer";
+import { EASE_SOFT } from "../common/motionPresets";
 
 export default function AIAssistantOverlay({
     isOpen,
@@ -83,13 +84,14 @@ export default function AIAssistantOverlay({
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.98 }}
+            exit={{ opacity: 0, y: 8, scale: 0.985 }}
+            transition={{ duration: 0.24, ease: EASE_SOFT }}
             role="dialog"
             aria-modal="true"
             aria-labelledby="ai-assistant-title"
-            className="absolute inset-0 z-[100] flex flex-col bg-[#050507]/90 backdrop-blur-3xl rounded-[28px] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
+            className="absolute inset-0 z-[100] flex flex-col bg-surface-950/90 backdrop-blur-2xl rounded-[28px] border border-line shadow-pop overflow-hidden"
         >
             {/* Confirmation Overlay */}
             <AIAssistantConfirmDialog
@@ -110,7 +112,10 @@ export default function AIAssistantOverlay({
             />
 
             {/* Content Area */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-6 custom-scrollbar">
+            <div
+                ref={scrollRef}
+                className="flex-1 overflow-y-auto overscroll-contain px-6 py-4 space-y-6 custom-scrollbar"
+            >
                 {showHistoryToggle ? (
                     <AIAssistantHistoryPanel
                         mode={mode}

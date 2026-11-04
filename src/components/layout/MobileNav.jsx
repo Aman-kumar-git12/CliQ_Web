@@ -25,20 +25,21 @@ const MobileNav = () => {
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] md:hidden pointer-events-none">
+        <nav aria-label="Main" className="fixed bottom-0 left-0 right-0 z-nav md:hidden pointer-events-none">
             {/* Gradient Blur Dock: Custom masked blur for a professional app-like feel */}
             <div
-                className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none backdrop-blur-xl"
+                className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-surface-950 via-surface-950/80 to-transparent pointer-events-none backdrop-blur-xl"
                 style={{
                     WebkitMaskImage: "linear-gradient(to top, black 40%, transparent 100%)",
                     maskImage: "linear-gradient(to top, black 40%, transparent 100%)",
                 }}
             />
 
-            <div className="relative w-full max-w-lg mx-auto pb-6 pt-2 px-4 pointer-events-auto">
-                <div className="flex items-center justify-around bg-surface-850/95 backdrop-blur-3xl border border-white/10 rounded-[28px] p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative overflow-hidden">
+            {/* Bottom padding grows on phones with a home indicator */}
+            <div className="relative w-full max-w-lg mx-auto pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 px-4 pointer-events-auto">
+                <div className="flex items-center justify-around bg-surface-850/95 backdrop-blur-3xl border border-line rounded-[28px] p-1.5 shadow-soft-lg relative overflow-hidden">
                     {/* Background accent glow: Subtler since we are more opaque */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-violet-500/10 to-pink-500/10 pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-brand/10 to-brand-pink/10 pointer-events-none" />
 
                     {navItems.map((item) => {
                         const active = isActive(item.path);
@@ -48,33 +49,42 @@ const MobileNav = () => {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className="relative flex flex-col items-center justify-center w-14 h-14 transition-all duration-300"
+                                aria-label={
+                                    item.path === "/requests" && pendingCount > 0
+                                        ? `${item.label} (${pendingCount} pending)`
+                                        : item.label
+                                }
+                                aria-current={active ? "page" : undefined}
+                                className="relative flex flex-col items-center justify-center w-14 h-14 rounded-2xl cliq-press"
                             >
                                 {active && (
                                     <motion.div
                                         layoutId="activeTabGlow"
-                                        className="absolute inset-0 bg-white/5 rounded-2xl"
-                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                        className="absolute inset-0 bg-white/[0.06] border border-line-soft rounded-2xl"
+                                        transition={{ type: "spring", stiffness: 420, damping: 36 }}
                                     />
                                 )}
 
                                 <div
-                                    className={`relative z-10 flex flex-col items-center gap-1 ${active ? "text-white" : "text-white/40"}`}
+                                    className={`relative z-10 flex flex-col items-center gap-1 cliq-transition ${active ? "text-white" : "text-ink-300"}`}
                                 >
                                     <div className="relative">
+                                        {/* Same box size active or not, so the row doesn't shift when the tab changes */}
                                         <Icon
-                                            size={active ? 22 : 20}
-                                            className={`${active ? "text-brand-light drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]" : "transition-transform hover:scale-110"}`}
+                                            size={21}
+                                            aria-hidden="true"
+                                            className={`cliq-transition ${active ? "text-brand-light drop-shadow-glow" : ""}`}
                                             strokeWidth={active ? 2.5 : 2}
                                         />
                                         {item.path === "/requests" && pendingCount > 0 && (
-                                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-gradient-to-r from-brand to-brand-pink text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-surface-850 shadow-[0_0_10px_rgba(236,72,153,0.4)]">
+                                            <span className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-0.5 bg-gradient-to-r from-brand to-brand-pink text-white text-[9px] font-black leading-none tabular-nums rounded-full flex items-center justify-center border-2 border-surface-850 shadow-glow-pink">
                                                 {pendingCount}
                                             </span>
                                         )}
                                     </div>
                                     <span
-                                        className={`text-[9px] font-black uppercase tracking-widest ${active ? "opacity-100" : "opacity-0 scale-75"} transition-all duration-300`}
+                                        aria-hidden="true"
+                                        className={`text-[9px] font-black uppercase tracking-widest cliq-transition duration-200 ${active ? "opacity-100" : "opacity-0 scale-75"}`}
                                     >
                                         {item.label}
                                     </span>
@@ -83,7 +93,8 @@ const MobileNav = () => {
                                 {active && (
                                     <motion.div
                                         layoutId="activeIndicator"
-                                        className="absolute -bottom-1 w-1 h-1 bg-gradient-to-r from-brand to-brand-pink rounded-full shadow-[0_0_8px_rgba(236,72,153,0.8)]"
+                                        className="absolute -bottom-1 w-1 h-1 bg-gradient-to-r from-brand to-brand-pink rounded-full shadow-glow-pink"
+                                        transition={{ type: "spring", stiffness: 420, damping: 36 }}
                                     />
                                 )}
                             </Link>
@@ -91,7 +102,7 @@ const MobileNav = () => {
                     })}
                 </div>
             </div>
-        </div>
+        </nav>
     );
 };
 

@@ -3,8 +3,8 @@ import { Award, Briefcase, Check, Code, Info, Mail, MapPin, RotateCcw, Sparkles,
 import GeneratedDetailCard from "./GeneratedDetailCard";
 
 const ExpertiseAIResultStep = ({ aiGeneratedData, aiGenerationSource, onUpload, onGenerateNew, onManualEdit }) => (
-    <div className="space-y-8 animate-slideUp">
-        <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-[0_24px_60px_rgba(79,70,229,0.08)]">
+    <div className="space-y-8 animate-fadeIn">
+        <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-xl shadow-brand/[0.06]">
             <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
@@ -73,7 +73,7 @@ const ExpertiseAIResultStep = ({ aiGeneratedData, aiGenerationSource, onUpload, 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <button
                 onClick={onUpload}
-                className="py-5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-indigo-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                className="py-5 bg-brand hover:bg-brand/90 text-white font-black rounded-2xl shadow-xl shadow-brand/25 active:scale-[0.98] transition duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white flex items-center justify-center gap-3"
             >
                 <Check size={22} className="stroke-[3]" />
                 Upload
@@ -81,7 +81,7 @@ const ExpertiseAIResultStep = ({ aiGeneratedData, aiGenerationSource, onUpload, 
 
             <button
                 onClick={onGenerateNew}
-                className="py-5 border border-slate-200 font-bold rounded-2xl hover:bg-slate-50 transition-all text-sm flex items-center justify-center gap-2 text-slate-700"
+                className="py-5 border border-slate-200 font-bold rounded-2xl hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white text-sm flex items-center justify-center gap-2 text-slate-700"
             >
                 <RotateCcw size={16} />
                 Generate New
@@ -89,7 +89,7 @@ const ExpertiseAIResultStep = ({ aiGeneratedData, aiGenerationSource, onUpload, 
 
             <button
                 onClick={onManualEdit}
-                className="py-5 bg-slate-100 font-bold rounded-2xl hover:bg-slate-200 transition-all text-sm flex items-center justify-center gap-2 text-slate-900"
+                className="py-5 bg-slate-100 font-bold rounded-2xl hover:bg-slate-200 active:scale-[0.98] transition duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white text-sm flex items-center justify-center gap-2 text-slate-900"
             >
                 <Wand2 size={16} />
                 Change Manually
